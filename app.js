@@ -249,6 +249,21 @@ EVENTS.forEach(event => {
   if (event.posterSourceUrl) event.posterVerifiedAt = "2026-08-23";
 });
 
+// Caminhos Metálicos is a valuable discovery calendar, but its public agenda
+// does not provide event-level sales pages. Never present that calendar as a
+// ticket button; the entry remains visible while its official page is audited.
+EVENTS.forEach(event => {
+  if (event.source === "Caminhos Metálicos") {
+    delete event.ticketUrl;
+    event.tickets = "Bilheteira oficial ainda não localizada";
+    event.availability = "Por confirmar";
+    event.source = "Caminhos Metálicos — agenda";
+  }
+  if (event.source === "gnration — página do evento" && event.tickets !== "Entrada livre" && !event.salesCheckedAt) {
+    event.availability = "Por confirmar";
+  }
+});
+
 function setupCustomSelect(select) {
   const wrapper = document.createElement("div");
   wrapper.className = "custom-select";
