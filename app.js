@@ -216,6 +216,14 @@ const officialPosters = {
   ,"campo-pequeno-nemanus": ["https://www.sagrescampopequeno.pt/uploads/cropped/NEMANUS_LX_POST_1200x1200px_crop_6936e33c0befa.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/nemanus"]
   ,"campo-pequeno-beatles-symphonic": ["https://www.sagrescampopequeno.pt/uploads/TBSF_2026_AtwVrtS_cpequeno_site_agenda.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/the-beatles-symphonic-fantasy"]
   ,"campo-pequeno-music-circus": ["https://www.sagrescampopequeno.pt/uploads/WhatsApp%20Image%202026-06-22%20at%2016.42.10.jpeg", "https://www.sagrescampopequeno.pt/pt/agenda/music-circus-show-on-ice-with-highlights-of-frozen"]
+  ,"casamusica-choro-bastos": ["https://casadamusica.com/wp-content/uploads/2026/06/20260903-clube-choro-porto-cartao.jpg", "https://casadamusica.com/event/clube-choro-do-porto-convida-cristovao-bastos-e-ilana-volcov/?selected_session=52898"]
+  ,"casamusica-barananu": ["https://casadamusica.com/wp-content/uploads/2026/05/20260904-barananu-cartao.jpg", "https://casadamusica.com/event/barananu/?selected_session=51635"]
+  ,"casamusica-fischer-z": ["https://casadamusica.com/wp-content/uploads/2026/02/20260905-fischer-z-cartao.jpg", "https://casadamusica.com/event/fischer-z/?selected_session=48427"]
+  ,"casamusica-bonds-festival": ["https://casadamusica.com/wp-content/uploads/2026/06/20260919-bonds-festival-cartao.jpg", "https://casadamusica.com/event/bonds-festival/"]
+  ,"casamusica-berlioz": ["https://casadamusica.com/wp-content/uploads/2025/11/20260920-berlioz-em-italia-cartao.jpg", "https://casadamusica.com/event/berlioz-em-italia/"]
+  ,"casamusica-mario-biondi": ["https://casadamusica.com/wp-content/uploads/2026/05/20260930-mario-biondi-cartao.jpg", "https://casadamusica.com/event/mario-biondi/"]
+  ,"casamusica-grant-lee": ["https://casadamusica.com/wp-content/uploads/2026/05/20261007-grant-lee-philips-cartao.jpg", "https://casadamusica.com/event/grant-lee-philips/"]
+  ,"casamusica-rita-redshoes": ["https://casadamusica.com/wp-content/uploads/2026/05/20261024-rita-redshoes-cartao.jpg", "https://casadamusica.com/event/rita-redshoes/"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
@@ -277,7 +285,15 @@ const officialEventPages = {
   "campo-pequeno-this-is-michael": ["https://www.sagrescampopequeno.pt/pt/agenda/this-is-michael", "https://www.ticketline.pt/evento/this-is-michael-world-tour-2026-100251", "Sagres Campo Pequeno — página do evento"],
   "campo-pequeno-nemanus": ["https://www.sagrescampopequeno.pt/pt/agenda/nemanus", "https://www.bol.pt/Comprar/Bilhetes/168684-nemanus_ao_vivo_sagres_campo_pequeno-sagres_campo_pequeno/", "Sagres Campo Pequeno — página do evento"],
   "campo-pequeno-beatles-symphonic": ["https://www.sagrescampopequeno.pt/pt/agenda/the-beatles-symphonic-fantasy", "https://www.ticketline.pt/evento/102519", "Sagres Campo Pequeno — página do evento"],
-  "campo-pequeno-music-circus": ["https://www.sagrescampopequeno.pt/pt/agenda/music-circus-show-on-ice-with-highlights-of-frozen", "https://www.ticketline.pt/evento/music-circus-show-on-ice-with-highlights-of-105929", "Sagres Campo Pequeno — página do evento"]
+  "campo-pequeno-music-circus": ["https://www.sagrescampopequeno.pt/pt/agenda/music-circus-show-on-ice-with-highlights-of-frozen", "https://www.ticketline.pt/evento/music-circus-show-on-ice-with-highlights-of-105929", "Sagres Campo Pequeno — página do evento"],
+  "casamusica-choro-bastos": ["https://casadamusica.com/event/clube-choro-do-porto-convida-cristovao-bastos-e-ilana-volcov/?selected_session=52898", "https://casadamusica.com/event/clube-choro-do-porto-convida-cristovao-bastos-e-ilana-volcov/?selected_session=52898", "Casa da Música — página do evento"],
+  "casamusica-barananu": ["https://casadamusica.com/event/barananu/?selected_session=51635", "https://casadamusica.com/event/barananu/?selected_session=51635", "Casa da Música — página do evento"],
+  "casamusica-fischer-z": ["https://casadamusica.com/event/fischer-z/?selected_session=48427", "https://casadamusica.com/event/fischer-z/?selected_session=48427", "Casa da Música — página do evento"],
+  "casamusica-bonds-festival": ["https://casadamusica.com/event/bonds-festival/", "https://casadamusica.com/event/bonds-festival/", "Casa da Música — página do evento"],
+  "casamusica-berlioz": ["https://casadamusica.com/event/berlioz-em-italia/", "https://casadamusica.com/event/berlioz-em-italia/", "Casa da Música — página do evento"],
+  "casamusica-mario-biondi": ["https://casadamusica.com/event/mario-biondi/", "https://casadamusica.com/event/mario-biondi/", "Casa da Música — página do evento"],
+  "casamusica-grant-lee": ["https://casadamusica.com/event/grant-lee-philips/", "https://casadamusica.com/event/grant-lee-philips/", "Casa da Música — página do evento"],
+  "casamusica-rita-redshoes": ["https://casadamusica.com/event/rita-redshoes/", "https://casadamusica.com/event/rita-redshoes/", "Casa da Música — página do evento"]
 };
 const auditedEventDetails = {
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
@@ -318,6 +334,9 @@ EVENTS.forEach(event => {
     event.availability = "Por confirmar";
   }
   if (event.source === "Sagres Campo Pequeno — página do evento" && !event.salesCheckedAt) {
+    event.availability = "Por confirmar";
+  }
+  if (event.source === "Casa da Música — página do evento" && !event.salesCheckedAt) {
     event.availability = "Por confirmar";
   }
 });
