@@ -1,4 +1,4 @@
-const state = { search: "", date: "", genre: "", area: "", district: "", city: "", type: "", highlight: "", page: 1 };
+const state = { search: "", date: "", genre: "", area: "", district: [], city: [], type: "", highlight: "", page: 1 };
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
@@ -10,8 +10,10 @@ const nextPage = document.querySelector("#next-page");
 const genreSelect = document.querySelector("#genre-filter");
 const dateSelect = document.querySelector("#date-filter");
 const areaSelect = document.querySelector("#area-filter");
-const districtSelect = document.querySelector("#district-filter");
-const citySelect = document.querySelector("#city-filter");
+const districtFilter = document.querySelector("#district-filter");
+const cityFilter = document.querySelector("#city-filter");
+const districtMenu = document.querySelector("#district-menu");
+const cityMenu = document.querySelector("#city-menu");
 const typeSelect = document.querySelector("#type-filter");
 const posterLightbox = document.querySelector("#poster-lightbox");
 const posterLightboxImage = document.querySelector("#poster-lightbox-image");
@@ -49,8 +51,6 @@ function addOptions(select, items) {
 
 addOptions(genreSelect, unique(EVENTS.flatMap(event => event.genres)));
 addOptions(areaSelect, unique(EVENTS.map(event => event.area)));
-addOptions(districtSelect, unique(EVENTS.map(event => event.district)));
-addOptions(citySelect, unique(EVENTS.map(event => event.city)));
 addOptions(typeSelect, unique(EVENTS.map(eventType)));
 
 // Festival programmes use one parent event in the agenda. Their daily
@@ -136,6 +136,7 @@ function setupCustomSelect(select) {
     item.addEventListener("click", () => {
       select.value = option.value;
       select.dispatchEvent(new Event("change", { bubbles: true }));
+      if (select === dateSelect) updateFilter("date", option.value);
       wrapper.classList.remove("open");
       trigger.setAttribute("aria-expanded", "false");
     });
@@ -154,9 +155,47 @@ function setupCustomSelect(select) {
   sync();
 }
 
-[dateSelect, genreSelect, typeSelect, areaSelect, districtSelect, citySelect].forEach(setupCustomSelect);
+[dateSelect, genreSelect, typeSelect, areaSelect].forEach(setupCustomSelect);
+const multiFilterSync = [];
+function setupMultiFilter(button, menu, values, key, allLabel) {
+  const sync = () => {
+    const selected = state[key];
+    button.querySelector("strong").textContent = selected.length ? `${selected.length} selecionado${selected.length === 1 ? "" : "s"}` : allLabel;
+    button.classList.toggle("has-value", Boolean(selected.length));
+    [...menu.children].forEach(option => option.setAttribute("aria-pressed", String(selected.includes(option.dataset.value))));
+  };
+  values.forEach(value => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "multi-select-option";
+    option.dataset.value = value;
+    option.textContent = value;
+    option.setAttribute("aria-pressed", "false");
+    option.addEventListener("click", () => {
+      state[key] = state[key].includes(value) ? state[key].filter(item => item !== value) : [...state[key], value];
+      state.page = 1;
+      sync();
+      render();
+    });
+    menu.append(option);
+  });
+  button.addEventListener("click", () => {
+    const open = !menu.classList.contains("open");
+    document.querySelectorAll(".multi-select-menu.open").forEach(other => other.classList.remove("open"));
+    menu.classList.toggle("open", open);
+    button.setAttribute("aria-expanded", String(open));
+  });
+  multiFilterSync.push(sync);
+  sync();
+}
+setupMultiFilter(districtFilter, districtMenu, unique(EVENTS.map(event => event.district)), "district", "Todos os distritos");
+setupMultiFilter(cityFilter, cityMenu, unique(EVENTS.map(event => event.city)), "city", "Todos os concelhos");
 document.addEventListener("click", event => {
   if (!event.target.closest(".custom-select")) document.querySelectorAll(".custom-select.open").forEach(select => select.classList.remove("open"));
+  if (!event.target.closest(".multi-filter-wrap")) {
+    document.querySelectorAll(".multi-select-menu.open").forEach(menu => menu.classList.remove("open"));
+    [districtFilter, cityFilter].forEach(button => button.setAttribute("aria-expanded", "false"));
+  }
 });
 document.querySelector("#event-total").textContent = EVENTS.filter(event => !event.seriesId).length;
 
@@ -263,8 +302,8 @@ function filteredEvents() {
       group.some(item => overlapsRange(item, selectedRange)) &&
       (!state.genre || group.some(item => item.genres.includes(state.genre))) &&
       (!state.area || group.some(item => item.area === state.area)) &&
-      (!state.district || group.some(item => item.district === state.district)) &&
-      (!state.city || group.some(item => item.city === state.city)) &&
+      (!state.district.length || group.some(item => state.district.includes(item.district))) &&
+      (!state.city.length || group.some(item => state.city.includes(item.city))) &&
       (!state.type || group.some(item => eventType(item) === state.type)) &&
       matchesHighlight(event);
   }).sort((a, b) => a.date.localeCompare(b.date));
@@ -294,20 +333,17 @@ document.querySelector("#search").addEventListener("input", event => updateFilte
 dateSelect.addEventListener("change", event => updateFilter("date", event.target.value));
 genreSelect.addEventListener("change", event => updateFilter("genre", event.target.value));
 areaSelect.addEventListener("change", event => updateFilter("area", event.target.value));
-districtSelect.addEventListener("change", event => updateFilter("district", event.target.value));
-citySelect.addEventListener("change", event => updateFilter("city", event.target.value));
 typeSelect.addEventListener("change", event => updateFilter("type", event.target.value));
 document.querySelector("#clear-filters").addEventListener("click", () => {
-  Object.assign(state, { search: "", date: "", genre: "", area: "", district: "", city: "", type: "", highlight: "", page: 1 });
+  Object.assign(state, { search: "", date: "", genre: "", area: "", district: [], city: [], type: "", highlight: "", page: 1 });
   document.querySelector("#search").value = "";
   dateSelect.value = "";
   genreSelect.value = "";
   areaSelect.value = "";
-  districtSelect.value = "";
-  citySelect.value = "";
   typeSelect.value = "";
   document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
-  [dateSelect, genreSelect, areaSelect, districtSelect, citySelect, typeSelect].forEach(select => select.dispatchEvent(new Event("change")));
+  multiFilterSync.forEach(sync => sync());
+  [dateSelect, genreSelect, areaSelect, typeSelect].forEach(select => select.dispatchEvent(new Event("change")));
   render();
 });
 document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEventListener("click", () => {
