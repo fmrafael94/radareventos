@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Event Radar — música pública em Portugal." />
+    <title>Event Radar — Música em Portugal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="immersive.css" />
+    <link rel="stylesheet" href="midnight.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Radar de Eventos, voltar ao início">Radar de Eventos</a>
+      <p>Portugal · música pública</p>
+      <a class="submit-link" href="mailto:ola@eventradar.pt?subject=Novo%20evento%20para%20o%20Event%20Radar">Enviar evento <span>↗</span></a>
+    </header>
+
+    <main id="top" class="shell">
+      <section class="intro">
+        <p class="kicker">A tua agenda de música</p>
+        <h1>Menos procura.<br /><em>Mais música.</em></h1>
+        <p>Todos os géneros. Todas as cidades. A música pública de Portugal, num só radar.</p>
+        <div class="intro-stat"><span>RADAR ATIVO</span><b id="event-total">—</b><small>eventos verificados</small></div>
+        <div class="signal-field" aria-hidden="true">
+          <span class="signal-label">A DETETAR SINAIS</span>
+          <span class="signal-ring ring-one"></span>
+          <span class="signal-ring ring-two"></span>
+          <span class="signal-ring ring-three"></span>
+          <span class="signal-sweep"></span>
+          <span class="signal-point point-one"></span>
+          <span class="signal-point point-two"></span>
+          <span class="signal-point point-three"></span>
+          <span class="signal-coordinates">38.7223° N&nbsp;&nbsp;·&nbsp;&nbsp;9.1393° W</span>
+        </div>
+      </section>
+
+      <section class="browse-panel" aria-labelledby="browse-title">
+        <div class="browse-heading">
+          <div><p class="kicker">Explorar agenda</p><h2 id="browse-title">Encontra algo teu.</h2></div>
+          <p id="result-count" class="result-count" aria-live="polite"></p>
+        </div>
+        <div class="filter-grid">
+          <label class="search-field"><span>Procurar</span><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" /></label>
+          <label><span>Género</span><select id="genre-filter"><option value="">Todos os géneros</option></select></label>
+          <label><span>Formato</span><select id="type-filter"><option value="">Todos os formatos</option></select></label>
+          <label><span>Distrito</span><select id="district-filter"><option value="">Todo o país</option></select></label>
+          <label><span>Cidade</span><select id="city-filter"><option value="">Todas as cidades</option></select></label>
+          <button id="clear-filters" class="clear-button" type="button">Limpar seleção</button>
+        </div>
+      </section>
+
+      <section class="agenda" aria-label="Eventos encontrados">
+        <div id="event-list" class="event-list"></div>
+        <p id="empty-state" class="empty-state" hidden>Não encontrámos eventos com esta seleção.</p>
+        <nav id="pagination" class="pagination" aria-label="Paginação de eventos" hidden>
+          <button id="previous-page" type="button">← Anterior</button>
+          <span id="page-label"></span>
+          <button id="next-page" type="button">Seguinte →</button>
+        </nav>
+      </section>
+
+      <section class="drawers" aria-label="Mais informação">
+        <details class="drawer">
+          <summary><span>Como verificamos os eventos</span><i>+</i></summary>
+          <div class="drawer-content"><p>Incluímos toda a música pública: festivais, concertos, bares, Fado, DJ sets, recitais, ópera e musicais. Revistas, blogs, Reddit e Instagram ajudam-nos a encontrar sinais; antes de um evento aparecer como confirmado, procuramos o promotor, a sala ou a bilheteira oficial. A percentagem de lotação só aparece quando é divulgada pelo promotor.</p></div>
+        </details>
+        <details class="drawer">
+          <summary><span>Fontes que acompanhamos</span><i>+</i></summary>
+          <div id="source-groups" class="source-groups"></div>
+        </details>
+      </section>
+    </main>
+
+    <footer><span>event radar</span><p>Confirma sempre a informação na fonte oficial antes de comprar.</p></footer>
+    <dialog id="poster-lightbox" class="poster-lightbox" aria-label="Cartaz ampliado">
+      <button class="poster-lightbox-close" type="button" aria-label="Fechar cartaz">×</button>
+      <img id="poster-lightbox-image" alt="Cartaz oficial ampliado" />
+    </dialog>
+    <script src="events.js"></script>
+    <script src="sources.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
