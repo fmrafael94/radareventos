@@ -205,6 +205,17 @@ const officialPosters = {
   ,"vul-riot": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a74af2fa3246f1b37497569/1786365717090/RIOT+LOGO.png?format=1500w", "https://vulisboa.com/eventos/riot-x-vul-october"]
   ,"vul-beleza-abstracta": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a74b54af480dc7087705ef1/1786033958848/beleza+abstracta+logo.png?format=1500w", "https://vulisboa.com/eventos/beleza-abstracta"]
   ,"vul-fatal-move": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a4bcee521561e4506d88912/1783353398892/FATAL+MOVE.jpeg?format=1500w", "https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath"]
+  ,"campo-pequeno-alma-iberica": ["https://www.sagrescampopequeno.pt/uploads/WhatsApp%20Image%202026-04-23%20at%2009.21.16.jpeg", "https://www.sagrescampopequeno.pt/pt/agenda/alma-iberica"]
+  ,"campo-pequeno-sigur-ros": ["https://www.sagrescampopequeno.pt/uploads/cropped/SIgurRos_2026_AtwSq_cpequeno_site_destaque_crop_69b7f3c7814ec.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/sigur-ros-the-orchestral-tour"]
+  ,"campo-pequeno-dire-straits-legacy": ["https://www.sagrescampopequeno.pt/uploads/cropped/LISBOA%20DIRE%20STRAITS%20%20%281000%20x%201450%20px%29%20%281000%20x%201450%20px%29%20%281%29_crop_699f1ef1e920a.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/dire-straits-legacy-europa-tour-2026"]
+  ,"campo-pequeno-roupa-nova": ["https://www.sagrescampopequeno.pt/uploads/4%20%281%29.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/simplesmente-roupa-nova"]
+  ,"campo-pequeno-alphaville": ["https://www.sagrescampopequeno.pt/uploads/eventos/alphaville-2026.png", "https://www.sagrescampopequeno.pt/pt/agenda/alphaville"]
+  ,"campo-pequeno-titas": ["https://www.sagrescampopequeno.pt/uploads/WhatsApp%20Image%202026-05-25%20at%2009.28.01%20%283%29.jpeg", "https://www.sagrescampopequeno.pt/pt/agenda/titas"]
+  ,"campo-pequeno-cat-power": ["https://www.sagrescampopequeno.pt/uploads/cropped/CatPower_banner_bol_740X960_crop_69caa0b0b60d0.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/cat-power"]
+  ,"campo-pequeno-this-is-michael": ["https://www.sagrescampopequeno.pt/uploads/Design%20sem%20nome%20%2840%29.png", "https://www.sagrescampopequeno.pt/pt/agenda/this-is-michael"]
+  ,"campo-pequeno-nemanus": ["https://www.sagrescampopequeno.pt/uploads/cropped/NEMANUS_LX_POST_1200x1200px_crop_6936e33c0befa.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/nemanus"]
+  ,"campo-pequeno-beatles-symphonic": ["https://www.sagrescampopequeno.pt/uploads/TBSF_2026_AtwVrtS_cpequeno_site_agenda.jpg", "https://www.sagrescampopequeno.pt/pt/agenda/the-beatles-symphonic-fantasy"]
+  ,"campo-pequeno-music-circus": ["https://www.sagrescampopequeno.pt/uploads/WhatsApp%20Image%202026-06-22%20at%2016.42.10.jpeg", "https://www.sagrescampopequeno.pt/pt/agenda/music-circus-show-on-ice-with-highlights-of-frozen"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
@@ -255,7 +266,18 @@ const officialEventPages = {
   "vul-afterglow": ["https://vulisboa.com/eventos/afterglow-music-session-26-09", null, "Village Underground Lisboa — página do evento"],
   "vul-riot": ["https://vulisboa.com/eventos/riot-x-vul-october", null, "Village Underground Lisboa — página do evento"],
   "vul-beleza-abstracta": ["https://vulisboa.com/eventos/beleza-abstracta", null, "Village Underground Lisboa — página do evento"],
-  "vul-fatal-move": ["https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath", "https://3cket.com/event/sportswear-bookings-presents-fatal-move-outta-spite-nopath", "Village Underground Lisboa — página do evento"]
+  "vul-fatal-move": ["https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath", "https://3cket.com/event/sportswear-bookings-presents-fatal-move-outta-spite-nopath", "Village Underground Lisboa — página do evento"],
+  "campo-pequeno-alma-iberica": ["https://www.sagrescampopequeno.pt/pt/agenda/alma-iberica", "https://www.ticketline.pt/evento/alma-iberica-104374", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-sigur-ros": ["https://www.sagrescampopequeno.pt/pt/agenda/sigur-ros-the-orchestral-tour", "https://www.ticketline.pt/evento/sigur-ros-102956", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-dire-straits-legacy": ["https://www.sagrescampopequeno.pt/pt/agenda/dire-straits-legacy-europa-tour-2026", "https://www.ticketline.pt/pt/evento/dire-straits-legacy-europa-tour-2026-102008", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-roupa-nova": ["https://www.sagrescampopequeno.pt/pt/agenda/simplesmente-roupa-nova", "https://www.ticketline.pt/evento/simplesmente-roupa-nova-tour-2026-lisboa-105957", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-alphaville": ["https://www.sagrescampopequeno.pt/pt/agenda/alphaville", "https://blueticket.meo.pt/pt/event/15712/alphaville-in-concert", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-titas": ["https://www.sagrescampopequeno.pt/pt/agenda/titas", "https://lisboaevents.bol.pt/Comprar/Bilhetes/179258-titas_lisboa-sagres_campo_pequeno/", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-cat-power": ["https://www.sagrescampopequeno.pt/pt/agenda/cat-power", "https://www.ticketline.pt/evento/cat-power-misty-fest-103614", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-this-is-michael": ["https://www.sagrescampopequeno.pt/pt/agenda/this-is-michael", "https://www.ticketline.pt/evento/this-is-michael-world-tour-2026-100251", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-nemanus": ["https://www.sagrescampopequeno.pt/pt/agenda/nemanus", "https://www.bol.pt/Comprar/Bilhetes/168684-nemanus_ao_vivo_sagres_campo_pequeno-sagres_campo_pequeno/", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-beatles-symphonic": ["https://www.sagrescampopequeno.pt/pt/agenda/the-beatles-symphonic-fantasy", "https://www.ticketline.pt/evento/102519", "Sagres Campo Pequeno — página do evento"],
+  "campo-pequeno-music-circus": ["https://www.sagrescampopequeno.pt/pt/agenda/music-circus-show-on-ice-with-highlights-of-frozen", "https://www.ticketline.pt/evento/music-circus-show-on-ice-with-highlights-of-105929", "Sagres Campo Pequeno — página do evento"]
 };
 const auditedEventDetails = {
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
@@ -293,6 +315,9 @@ EVENTS.forEach(event => {
     event.availability = "Por confirmar";
   }
   if (event.source === "Village Underground Lisboa — página do evento" && !event.salesCheckedAt) {
+    event.availability = "Por confirmar";
+  }
+  if (event.source === "Sagres Campo Pequeno — página do evento" && !event.salesCheckedAt) {
     event.availability = "Por confirmar";
   }
 });
