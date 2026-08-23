@@ -175,6 +175,25 @@ const officialPosters = {
   "povoa-boney-m": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz151824_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/176838-boney_m_povoa_de_varzim-povoa_arena/"],
   "povoa-pedro-abrunhosa": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz151838_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/176846-pedro_abrunhosa-povoa_arena_cmpv/"],
   "famalicao-samuel-uria": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz156774_grande.jpg", "https://casadasartesvnf.bol.pt/Comprar/Bilhetes/182460-samuel_uria_cine_concerto-casa_das_artes_de_famalicao/"]
+  ,"gnration-maria-amaro-calgon": ["https://www.gnration.pt/wp-content/uploads/2026/07/maria-amaro-calgon.jpg", "https://www.gnration.pt/event/2026/maria-amaro-calgon/"]
+  ,"gnration-coral-autotune": ["https://www.gnration.pt/wp-content/uploads/2026/07/grupo-coral-do-auto-tune.jpg", "https://www.gnration.pt/event/2026/grupo-coral-do-auto-tune/"]
+  ,"gnration-ocenpsiea": ["https://www.gnration.pt/wp-content/uploads/2026/07/ocenpsiea.jpg", "https://www.gnration.pt/event/2026/ocenpsiea/"]
+  ,"gnration-kalia-vandever": ["https://www.gnration.pt/wp-content/uploads/2026/07/kalia-vandever.png", "https://www.gnration.pt/event/2026/kalia-vandever/"]
+  ,"gnration-zona-franca": ["https://www.gnration.pt/wp-content/uploads/2026/07/zona-franca_-fabio-krayze-x-dj-poco.jpg", "https://www.gnration.pt/event/2026/zona-franca-fabio-krayze-x-dj-poco/"]
+  ,"gnration-ana-teresa-pereira": ["https://www.gnration.pt/wp-content/uploads/2026/07/radiografia-9-%E2%80%94-ana-teresa-pereira.jpg", "https://www.gnration.pt/event/2026/radiografia-9-ana-teresa-pereira/"]
+  ,"gnration-midori-hirano": ["https://www.gnration.pt/wp-content/uploads/2026/07/midori-hirano.jpg", "https://www.gnration.pt/event/2026/midori-hirano/"]
+  ,"gnration-joana-sa": ["https://www.gnration.pt/wp-content/uploads/2026/07/joana-sa.jpg", "https://www.gnration.pt/event/2026/joana-sa-2/"]
+  ,"gnration-travo": ["https://www.gnration.pt/wp-content/uploads/2026/07/travo.jpg", "https://www.gnration.pt/event/2026/travo/"]
+  ,"gnration-easter-island-head": ["https://www.gnration.pt/wp-content/uploads/2026/07/ex-easter-island-head.jpg", "https://www.gnration.pt/event/2026/ex-easter-island-head/"]
+  ,"gnration-ana-lua-caiano": ["https://www.gnration.pt/wp-content/uploads/2026/06/ana-lua-caiano.png", "https://www.gnration.pt/event/2026/ana-lua-caiano/"]
+  ,"gnration-angel-bat-dawid": ["https://www.gnration.pt/wp-content/uploads/2026/07/angel-bat-dawid.jpg", "https://www.gnration.pt/event/2026/angel-bat-dawid/"]
+  ,"gnration-park-jiha": ["https://www.gnration.pt/wp-content/uploads/2026/07/park-jiha.jpg", "https://www.gnration.pt/event/2026/park-jiha/"]
+  ,"gnration-felicia-atkinson": ["https://www.gnration.pt/wp-content/uploads/2026/07/felicia-atkinson.jpg", "https://www.gnration.pt/event/2026/felicia-atkinson/"]
+  ,"gnration-bvhz": ["https://www.gnration.pt/wp-content/uploads/2026/07/ocupa-bvhz.jpg", "https://www.gnration.pt/event/2026/bvhz/"]
+  ,"gnration-joao-ms": ["https://www.gnration.pt/wp-content/uploads/2026/07/ocupa-joao-ms.jpg", "https://www.gnration.pt/event/2026/joao-ms/"]
+  ,"gnration-iav": ["https://www.gnration.pt/wp-content/uploads/2026/07/ocupa-iav.jpg", "https://www.gnration.pt/event/2026/iav/"]
+  ,"gnration-jose-israel": ["https://www.gnration.pt/wp-content/uploads/2026/07/ocupa-jose-rios-israel-machado.jpg", "https://www.gnration.pt/event/2026/jose-goncalves-rios-israel-machado/"]
+  ,"gnration-maquina-scuru": ["https://www.gnration.pt/wp-content/uploads/2026/07/maquina-scuru-fitchadu.jpg", "https://www.gnration.pt/event/2026/maquina-scuru-fitchadu/"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
@@ -195,7 +214,26 @@ const officialEventPages = {
   "ccb-nancy-vieira": ["https://www.ccb.pt/evento/nancy-vieira-francisco-sassetti-misty-fest/"],
   "ccb-maria-joao": ["https://www.ccb.pt/evento/maria-joao-joao-farinha-misty-fest/"],
   "ccb-eliana-glass": ["https://www.ccb.pt/evento/eliana-glass-misty-fest/", "https://ccb.bol.pt/Comprar/Bilhetes/179611-eliana_glass_misty_fest-fundacao_centro_cultural_de_belem/Sessoes?lang=pt-PT"],
-  "ccb-gospel-choir": ["https://www.ccb.pt/evento/black-heritage-gospel-choir/", "https://uguru.bol.pt/Comprar/Bilhetes/176584-black_heritage_gospel_choir-uguru_ii_producoes_unipessoal_lda/Sessoes?lang=pt-PT"]
+  "ccb-gospel-choir": ["https://www.ccb.pt/evento/black-heritage-gospel-choir/", "https://uguru.bol.pt/Comprar/Bilhetes/176584-black_heritage_gospel_choir-uguru_ii_producoes_unipessoal_lda/Sessoes?lang=pt-PT"],
+  "gnration-maria-amaro-calgon": ["https://www.gnration.pt/event/2026/maria-amaro-calgon/", null, "gnration — página do evento"],
+  "gnration-coral-autotune": ["https://www.gnration.pt/event/2026/grupo-coral-do-auto-tune/", null, "gnration — página do evento"],
+  "gnration-ocenpsiea": ["https://www.gnration.pt/event/2026/ocenpsiea/", null, "gnration — página do evento"],
+  "gnration-kalia-vandever": ["https://www.gnration.pt/event/2026/kalia-vandever/", "https://gnration.bol.pt/Comprar/Bilhetes/180299-kalia_vandever_mana-gnration/", "gnration — página do evento"],
+  "gnration-zona-franca": ["https://www.gnration.pt/event/2026/zona-franca-fabio-krayze-x-dj-poco/", "https://gnration.bol.pt/Comprar/Bilhetes/180301-zona_franca_fabio_krayze_x_dj_poco-gnration/", "gnration — página do evento"],
+  "gnration-ana-teresa-pereira": ["https://www.gnration.pt/event/2026/radiografia-9-ana-teresa-pereira/", "https://gnration.bol.pt/Comprar/Bilhetes/180308-radiografia_9_ana_teresa_pereira-gnration/", "gnration — página do evento"],
+  "gnration-midori-hirano": ["https://www.gnration.pt/event/2026/midori-hirano/", "https://gnration.bol.pt/Comprar/Bilhetes/180310-midori_hirano_otonoma-gnration/", "gnration — página do evento"],
+  "gnration-joana-sa": ["https://www.gnration.pt/event/2026/joana-sa-2/", "https://gnration.bol.pt/Comprar/Bilhetes/180312-joana_sa_corpo_territorio_variacoes_sobre_inquietacao-gnration/", "gnration — página do evento"],
+  "gnration-travo": ["https://www.gnration.pt/event/2026/travo/", "https://gnration.bol.pt/Comprar/Bilhetes/180368-travo_wasteland-gnration/", "gnration — página do evento"],
+  "gnration-easter-island-head": ["https://www.gnration.pt/event/2026/ex-easter-island-head/", "https://gnration.bol.pt/Comprar/Bilhetes/180370-ex_easter_island_head-gnration/", "gnration — página do evento"],
+  "gnration-ana-lua-caiano": ["https://www.gnration.pt/event/2026/ana-lua-caiano/", "https://gnration.bol.pt/Comprar/Bilhetes/180171-ana_lua_caiano_devagar_que_a_vida_e_curta-gnration/", "gnration — página do evento"],
+  "gnration-angel-bat-dawid": ["https://www.gnration.pt/event/2026/angel-bat-dawid/", "https://gnration.bol.pt/Comprar/Bilhetes/180372-angel_bat_dawid-gnration/", "gnration — página do evento"],
+  "gnration-park-jiha": ["https://www.gnration.pt/event/2026/park-jiha/", "https://gnration.bol.pt/Comprar/Bilhetes/180375-park_jiha-gnration/", "gnration — página do evento"],
+  "gnration-felicia-atkinson": ["https://www.gnration.pt/event/2026/felicia-atkinson/", "https://www.bol.pt/Comprar/Bilhetes/180378-felicia_atkinson-gnration/", "gnration — página do evento"],
+  "gnration-bvhz": ["https://www.gnration.pt/event/2026/bvhz/", null, "gnration — página do evento"],
+  "gnration-joao-ms": ["https://www.gnration.pt/event/2026/joao-ms/", null, "gnration — página do evento"],
+  "gnration-iav": ["https://www.gnration.pt/event/2026/iav/", null, "gnration — página do evento"],
+  "gnration-jose-israel": ["https://www.gnration.pt/event/2026/jose-goncalves-rios-israel-machado/", null, "gnration — página do evento"],
+  "gnration-maquina-scuru": ["https://www.gnration.pt/event/2026/maquina-scuru-fitchadu/", "https://gnration.bol.pt/Comprar/Bilhetes/180379-maquina_scuru_fitchadu-gnration/", "gnration — página do evento"]
 };
 EVENTS.forEach(event => {
   const poster = officialPosters[event.id];
@@ -203,8 +241,9 @@ EVENTS.forEach(event => {
   if (poster) [event.image, event.posterSourceUrl] = poster;
   if (page) {
     event.sourceUrl = page[0];
-    event.source = "CCB — página do evento";
+    event.source = page[2] || "CCB — página do evento";
     if (page[1]) event.ticketUrl = page[1];
+    else delete event.ticketUrl;
   }
   if (legacyOfficialPosterIds.has(event.id) && event.image) event.posterSourceUrl = event.sourceUrl;
   if (event.posterSourceUrl) event.posterVerifiedAt = "2026-08-23";
