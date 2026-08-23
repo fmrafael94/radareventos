@@ -242,6 +242,15 @@ const officialPosters = {
   ,"leiria-em-casa-amalia": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/c80de5605d5ae093c34710d994df6f39/em_casa_damalia_o_concerto_ao_vivo_358x329.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/em-casa-damalia--o-concerto-ao-vivo"]
   ,"leiria-diz-concerto": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/4182733be7371d2eb2ac35c685e1baf9/diz_concerto.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/diz--concerto"]
   ,"leiria-orquestra-jazz": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/a6157e37db04afb5aa34f96b9830c870/rquestra_de_jazz.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/orquestra-jazz-de-leiria-christian-mcbride"]
+  ,"ccb-sul": ["https://www.ccb.pt/wp-content/uploads/2025/09/2000x940_SUL-1.jpg", "https://www.ccb.pt/evento/sul/"]
+  ,"ccb-barbara-hendricks": ["https://www.ccb.pt/wp-content/uploads/2026/04/Barbara_Hendricks_2000x940.jpg", "https://www.ccb.pt/evento/still-on-the-road-to-freedom/"]
+  ,"ccb-al-di-meola": ["https://www.ccb.pt/wp-content/uploads/2026/03/AlDiMeola_banner_fnac_1920x1080.jpg", "https://www.ccb.pt/evento/al-di-meola-misty-fest/"]
+  ,"ccb-jazz-nights": ["https://www.ccb.pt/wp-content/uploads/2026/04/LauraMammalAnne_banner_fnac_1920x1080.jpg", "https://www.ccb.pt/evento/contemporary-jazz-nights-misty-fest/"]
+  ,"ccb-youn-sun-nah": ["https://www.ccb.pt/wp-content/uploads/2026/05/Youn_banner_fnac_1920x1080-1.jpg", "https://www.ccb.pt/evento/youn-sun-nah-misty-fest/"]
+  ,"ccb-galaxia-vivaldi": ["https://www.ccb.pt/wp-content/uploads/2026/05/2000x940_GalaxiaVivaldi.jpg", "https://www.ccb.pt/evento/galaxia-vivaldi/"]
+  ,"ccb-glenn-miller": ["https://www.ccb.pt/wp-content/uploads/2025/04/GMO_XMAS3_2000x940-2.jpg", "https://www.ccb.pt/evento/glenn-miller-orchestra-4/"]
+  ,"ccb-cabaret-songs": ["https://www.ccb.pt/wp-content/uploads/2026/05/2000x940_CabaretSongs.jpg", "https://www.ccb.pt/evento/cabaret-songs/"]
+  ,"ccb-bach-natal": ["https://www.ccb.pt/wp-content/uploads/2026/05/2000x940_ConcertoDeNatal.jpg", "https://www.ccb.pt/evento/concerto-de-natal-missa-em-si-menor-de-bach/"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
@@ -329,7 +338,17 @@ const officialEventPages = {
   "leiria-mendelssohn": ["https://leiriagenda.cm-leiria.pt/pt/agenda/ciclo-mendelssohn--integral-das-sinfonias-e-dos-concertos", null, "Leiriagenda — página do evento"],
   "leiria-em-casa-amalia": ["https://leiriagenda.cm-leiria.pt/pt/agenda/em-casa-damalia--o-concerto-ao-vivo", null, "Leiriagenda — página do evento"],
   "leiria-diz-concerto": ["https://leiriagenda.cm-leiria.pt/pt/agenda/diz--concerto", null, "Leiriagenda — página do evento"],
-  "leiria-orquestra-jazz": ["https://leiriagenda.cm-leiria.pt/pt/agenda/orquestra-jazz-de-leiria-christian-mcbride", null, "Leiriagenda — página do evento"]
+  "leiria-orquestra-jazz": ["https://leiriagenda.cm-leiria.pt/pt/agenda/orquestra-jazz-de-leiria-christian-mcbride", null, "Leiriagenda — página do evento"],
+  "ccb-sul": ["https://www.ccb.pt/evento/sul/", "https://ccb.bol.pt/Comprar/Bilhetes/162118/1741094/Sectores"],
+  "ccb-barbara-hendricks": ["https://www.ccb.pt/evento/still-on-the-road-to-freedom/", "https://incubadoradartes.bol.pt/Comprar/Bilhetes/177182/1940979/Sectores"],
+  "ccb-christian-loffler": ["https://www.ccb.pt/evento/until-we-meet-again-misty-fest/", "https://www.bol.pt/Comprar/Bilhetes/176065/1937573/Sectores"],
+  "ccb-al-di-meola": ["https://www.ccb.pt/evento/al-di-meola-misty-fest/", "https://www.bol.pt/Comprar/Bilhetes/175829/1936588/Sectores"],
+  "ccb-jazz-nights": ["https://www.ccb.pt/evento/contemporary-jazz-nights-misty-fest/", "https://ccb.bol.pt/Comprar/Bilhetes/177249/1941312/Sectores"],
+  "ccb-youn-sun-nah": ["https://www.ccb.pt/evento/youn-sun-nah-misty-fest/", "https://ccb.bol.pt/Comprar/Bilhetes/179616/1953760/Sectores"],
+  "ccb-galaxia-vivaldi": ["https://www.ccb.pt/evento/galaxia-vivaldi/", "https://www.bol.pt/Comprar/Bilhetes/180212/1956212/Sectores"],
+  "ccb-glenn-miller": ["https://www.ccb.pt/evento/glenn-miller-orchestra-4/", "https://www.bol.pt/Comprar/Bilhetes/174071/1927123/Sectores"],
+  "ccb-cabaret-songs": ["https://www.ccb.pt/evento/cabaret-songs/", "https://www.bol.pt/Comprar/Bilhetes/180217/1956220/Sectores"],
+  "ccb-bach-natal": ["https://www.ccb.pt/evento/concerto-de-natal-missa-em-si-menor-de-bach/", "https://www.bol.pt/Comprar/Bilhetes/180224/1956226/Sectores"]
 };
 const auditedEventDetails = {
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
@@ -395,6 +414,9 @@ EVENTS.forEach(event => {
     event.availability = "Por confirmar";
   }
   if (event.source === "Leiriagenda — página do evento" && !event.salesCheckedAt) {
+    event.availability = "Por confirmar";
+  }
+  if (event.source === "CCB — página do evento" && !event.salesCheckedAt) {
     event.availability = "Por confirmar";
   }
 });
