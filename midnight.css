@@ -78,3 +78,28 @@ body { color:var(--ink); background:linear-gradient(135deg,#f5f2e9 0%,#eef1e8 48
 .featured-card { display:block; min-height:0; padding:8px; }.featured-poster { width:100%; border-radius:7px; }.featured-poster img { width:100%; height:175px; object-fit:cover; }.featured-copy p { margin-top:9px; }.featured-copy h3 { min-height:33px; font-size:14px; }.featured-copy time { min-height:27px; margin-top:6px; }.featured-copy a { display:inline-block; margin-top:10px; }
 @media (max-width:900px) { .featured-rail { grid-template-columns:repeat(3,minmax(0,1fr)); }.featured-card { display:block; }.featured-poster { width:100%; }.featured-poster img { height:185px; } }
 @media (max-width:580px) { .featured-rail { grid-template-columns:repeat(2,minmax(0,1fr)); }.featured-poster img { height:160px; } }
+
+/* Poster rule in the interface: every format sits inside the same square;
+   nothing is cropped, and the lightbox keeps the original image dimensions. */
+.featured-poster { aspect-ratio:1; display:grid; place-items:center; background:#202422; }
+.featured-poster img { width:100%; height:100%; object-fit:contain; }
+.event-art { aspect-ratio:1; display:grid; place-items:center; }
+.event-art img { width:100%; height:100%; max-height:none; object-fit:contain; }
+.festival-slot-art { aspect-ratio:1; display:grid; place-items:center; }
+.festival-slot-art img { width:100%; height:100%; max-height:none; object-fit:contain; }
+.poster-lightbox { width:auto; max-width:96vw; max-height:96vh; }
+.poster-lightbox img { width:auto; height:auto; max-width:96vw; max-height:92vh; object-fit:contain; }
+
+/* Mineral editorial direction: a dark, cinematic masthead with a softer
+   graphite canvas below replaces the flat green block and white field. */
+:root { --ink:#1d211f; --muted:#69706b; --cream:#d9d9d3; --white:#eeece5; --line:#babdb6; --lime:#9fbf9a; --blue:#364a63; --accent:#dc8c70; }
+body { background:radial-gradient(circle at 86% 5%,rgba(108,128,160,.22),transparent 30rem),radial-gradient(circle at 12% 38%,rgba(220,140,112,.12),transparent 26rem),#d9d9d3; }
+.site-header { border-color:rgba(30,34,32,.22); }.brand { color:#1d211f; }.site-header>p { color:#59615c; }.submit-link { color:#334857; }
+.intro { min-height:330px; border-radius:22px; background:radial-gradient(circle at 93% 10%,rgba(132,149,189,.45),transparent 19rem),radial-gradient(circle at 77% 100%,rgba(222,142,114,.32),transparent 23rem),linear-gradient(125deg,#191c1b,#262a28 65%,#30322f); box-shadow:0 24px 55px rgba(31,34,32,.22); }
+.intro::before { opacity:.22; background-image:linear-gradient(130deg,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(40deg,rgba(255,255,255,.04) 1px,transparent 1px); background-size:34px 34px; }
+.intro .kicker { color:#d9d9ca; }.intro h1 { color:#f5f2e9; font-family:"DM Sans",Arial,sans-serif; font-size:clamp(47px,6.3vw,78px); letter-spacing:-.085em; }.intro h1 em { color:#d9debb; }.intro h1 em::after { background:#dc8c70; }.intro>p:not(.kicker) { max-width:480px; color:#d8dad3; font-size:15px; }
+.intro-principles { right:38px; bottom:34px; }.intro-principles span { border-color:rgba(255,255,255,.18); color:#e8e9e0; background:rgba(11,14,13,.22); backdrop-filter:blur(10px); }
+.featured-heading .kicker { color:#5c6260; }.featured-heading h2 { color:#1e2421; }.featured-description { color:#606864; }.featured-heading>a { color:#334857; }
+.featured-card { border-color:rgba(34,39,36,.18); background:rgba(238,236,229,.75); box-shadow:0 8px 19px rgba(34,39,36,.08); }.featured-card:hover { box-shadow:0 16px 29px rgba(34,39,36,.16); }.featured-poster { background:#202422; }.featured-copy p { color:#577269; }.featured-copy h3 { color:#1f2823; }.featured-copy a { color:#334857; }
+.browse-panel { border-color:rgba(34,39,36,.22); background:rgba(238,236,229,.88); box-shadow:0 17px 37px rgba(34,39,36,.1); }.browse-panel::before { background:linear-gradient(90deg,transparent,#9fbf9a 34%,#6f8aa6 67%,transparent); }.browse-heading h2 { color:#1e2421; }.filter-grid label,.location-bar label,.multi-filter { border-color:#b9bdb5; background:#e7e6df; }.filter-grid input,.filter-grid select,.location-bar label select,.multi-filter strong,.custom-select-trigger { color:#202622; }.event-card[open] summary,.event-details { background:#e8e8e1; }.event-card { border-color:#c3c6be; }.event-title { color:#202622; }.drawer { border-color:#b9bdb5; background:#e9e8e1; }.source-group { background:#e3e3dc; }
+@media (max-width:700px) { .intro { min-height:342px; }.intro-principles { right:auto; bottom:22px; left:25px; }.intro h1 { font-size:48px; } }
