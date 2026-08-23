@@ -20,6 +20,9 @@ const posterLightboxImage = document.querySelector("#poster-lightbox-image");
 const nearbyButton = document.querySelector("#nearby-button");
 const nearbyHint = document.querySelector("#nearby-hint");
 const featuredRail = document.querySelector("#featured-rail");
+const featuredKicker = document.querySelector("#featured-kicker");
+const featuredTitle = document.querySelector("#featured-title");
+const featuredDescription = document.querySelector("#featured-description");
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -305,10 +308,31 @@ const isSpecificEventPage = url => !genericTicketUrl(url);
 const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl);
 const reportUrl = event => `https://github.com/fabio-rafael-sorted/radareventos/issues/new?title=${encodeURIComponent(`Correção: ${event.title}`)}&body=${encodeURIComponent(`Evento: ${event.title}\nData: ${prettyDate(event.date)}\nFonte atual: ${event.sourceUrl}\n\nO que está errado ou falta atualizar?\n`)}`;
 
+let featuredMode = 0;
 function renderFeatured() {
   const today = shiftedIso(0);
-  const featured = EVENTS
-    .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today)
+  const upcoming = EVENTS.filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today);
+  const modes = [
+    {
+      kicker: "Em destaque",
+      title: "Próximos festivais.",
+      description: "Os próximos grandes encontros de música em Portugal.",
+      events: upcoming.filter(event => eventType(event) === "Festival")
+    },
+    {
+      kicker: "A acontecer",
+      title: "Nos próximos 7 dias.",
+      description: "Esta seleção roda automaticamente com a agenda da semana.",
+      events: upcoming.filter(event => overlapsRange(event, [today, shiftedIso(6)]))
+    }
+  ].filter(mode => mode.events.length);
+  if (!modes.length) return;
+  featuredMode %= modes.length;
+  const mode = modes[featuredMode];
+  featuredKicker.textContent = mode.kicker;
+  featuredTitle.textContent = mode.title;
+  featuredDescription.textContent = mode.description;
+  const featured = mode.events
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 3);
   featuredRail.innerHTML = featured.map(event => {
@@ -465,4 +489,7 @@ posterLightbox.querySelector(".poster-lightbox-close").addEventListener("click",
 
 renderSources();
 renderFeatured();
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  window.setInterval(() => { featuredMode += 1; renderFeatured(); }, 8000);
+}
 render();

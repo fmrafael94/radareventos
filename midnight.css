@@ -64,3 +64,10 @@ body { color:var(--ink); background:linear-gradient(135deg,#f5f2e9 0%,#eef1e8 48
 .drawer { border-color:#d4dbd0; background:#fffdf8; box-shadow:0 7px 18px rgba(45,70,52,.06); }.drawer summary { color:#203126; }.drawer summary:hover { background:#f2f6e9; }.drawer summary i { color:#568a46; }.drawer-content { color:#5e6c62; }.source-group { border-color:#d9dfd5; background:#fafbf6; }.source-group h3 { color:#26382b; }.source-group a { border-color:#e0e4dc; color:#526157; }.source-group a:hover { color:#416d3d; } footer { border-color:#d7ded2; color:#66736a; } footer span { color:#315c40; }
 @media (max-width:900px) { .featured-rail { grid-template-columns:1fr; }.featured-card { grid-template-columns:92px minmax(0,1fr); min-height:125px; }.featured-poster { width:92px; }.featured-poster img { height:112px; } }
 @media (max-width:700px) { .intro { min-height:326px; }.signal-field { right:-20px; opacity:.37; }.intro-stat { background:rgba(27,67,47,.44); }.featured-events { margin-top:23px; }.featured-heading h2 { font-size:23px; }.featured-heading>a { white-space:nowrap; }.featured-card { padding:8px; } }
+
+/* The brand remains Radar de Eventos, but the decorative sonar is retired. */
+.signal-field { display:none!important; }
+.intro::after { display:none; }
+.intro { min-height:270px; }
+.featured-description { margin:5px 0 0; color:#68766b; font-size:11px; line-height:1.4; }
+@media (max-width:700px) { .intro { min-height:280px; }.featured-description { max-width:220px; } }
