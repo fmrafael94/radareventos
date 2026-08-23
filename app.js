@@ -194,6 +194,17 @@ const officialPosters = {
   ,"gnration-iav": ["https://www.gnration.pt/wp-content/uploads/2026/07/ocupa-iav.jpg", "https://www.gnration.pt/event/2026/iav/"]
   ,"gnration-jose-israel": ["https://www.gnration.pt/wp-content/uploads/2026/07/ocupa-jose-rios-israel-machado.jpg", "https://www.gnration.pt/event/2026/jose-goncalves-rios-israel-machado/"]
   ,"gnration-maquina-scuru": ["https://www.gnration.pt/wp-content/uploads/2026/07/maquina-scuru-fitchadu.jpg", "https://www.gnration.pt/event/2026/maquina-scuru-fitchadu/"]
+  ,"vul-sobass-friends": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a71e8c091dccd7950b113ac/1786025095026/Sobass+Friends+Story.jpeg?format=1500w", "https://vulisboa.com/eventos/sobass-friends-04-09"]
+  ,"vul-omar-perry": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a749807ea1fcd7b69922b97/1786380725512/OMAR+PERRY+POST+%281%29.png?format=1500w", "https://vulisboa.com/eventos/2-aniversario-atlantic-sound-omar-perry-friends"]
+  ,"vul-micronova-bungee": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a748a7d6a74a53148b9f7a2/1786647385733/bungee+x+micronova+DEFINITIVO+1440X1080.jpg?format=1500w", "https://vulisboa.com/eventos/micronova-x-bungee-day-night"]
+  ,"vul-afro-encircle": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a70d2bad808af4df7175dba/1786980035844/LOGO+AFROENCIRCLE.png?format=1500w", "https://vulisboa.com/eventos/afro-encircle-setembro"]
+  ,"vul-possivel": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a63d4c0e65ccc609775846e/1786448584315/Possi%CC%81vel.jpg?format=1500w", "https://vulisboa.com/eventos/possvel-18-setembro"]
+  ,"vul-sensorial-sounds": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a720d5f2c44d66fc4bb2cac/1786041872052/IMG_1138.PNG?format=1500w", "https://vulisboa.com/eventos/sensorial-sounds"]
+  ,"vul-kizomba-rua": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a70d0ebb5cf2f5353b8a194/1786459324980/KNR+logo+vertical.png?format=1500w", "https://vulisboa.com/eventos/kizomba-na-rua-setembro"]
+  ,"vul-afterglow": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a7f38d01a023d011a07a548/1786722893165/AFTERGLOW+logo.png?format=1500w", "https://vulisboa.com/eventos/afterglow-music-session-26-09"]
+  ,"vul-riot": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a74af2fa3246f1b37497569/1786365717090/RIOT+LOGO.png?format=1500w", "https://vulisboa.com/eventos/riot-x-vul-october"]
+  ,"vul-beleza-abstracta": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a74b54af480dc7087705ef1/1786033958848/beleza+abstracta+logo.png?format=1500w", "https://vulisboa.com/eventos/beleza-abstracta"]
+  ,"vul-fatal-move": ["https://static1.squarespace.com/static/65d770165e44f6173a5c3868/662faee562de8c5dc364cd19/6a4bcee521561e4506d88912/1783353398892/FATAL+MOVE.jpeg?format=1500w", "https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
@@ -233,7 +244,25 @@ const officialEventPages = {
   "gnration-joao-ms": ["https://www.gnration.pt/event/2026/joao-ms/", null, "gnration — página do evento"],
   "gnration-iav": ["https://www.gnration.pt/event/2026/iav/", null, "gnration — página do evento"],
   "gnration-jose-israel": ["https://www.gnration.pt/event/2026/jose-goncalves-rios-israel-machado/", null, "gnration — página do evento"],
-  "gnration-maquina-scuru": ["https://www.gnration.pt/event/2026/maquina-scuru-fitchadu/", "https://gnration.bol.pt/Comprar/Bilhetes/180379-maquina_scuru_fitchadu-gnration/", "gnration — página do evento"]
+  "gnration-maquina-scuru": ["https://www.gnration.pt/event/2026/maquina-scuru-fitchadu/", "https://gnration.bol.pt/Comprar/Bilhetes/180379-maquina_scuru_fitchadu-gnration/", "gnration — página do evento"],
+  "vul-sobass-friends": ["https://vulisboa.com/eventos/sobass-friends-04-09", "https://3cket.com/en/event/sobass-friends-95711", "Village Underground Lisboa — página do evento"],
+  "vul-omar-perry": ["https://vulisboa.com/eventos/2-aniversario-atlantic-sound-omar-perry-friends", "https://3cket.com/en/event/2-aniversario-atlantic-sound-omar-perry-friends", "Village Underground Lisboa — página do evento"],
+  "vul-micronova-bungee": ["https://vulisboa.com/eventos/micronova-x-bungee-day-night", "https://3cket.com/event/bungee-x-micronova-day-night", "Village Underground Lisboa — página do evento"],
+  "vul-afro-encircle": ["https://vulisboa.com/eventos/afro-encircle-setembro", null, "Village Underground Lisboa — página do evento"],
+  "vul-possivel": ["https://vulisboa.com/eventos/possvel-18-setembro", "https://3cket.com/event/possivel", "Village Underground Lisboa — página do evento"],
+  "vul-sensorial-sounds": ["https://vulisboa.com/eventos/sensorial-sounds", "https://3cket.com/event/sensorial-sounds/cjlsf", "Village Underground Lisboa — página do evento"],
+  "vul-kizomba-rua": ["https://vulisboa.com/eventos/kizomba-na-rua-setembro", null, "Village Underground Lisboa — página do evento"],
+  "vul-afterglow": ["https://vulisboa.com/eventos/afterglow-music-session-26-09", null, "Village Underground Lisboa — página do evento"],
+  "vul-riot": ["https://vulisboa.com/eventos/riot-x-vul-october", null, "Village Underground Lisboa — página do evento"],
+  "vul-beleza-abstracta": ["https://vulisboa.com/eventos/beleza-abstracta", null, "Village Underground Lisboa — página do evento"],
+  "vul-fatal-move": ["https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath", "https://3cket.com/event/sportswear-bookings-presents-fatal-move-outta-spite-nopath", "Village Underground Lisboa — página do evento"]
+};
+const auditedEventDetails = {
+  "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
+  "vul-kizomba-rua": { tickets: "Entrada gratuita; RSVP em breve" },
+  "vul-afterglow": { tickets: "Registo obrigatório; bilhetes em breve" },
+  "vul-riot": { tickets: "Bilhetes em breve" },
+  "vul-beleza-abstracta": { tickets: "Entrada gratuita (17:00–23:00); bilhetes em breve" }
 };
 EVENTS.forEach(event => {
   const poster = officialPosters[event.id];
@@ -245,6 +274,7 @@ EVENTS.forEach(event => {
     if (page[1]) event.ticketUrl = page[1];
     else delete event.ticketUrl;
   }
+  if (auditedEventDetails[event.id]) Object.assign(event, auditedEventDetails[event.id]);
   if (legacyOfficialPosterIds.has(event.id) && event.image) event.posterSourceUrl = event.sourceUrl;
   if (event.posterSourceUrl) event.posterVerifiedAt = "2026-08-23";
 });
@@ -260,6 +290,9 @@ EVENTS.forEach(event => {
     event.source = "Caminhos Metálicos — agenda";
   }
   if (event.source === "gnration — página do evento" && event.tickets !== "Entrada livre" && !event.salesCheckedAt) {
+    event.availability = "Por confirmar";
+  }
+  if (event.source === "Village Underground Lisboa — página do evento" && !event.salesCheckedAt) {
     event.availability = "Por confirmar";
   }
 });
