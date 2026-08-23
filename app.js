@@ -15,6 +15,8 @@ const citySelect = document.querySelector("#city-filter");
 const typeSelect = document.querySelector("#type-filter");
 const posterLightbox = document.querySelector("#poster-lightbox");
 const posterLightboxImage = document.querySelector("#poster-lightbox-image");
+const nearbyButton = document.querySelector("#nearby-button");
+const nearbyHint = document.querySelector("#nearby-hint");
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -24,6 +26,17 @@ const dateParts = iso => {
   return [String(date.getDate()).padStart(2, "0"), new Intl.DateTimeFormat("pt-PT", { month: "short" }).format(date).replace(".", "")];
 };
 const prettyDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
+const areaCentres = {
+  "Algarve":[37.02,-7.93], "Alto Alentejo":[39.29,-7.43], "Alto Minho":[41.69,-8.83], "Ave":[41.44,-8.30], "Aveiro":[40.64,-8.65], "Beira Baixa":[40.28,-7.50], "Cávado":[41.55,-8.43], "Douro":[41.16,-7.79], "Grande Lisboa":[38.72,-9.14], "Grande Porto":[41.16,-8.63], "Lezíria do Tejo":[39.24,-8.69], "Madeira":[32.65,-16.91], "Minho":[41.57,-8.29], "Oeiras":[38.69,-9.31], "Oeste":[39.35,-9.38], "Península de Setúbal":[38.53,-8.89], "Região de Aveiro":[40.64,-8.65], "Região de Coimbra":[40.21,-8.43], "Região de Leiria":[39.74,-8.81], "São Miguel":[37.74,-25.67], "Tâmega e Sousa":[41.21,-8.28], "Vale do Sousa":[41.20,-8.28], "Viseu Dão Lafões":[40.66,-7.91], "Área Metropolitana do Porto":[41.16,-8.63]
+};
+const radians = value => value * Math.PI / 180;
+const distanceTo = (fromLat, fromLon, toLat, toLon) => {
+  const earthRadius = 6371;
+  const dLat = radians(toLat - fromLat);
+  const dLon = radians(toLon - fromLon);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(radians(fromLat)) * Math.cos(radians(toLat)) * Math.sin(dLon / 2) ** 2;
+  return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
 
 function addOptions(select, items) {
   items.forEach(item => {
@@ -308,6 +321,29 @@ document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEvent
   document.querySelectorAll("[data-quick-pick]").forEach(item => item.setAttribute("aria-pressed", String(item === button && Boolean(next))));
   dateSelect.dispatchEvent(new Event("change"));
 }));
+nearbyButton.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    nearbyHint.textContent = "Localização não disponível neste browser.";
+    return;
+  }
+  nearbyButton.disabled = true;
+  nearbyHint.textContent = "A localizar a tua área…";
+  navigator.geolocation.getCurrentPosition(({ coords }) => {
+    const [area, distance] = Object.entries(areaCentres).reduce((closest, [name, [latitude, longitude]]) => {
+      const kilometres = distanceTo(coords.latitude, coords.longitude, latitude, longitude);
+      return kilometres < closest[1] ? [name, kilometres] : closest;
+    }, ["", Infinity]);
+    state.area = area;
+    state.page = 1;
+    areaSelect.value = area;
+    nearbyHint.textContent = `${area} · cerca de ${Math.round(distance)} km`;
+    nearbyButton.disabled = false;
+    areaSelect.dispatchEvent(new Event("change"));
+  }, () => {
+    nearbyHint.textContent = "Ativa a localização para ver eventos próximos.";
+    nearbyButton.disabled = false;
+  }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 3600000 });
+});
 previousPage.addEventListener("click", () => { state.page -= 1; render(); });
 nextPage.addEventListener("click", () => { state.page += 1; render(); });
 list.addEventListener("click", event => {
