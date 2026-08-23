@@ -177,9 +177,35 @@ const officialPosters = {
   "famalicao-samuel-uria": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz156774_grande.jpg", "https://casadasartesvnf.bol.pt/Comprar/Bilhetes/182460-samuel_uria_cine_concerto-casa_das_artes_de_famalicao/"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
+const officialEventPages = {
+  "ccb-big-bang": ["https://www.ccb.pt/evento/festival-big-bang-lx2026/2026-10-02/", "http://festivalbigbang.bol.pt/"],
+  "ccb-mike-stern": ["https://www.ccb.pt/evento/mike-stern-band/", "https://www.bol.pt/Comprar/Bilhetes/175568/1936036/Sectores"],
+  "ccb-handel": ["https://www.ccb.pt/evento/handel/"],
+  "ccb-margarida-campelo": ["https://www.ccb.pt/evento/margarida-campelo/", "https://ccb.bol.pt/Comprar/Bilhetes/180147-margarida_campelo-fundacao_centro_cultural_de_belem/Sessoes"],
+  "ccb-boca-livre": ["https://www.ccb.pt/evento/boca-canta-edu/", "https://www.bol.pt/Comprar/Bilhetes/183053-boca_livre_com_participacao_super_especial_de_edu_lobo-everything_is_new_lda/Sessoes"],
+  "ccb-trio-fantasma": ["https://www.ccb.pt/evento/trio-fantasma-de-beethoven/", "https://www.bol.pt/Comprar/Bilhetes/180395/1956762/Sectores"],
+  "ccb-joana-gama": ["https://www.ccb.pt/evento/a-mind-in-the-heart-de-ivan-vukosavljevic/", "https://www.bol.pt/Comprar/Bilhetes/180164/1956129/Sectores"],
+  "ccb-pedro-melo-alves": ["https://www.ccb.pt/evento/pedro-melo-alves-omniae-large-ensemble/", "https://www.bol.pt/Comprar/Bilhetes/180177/1956146/Sectores"],
+  "ccb-carmen": ["https://www.ccb.pt/evento/carmen-de-bizet/2026-10-28/", "https://www.bol.pt/Comprar/Bilhetes/180184-carmen_de_bizet_opera-ccb/Sessoes"],
+  "ccb-marco-rodrigues": ["https://www.ccb.pt/evento/marco-rodrigues-canta-carlos-do-carmo/", "https://ccb.bol.pt/Comprar/Bilhetes/162165/1741114/Sectores"],
+  "ccb-100-miles": ["https://www.ccb.pt/evento/100-miles-centennial-celebration-of-miles-davis/", "https://www.bol.pt/Comprar/Bilhetes/179321/1952266/Sectores"],
+  "ccb-cancioneiro-elvas": ["https://www.ccb.pt/evento/cancioneiro-de-elvas/", "https://www.bol.pt/Comprar/Bilhetes/180195/1956170/Sectores"],
+  "ccb-bolero-ravel": ["https://www.ccb.pt/evento/o-bolero-de-ravel/", "https://ccb.bol.pt/Comprar/Bilhetes/179843-o_bolero_de_ravel_oml-fundacao_centro_cultural_de_belem/Sessoes"],
+  "ccb-alan-stivell": ["https://www.ccb.pt/evento/alan-stivell-misty-fest/"],
+  "ccb-nancy-vieira": ["https://www.ccb.pt/evento/nancy-vieira-francisco-sassetti-misty-fest/"],
+  "ccb-maria-joao": ["https://www.ccb.pt/evento/maria-joao-joao-farinha-misty-fest/"],
+  "ccb-eliana-glass": ["https://www.ccb.pt/evento/eliana-glass-misty-fest/", "https://ccb.bol.pt/Comprar/Bilhetes/179611-eliana_glass_misty_fest-fundacao_centro_cultural_de_belem/Sessoes?lang=pt-PT"],
+  "ccb-gospel-choir": ["https://www.ccb.pt/evento/black-heritage-gospel-choir/", "https://uguru.bol.pt/Comprar/Bilhetes/176584-black_heritage_gospel_choir-uguru_ii_producoes_unipessoal_lda/Sessoes?lang=pt-PT"]
+};
 EVENTS.forEach(event => {
   const poster = officialPosters[event.id];
+  const page = officialEventPages[event.id];
   if (poster) [event.image, event.posterSourceUrl] = poster;
+  if (page) {
+    event.sourceUrl = page[0];
+    event.source = "CCB — página do evento";
+    if (page[1]) event.ticketUrl = page[1];
+  }
   if (legacyOfficialPosterIds.has(event.id) && event.image) event.posterSourceUrl = event.sourceUrl;
   if (event.posterSourceUrl) event.posterVerifiedAt = "2026-08-23";
 });
