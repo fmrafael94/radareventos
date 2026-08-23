@@ -103,3 +103,21 @@ body { background:radial-gradient(circle at 86% 5%,rgba(108,128,160,.22),transpa
 .featured-card { border-color:rgba(34,39,36,.18); background:rgba(238,236,229,.75); box-shadow:0 8px 19px rgba(34,39,36,.08); }.featured-card:hover { box-shadow:0 16px 29px rgba(34,39,36,.16); }.featured-poster { background:#202422; }.featured-copy p { color:#577269; }.featured-copy h3 { color:#1f2823; }.featured-copy a { color:#334857; }
 .browse-panel { border-color:rgba(34,39,36,.22); background:rgba(238,236,229,.88); box-shadow:0 17px 37px rgba(34,39,36,.1); }.browse-panel::before { background:linear-gradient(90deg,transparent,#9fbf9a 34%,#6f8aa6 67%,transparent); }.browse-heading h2 { color:#1e2421; }.filter-grid label,.location-bar label,.multi-filter { border-color:#b9bdb5; background:#e7e6df; }.filter-grid input,.filter-grid select,.location-bar label select,.multi-filter strong,.custom-select-trigger { color:#202622; }.event-card[open] summary,.event-details { background:#e8e8e1; }.event-card { border-color:#c3c6be; }.event-title { color:#202622; }.drawer { border-color:#b9bdb5; background:#e9e8e1; }.source-group { background:#e3e3dc; }
 @media (max-width:700px) { .intro { min-height:342px; }.hero-logo { right:24px; top:auto; bottom:24px; transform:none; gap:10px; opacity:.62; }.hero-logo-mark { width:60px; height:60px; box-shadow:none; }.hero-logo-mark i:nth-child(1) { width:36px; height:36px; }.hero-logo-mark i:nth-child(2) { width:20px; height:20px; }.hero-logo-mark b { font-size:28px; }.hero-logo p { display:none; }.intro h1 { font-size:48px; } }
+
+/* A calmer wordmark and poster frames that respect every original format. */
+.intro h1 em::after { content:none; display:none; }
+.hero-logo { right:66px; }
+.hero-logo-wordmark { display:flex; align-items:center; gap:14px; }
+.hero-logo-monogram { position:relative; display:grid; width:66px; height:66px; place-items:center; overflow:hidden; border:1px solid rgba(245,242,233,.62); color:#f5f2e9; font:700 40px/.8 "Space Grotesk",sans-serif; letter-spacing:-.15em; }
+.hero-logo-monogram::before { content:""; position:absolute; right:-12px; bottom:-13px; width:47px; height:2px; background:#d9debb; transform:rotate(-48deg); transform-origin:center; }
+.hero-logo-monogram::after { content:""; position:absolute; top:8px; right:8px; width:7px; height:7px; border:1px solid rgba(217,222,187,.8); }
+.hero-logo p { gap:5px; font:500 10px "DM Mono",monospace; letter-spacing:.16em; }
+.hero-logo p strong { color:#f5f2e9; font-size:15px; letter-spacing:.11em; }
+.hero-logo p span { color:#c5c9bd; }
+.poster-trigger { position:relative; isolation:isolate; background:#d6d7d0!important; }
+.poster-trigger::before { content:""; position:absolute; z-index:0; inset:-18px; background:var(--poster-image) center/cover no-repeat; filter:blur(17px) saturate(.82); opacity:.78; transform:scale(1.12); }
+.poster-trigger::after { content:""; position:absolute; z-index:2; inset:0; background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(0,0,0,.1)); pointer-events:none; }
+.poster-trigger img { position:relative; z-index:1; filter:drop-shadow(0 6px 12px rgba(19,23,20,.22)); }
+.featured-poster,.event-art,.festival-slot-art { background:#d6d7d0!important; }
+.featured-poster img,.event-art img,.festival-slot-art img { object-fit:contain; }
+@media (max-width:700px) { .hero-logo { right:24px; bottom:28px; opacity:1; }.hero-logo-monogram { width:42px; height:42px; font-size:26px; }.hero-logo-monogram::before { right:-9px; bottom:-11px; width:35px; }.hero-logo-monogram::after { top:5px; right:5px; width:5px; height:5px; }.hero-logo p { display:none; } }
