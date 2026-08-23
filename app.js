@@ -102,9 +102,11 @@ Object.entries(festivalSeriesPrefixes).forEach(([parentId, prefix]) => {
   });
 });
 
-// Poster rule: a visual is shown only after it has been located on the
-// official event, promoter, venue or official-ticket page. Never create an
-// artificial flyer; when this record is absent, the UI says so plainly.
+// Poster rule: always look in this order before publishing a visual:
+// 1) official event site, 2) that event's concrete Ticketline/BOL/FNAC/etc.
+// ticket page, 3) official promoter or venue, 4) municipal/cultural venue.
+// Never create an artificial flyer; when this record is absent, the UI says
+// so plainly.
 const officialPosters = {
   "corroios-2026": ["https://www.cm-seixal.pt/sites/default/files/styles/640x426/public/festas_populares_corroios_2026.png?itok=CsM8ke8c&timestamp=1783007117", "https://www.cm-seixal.pt/evento/festas-populares-de-corroios-2026"],
   "festas-mar-cascais-2026": ["https://www.cascais.pt/sites/default/files/styles/galeria-new/public/imagens/galerias/new/2026_ge_fm_site_1000x500px_programa.jpg?itok=COquiY-c", "https://www.cascais.pt/noticia/musica-esta-de-volta-ao-palco-mais-proximo-do-atlantico"],

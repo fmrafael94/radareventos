@@ -13,7 +13,7 @@ Include public concerts, festivals, DJ sets, bar and club gigs, free local shows
 3. Give it a `type`: `Concerto`, `Festival`, `Concerto em bar`, `Fado regular`, `DJ set`, `Recital`, or `Musical`.
 4. Only add an event after confirming it with an organiser, official venue, or official ticket seller.
 5. Add the official URLs, set `verifiedAt` to the date checked, and keep the capacity as `Não divulgado` unless the organiser confirms a figure.
-6. Only show a poster when it is visible on that event's official page, official promoter/venue page, or its concrete official ticket page. Save that exact page in `posterSourceUrl` and set `posterVerifiedAt`. Never create, edit, or infer a flyer. If this confirmation is missing, leave out `image`: the site will show `Não existe cartaz oficial ainda.`
+6. Before declaring that there is no poster, look in this exact order: the event's own official website; its concrete official ticket page (Ticketline, BOL, FNAC, Fever, etc.); the official promoter or venue; then the relevant Câmara Municipal/cultural venue. Only show a poster when it is visible on one of these pages. Save that exact page in `posterSourceUrl` and set `posterVerifiedAt`. Never create, edit, or infer a flyer. If this confirmation is missing, leave out `image`: the site will show `Não existe cartaz oficial ainda.`
 7. Remove cancelled events only after their date; before then, keep them with `availability: "Cancelado"`.
 
 `sources.js` is the source watchlist. Discovery sites help find events, but are not sufficient confirmation by themselves.
