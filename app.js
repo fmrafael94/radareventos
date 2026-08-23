@@ -233,6 +233,15 @@ const officialPosters = {
   ,"viriato-sophia": ["https://www.teatroviriato.com/contents/imported_images/calendario_sophia_1694440897.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/sophia-188"]
   ,"viriato-manel-cruz": ["https://www.teatroviriato.com/contents/imported_images/calendario_manel_cruz_1694441113.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/manel-cruz"]
   ,"viriato-carminho": ["https://www.teatroviriato.com/contents/imported_images/calendario_carminho_1725032276.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/carminho"]
+  ,"leiria-carolina-deus": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/eb0c3830b118aaecd6a104e62aae905e/carolinadedeus.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/carolina-de-deus-3"]
+  ,"leiria-jazz-dixie-gang": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/7f7fb08c24229d91cdbcf776f828b001/leiriagenda_jazz_no_centro_historico.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/jazz-no-centro-historico-dixie-gang"]
+  ,"leiria-uhf-cartel": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/34cf457ec154b56e36ba035018ccb363/uhf.jpeg", "https://leiriagenda.cm-leiria.pt/pt/agenda/concerto-solidario-uhf-e-the-cartel"]
+  ,"leiria-valter-lobo": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/68281920a2ffb5a337f30111b468bed6/copia_de_copia_de_20221202_valterlobo_0055_9327_sp_gabriela_mo.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/valter-lobo"]
+  ,"leiria-juntos-musica": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/e915756fd241c0b63c02e925191f1670/imagem_002.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/juntos-pela-musica"]
+  ,"leiria-mendelssohn": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/6232a78307be29f6f81cd2dd437cb0e6/zukerman_1600-992x558.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/ciclo-mendelssohn--integral-das-sinfonias-e-dos-concertos"]
+  ,"leiria-em-casa-amalia": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/c80de5605d5ae093c34710d994df6f39/em_casa_damalia_o_concerto_ao_vivo_358x329.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/em-casa-damalia--o-concerto-ao-vivo"]
+  ,"leiria-diz-concerto": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/4182733be7371d2eb2ac35c685e1baf9/diz_concerto.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/diz--concerto"]
+  ,"leiria-orquestra-jazz": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/a6157e37db04afb5aa34f96b9830c870/rquestra_de_jazz.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/orquestra-jazz-de-leiria-christian-mcbride"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
@@ -311,7 +320,16 @@ const officialEventPages = {
   "viriato-ballake-piers": ["https://www.teatroviriato.com/pt/programacao/espetaculo/ballake-sissoko-and-piers-faccini", "https://caeviseu.bol.pt/Comprar/Bilhetes/160651-ballake_sissoko_piers_faccini-centro_artes_espectaculo_de_viseu_assoc_cult_pedag/Sessoes", "Teatro Viriato — página do evento"],
   "viriato-sophia": ["https://www.teatroviriato.com/pt/programacao/espetaculo/sophia-188", null, "Teatro Viriato — página do evento"],
   "viriato-manel-cruz": ["https://www.teatroviriato.com/pt/programacao/espetaculo/manel-cruz", null, "Teatro Viriato — página do evento"],
-  "viriato-carminho": ["https://www.teatroviriato.com/pt/programacao/espetaculo/carminho", null, "Teatro Viriato — página do evento"]
+  "viriato-carminho": ["https://www.teatroviriato.com/pt/programacao/espetaculo/carminho", null, "Teatro Viriato — página do evento"],
+  "leiria-carolina-deus": ["https://leiriagenda.cm-leiria.pt/pt/agenda/carolina-de-deus-3", null, "Leiriagenda — página do evento"],
+  "leiria-jazz-dixie-gang": ["https://leiriagenda.cm-leiria.pt/pt/agenda/jazz-no-centro-historico-dixie-gang", null, "Leiriagenda — página do evento"],
+  "leiria-uhf-cartel": ["https://leiriagenda.cm-leiria.pt/pt/agenda/concerto-solidario-uhf-e-the-cartel", null, "Leiriagenda — página do evento"],
+  "leiria-valter-lobo": ["https://leiriagenda.cm-leiria.pt/pt/agenda/valter-lobo", null, "Leiriagenda — página do evento"],
+  "leiria-juntos-musica": ["https://leiriagenda.cm-leiria.pt/pt/agenda/juntos-pela-musica", null, "Leiriagenda — página do evento"],
+  "leiria-mendelssohn": ["https://leiriagenda.cm-leiria.pt/pt/agenda/ciclo-mendelssohn--integral-das-sinfonias-e-dos-concertos", null, "Leiriagenda — página do evento"],
+  "leiria-em-casa-amalia": ["https://leiriagenda.cm-leiria.pt/pt/agenda/em-casa-damalia--o-concerto-ao-vivo", null, "Leiriagenda — página do evento"],
+  "leiria-diz-concerto": ["https://leiriagenda.cm-leiria.pt/pt/agenda/diz--concerto", null, "Leiriagenda — página do evento"],
+  "leiria-orquestra-jazz": ["https://leiriagenda.cm-leiria.pt/pt/agenda/orquestra-jazz-de-leiria-christian-mcbride", null, "Leiriagenda — página do evento"]
 };
 const auditedEventDetails = {
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
@@ -326,7 +344,15 @@ const auditedEventDetails = {
   "viriato-kevin-morby": { tickets: "Bilheteira oficial ainda não localizada" },
   "viriato-sophia": { tickets: "Bilheteira oficial ainda não localizada" },
   "viriato-manel-cruz": { tickets: "Bilheteira oficial ainda não localizada" },
-  "viriato-carminho": { tickets: "Bilheteira oficial ainda não localizada" }
+  "viriato-carminho": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-carolina-deus": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-uhf-cartel": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-valter-lobo": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-juntos-musica": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-mendelssohn": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-em-casa-amalia": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-diz-concerto": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-orquestra-jazz": { tickets: "Bilheteira oficial ainda não localizada" }
 };
 EVENTS.forEach(event => {
   const poster = officialPosters[event.id];
@@ -366,6 +392,9 @@ EVENTS.forEach(event => {
     event.availability = "Por confirmar";
   }
   if (event.source === "Teatro Viriato — página do evento" && !event.salesCheckedAt) {
+    event.availability = "Por confirmar";
+  }
+  if (event.source === "Leiriagenda — página do evento" && !event.salesCheckedAt) {
     event.availability = "Por confirmar";
   }
 });
