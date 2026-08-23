@@ -19,6 +19,7 @@ const posterLightbox = document.querySelector("#poster-lightbox");
 const posterLightboxImage = document.querySelector("#poster-lightbox-image");
 const nearbyButton = document.querySelector("#nearby-button");
 const nearbyHint = document.querySelector("#nearby-hint");
+const featuredRail = document.querySelector("#featured-rail");
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -101,13 +102,54 @@ Object.entries(festivalSeriesPrefixes).forEach(([parentId, prefix]) => {
   });
 });
 
-const officialArt = {
-  "corroios-2026": "https://www.cm-seixal.pt/sites/default/files/styles/640x426/public/festas_populares_corroios_2026.png?itok=CsM8ke8c&timestamp=1783007117",
-  "festas-mar-cascais-2026": "https://www.cascais.pt/sites/default/files/styles/galeria-new/public/imagens/galerias/new/2026_ge_fm_site_1000x500px_programa.jpg?itok=COquiY-c",
-  "kalorama-2026": "https://meokalorama.pt/wp-content/uploads/2026/08/MEO_KLR_TERCEIRO_ANUNCIO_POST.jpg",
-  "iminente-2026": "https://festivaliminente.com/assets/images/cartaz-4x5-v2.svg"
+// Poster rule: a visual is shown only after it has been located on the
+// official event, promoter, venue or official-ticket page. Never create an
+// artificial flyer; when this record is absent, the UI says so plainly.
+const officialPosters = {
+  "corroios-2026": ["https://www.cm-seixal.pt/sites/default/files/styles/640x426/public/festas_populares_corroios_2026.png?itok=CsM8ke8c&timestamp=1783007117", "https://www.cm-seixal.pt/evento/festas-populares-de-corroios-2026"],
+  "festas-mar-cascais-2026": ["https://www.cascais.pt/sites/default/files/styles/galeria-new/public/imagens/galerias/new/2026_ge_fm_site_1000x500px_programa.jpg?itok=COquiY-c", "https://www.cascais.pt/noticia/musica-esta-de-volta-ao-palco-mais-proximo-do-atlantico"],
+  "kalorama-2026": ["https://meokalorama.pt/wp-content/uploads/2026/04/MEO_KLR_BILLING_1080x1350_NO_LOGOS.jpg", "https://meokalorama.pt/en/"],
+  "iminente-2026": ["https://festivaliminente.com/assets/images/cartaz-4x5-v2.svg", "https://festivaliminente.com/"],
+  "saint-levant": ["https://applications-media.feverup.com/image/upload/f_auto,ar_15:8,c_fill/fever2/plan/photo/4e135ed4-7ba2-11f1-81c5-4e26ba31000a.jpeg", "https://feverup.com/m/645845/en?seasonal=p0f172p"],
+  "matondi-celebration": ["https://republicadamusica.pt/wp-content/uploads/2026/06/cartaz.jpg", "https://republicadamusica.pt/evento/matondi-celebration/"],
+  "andru-donalds": ["https://republicadamusica.pt/wp-content/uploads/2026/06/352_1781107649.jpg", "https://republicadamusica.pt/evento/andru-donalds/"],
+  "aveirense-monitor": ["https://teatroaveirense.pt/imagens/eventos/monitor-dinis-mota-nayr-faquira-bela-noia_img669fd9600b290.jpg", "https://www.teatroaveirense.pt/pt/evento/monitor-dinis-mota-nayr-faquira-bela-noia/"],
+  "aveirense-ganso": ["https://teatroaveirense.pt/imagens/eventos/ganso-ciclo-novas-quintas_img66f523504e81e.jpg", "https://www.teatroaveirense.pt/pt/evento/ganso-ciclo-novas-quintas/"],
+  "aveirense-tindersticks": ["https://teatroaveirense.pt/imagens/eventos/tindersticks_img6728b0224c135.jpg", "https://www.teatroaveirense.pt/pt/evento/tindersticks/"],
+  "aveirense-ofb": ["https://teatroaveirense.pt/imagens/eventos/52-aniversario-da-ua-e-28-aniversario-da-ofb_img69302b88728da.jpg", "https://www.teatroaveirense.pt/pt/evento/52-aniversario-da-ua-e-28-aniversario-da-ofb/"],
+  "taguspark-carlos-bica": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz155361_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/180813-ciclo_de_concertos_taguspark_music_sessions-taguspark/"],
+  "taguspark-cabrita": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz155361_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/180813-ciclo_de_concertos_taguspark_music_sessions-taguspark/"],
+  "taguspark-ricardo-reis": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz155361_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/180813-ciclo_de_concertos_taguspark_music_sessions-taguspark/"],
+  "outfest-2026": ["https://outfest.pt/wp-content/uploads/2026/03/cropped-FB_Thumbnail.webp", "https://outfest.pt/programa/"],
+  "lagos-fado-jazz": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz157695_grande.jpg", "https://centraldeartistas.bol.pt/Comprar/Bilhetes/183512-fado_jazz_uma_so_alma-centro_cultural_lagos/"],
+  "ivete-guimaraes": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz156523_grande.jpg", "https://serveasy.bol.pt/Comprar/Bilhetes/182182-ivete_sangalo-multiusos_de_guimaraes/"],
+  "rock-dao": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz155627_grande.jpg", "https://lisboaevents.bol.pt/Comprar/Bilhetes/181125-rock_dao_18_setembro-viseu/"],
+  "fever-candlelight-natal": ["https://applications-media.feverup.com/image/upload/f_auto,ar_15:8,c_fill/fever2/plan/photo/675fe2d2-1a9f-11f0-8be7-b25552496a35.jpg", "https://feverup.com/m/664959?seasonal=p9d5d4p"],
+  "bota-francisco-sales": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz153298_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/178498-francisco_sales-bota_base_organizada_da_toca_das_artes/"],
+  "theatrocirco-contraponto": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz155272_grande.png", "https://www.bol.pt/Comprar/Bilhetes/180722-contraponto_pierre_boulez_frank_zappa_por_remix_ensemble-theatro_circo/"],
+  "ana-bacalhau-almada": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz145271_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/169125-ana_bacalhau-t_m_joaquim_benite/"],
+  "esquecimento-global-guimaraes": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz157064_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/182771-esquecimento_global_jose_nunes_e_luca_argel-c_cultural_vila_flor/"],
+  "mario-pacheco-ccb": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz157688_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/183505-a_musica_de_mario_pacheco-ccb/"],
+  "natal-jop-almada": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz145272_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/169126-concerto_de_natal_2026-teatro_municipal_joaquim_benite/"],
+  "chico-chico-ovar": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz157700_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/183513-chico_chico_let_it_burn_deixa_arder-escola_de_artes_e_oficios/"],
+  "figl-lagoa-guitarras": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz157439_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/183209-27_set_figl_paolodevecchi_salvatoreseminara_cuartetoguitarrasandaluzia-convento_de_s_jose/"],
+  "tt-coliseu": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz149443_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/174178-tt_20_anos_de_rnb_come_closer-coliseu_de_lisboa/"],
+  "gil-semedo-coliseu": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz152280_grande.jpg", "https://artistscliveon.bol.pt/Comprar/Bilhetes/177358-gil_semedo_caboswing_novo_e_velho_tour-coliseu_de_lisboa/"],
+  "deva-premal-coliseu": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz146420_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/170711-deva_premal_miten_singing_our_prayers_lisbon_2026-coliseu_de_lisboa/"],
+  "billy-corgan-coliseu": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz153784_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/179076-a_night_of_mellon_collie_and_infinite_sadness_featuring_billy_corgan-coliseu_de_lisboa/"],
+  "irina-barros-monsantos": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz151056_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/175975-irina_barros-monsantos_open_air/"],
+  "operafest-anatema": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz155216_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/180660-anatema_performance_operafest_2026-museu_de_lisboa/"],
+  "povoa-boney-m": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz151824_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/176838-boney_m_povoa_de_varzim-povoa_arena/"],
+  "povoa-pedro-abrunhosa": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz151838_grande.jpg", "https://www.bol.pt/Comprar/Bilhetes/176846-pedro_abrunhosa-povoa_arena_cmpv/"],
+  "famalicao-samuel-uria": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz156774_grande.jpg", "https://casadasartesvnf.bol.pt/Comprar/Bilhetes/182460-samuel_uria_cine_concerto-casa_das_artes_de_famalicao/"]
 };
-EVENTS.forEach(event => { if (officialArt[event.id]) event.image = officialArt[event.id]; });
+const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
+EVENTS.forEach(event => {
+  const poster = officialPosters[event.id];
+  if (poster) [event.image, event.posterSourceUrl] = poster;
+  if (legacyOfficialPosterIds.has(event.id) && event.image) event.posterSourceUrl = event.sourceUrl;
+  if (event.posterSourceUrl) event.posterVerifiedAt = "2026-08-23";
+});
 
 function setupCustomSelect(select) {
   const wrapper = document.createElement("div");
@@ -258,7 +300,23 @@ const matchesHighlight = event => !state.highlight ||
   (state.highlight === "underground" && isUnderground(event)) ||
   (state.highlight === "sold" && availabilityLabel(event) === "Esgotado");
 const isSpecificEventPage = url => !genericTicketUrl(url);
+const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl);
 const reportUrl = event => `https://github.com/fabio-rafael-sorted/radareventos/issues/new?title=${encodeURIComponent(`Correção: ${event.title}`)}&body=${encodeURIComponent(`Evento: ${event.title}\nData: ${prettyDate(event.date)}\nFonte atual: ${event.sourceUrl}\n\nO que está errado ou falta atualizar?\n`)}`;
+
+function renderFeatured() {
+  const today = shiftedIso(0);
+  const featured = EVENTS
+    .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 3);
+  featuredRail.innerHTML = featured.map(event => {
+    const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
+    return `<article class="featured-card">
+      <button class="featured-poster poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"></button>
+      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${event.sourceUrl}" target="_blank" rel="noopener">Página oficial ↗</a></div>
+    </article>`;
+  }).join("");
+}
 
 function eventCard(event) {
   const [day, month] = dateParts(event.date);
@@ -268,11 +326,11 @@ function eventCard(event) {
   const statusClass = availability === "Esgotado" ? "sold" : availability === "Cancelado" ? "cancelled" : availability === "Por confirmar" ? "pending" : "";
   const children = festivalChildren(event).sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
   const groupedDays = [...new Set(children.map(child => child.date))];
-  const schedule = children.length ? `<div class="festival-program"><span class="detail-label">${event.endDate ? "Programa por dia / sessões" : "Alinhamento e horário"}</span>${groupedDays.length > 1 ? `<div class="festival-day-tabs" role="tablist">${groupedDays.map((date, index) => `<button type="button" role="tab" data-festival-day="${event.id}-${date}" aria-selected="${index === 0}">${prettyDate(date)}</button>`).join("")}</div>` : ""}${groupedDays.map((date, index) => `<section class="festival-day" data-festival-day-panel="${event.id}-${date}"${index ? " hidden" : ""}><h4>${prettyDate(date)}</h4>${children.filter(child => child.date === date).map(child => `<div class="festival-slot">${child.image ? `<button class="festival-slot-art poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${child.title}"><img src="${child.image}" alt="Cartaz oficial de ${child.title}" loading="lazy"></button>` : ""}<time>${child.time || "Horário a confirmar"}</time><div><strong>${child.title.replace(/^.*?— /, "")}</strong><span>${child.venue}</span></div><em>${ticketStatus(child)}</em>${programmeAction(child)}</div>`).join("")}</section>`).join("")}</div>` : `<div class="single-program"><span class="detail-label">Alinhamento / horário</span><div class="festival-slot"><time>${event.time || "Horário a confirmar"}</time><div><strong>${event.lineup || event.title}</strong><span>${event.venue}</span></div><em>${ticketStatus(event)}</em>${programmeAction(event)}</div></div>`;
-  const art = event.image ? `<button class="event-art poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
+  const schedule = children.length ? `<div class="festival-program"><span class="detail-label">${event.endDate ? "Programa por dia / sessões" : "Alinhamento e horário"}</span>${groupedDays.length > 1 ? `<div class="festival-day-tabs" role="tablist">${groupedDays.map((date, index) => `<button type="button" role="tab" data-festival-day="${event.id}-${date}" aria-selected="${index === 0}">${prettyDate(date)}</button>`).join("")}</div>` : ""}${groupedDays.map((date, index) => `<section class="festival-day" data-festival-day-panel="${event.id}-${date}"${index ? " hidden" : ""}><h4>${prettyDate(date)}</h4>${children.filter(child => child.date === date).map(child => `<div class="festival-slot">${hasOfficialPoster(child) ? `<button class="festival-slot-art poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${child.title}"><img src="${child.image}" alt="Cartaz oficial de ${child.title}" loading="lazy"></button>` : ""}<time>${child.time || "Horário a confirmar"}</time><div><strong>${child.title.replace(/^.*?— /, "")}</strong><span>${child.venue}</span></div><em>${ticketStatus(child)}</em>${programmeAction(child)}</div>`).join("")}</section>`).join("")}</div>` : `<div class="single-program"><span class="detail-label">Alinhamento / horário</span><div class="festival-slot"><time>${event.time || "Horário a confirmar"}</time><div><strong>${event.lineup || event.title}</strong><span>${event.venue}</span></div><em>${ticketStatus(event)}</em>${programmeAction(event)}</div></div>`;
+  const art = hasOfficialPoster(event) ? `<button class="event-art poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
   const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
   const sourceLabel = "Fonte";
-  const verification = `<div class="verification-strip" aria-label="Estado da verificação"><span class="verification-item ${event.salesCheckedAt ? "checked" : ""}"><b>Venda</b>${event.salesCheckedAt ? `Confirmada ${event.salesCheckedAt}` : availability}</span><span class="verification-item ${isSpecificEventPage(event.sourceUrl) ? "checked" : ""}"><b>Evento</b>${isSpecificEventPage(event.sourceUrl) ? "Página específica" : "Fonte de agenda"}</span><span class="verification-item ${!genericTicketUrl(event.ticketUrl) ? "checked" : ""}"><b>Bilheteira</b>${!genericTicketUrl(event.ticketUrl) ? "Página específica" : "Por localizar"}</span><span class="verification-item ${event.image ? "checked" : ""}"><b>Cartaz</b>${event.image ? "Oficial encontrado" : "Ainda não localizado"}</span></div>`;
+  const verification = `<div class="verification-strip" aria-label="Estado da verificação"><span class="verification-item ${event.salesCheckedAt ? "checked" : ""}"><b>Venda</b>${event.salesCheckedAt ? `Confirmada ${event.salesCheckedAt}` : availability}</span><span class="verification-item ${isSpecificEventPage(event.sourceUrl) ? "checked" : ""}"><b>Evento</b>${isSpecificEventPage(event.sourceUrl) ? "Página específica" : "Fonte de agenda"}</span><span class="verification-item ${!genericTicketUrl(event.ticketUrl) ? "checked" : ""}"><b>Bilheteira</b>${!genericTicketUrl(event.ticketUrl) ? "Página específica" : "Por localizar"}</span><span class="verification-item ${hasOfficialPoster(event) ? "checked" : ""}"><b>Cartaz</b>${hasOfficialPoster(event) ? "Oficial confirmado" : "Ainda não localizado"}</span></div>`;
   return `<details class="event-card">
     <summary>
       <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
@@ -382,7 +440,7 @@ nearbyButton.addEventListener("click", () => {
 });
 previousPage.addEventListener("click", () => { state.page -= 1; render(); });
 nextPage.addEventListener("click", () => { state.page += 1; render(); });
-list.addEventListener("click", event => {
+document.addEventListener("click", event => {
   const dayTab = event.target.closest("[data-festival-day]");
   if (dayTab) {
     const programme = dayTab.closest(".festival-program");
@@ -404,4 +462,5 @@ posterLightbox.addEventListener("click", event => {
 posterLightbox.querySelector(".poster-lightbox-close").addEventListener("click", () => posterLightbox.close());
 
 renderSources();
+renderFeatured();
 render();

@@ -13,7 +13,8 @@ Include public concerts, festivals, DJ sets, bar and club gigs, free local shows
 3. Give it a `type`: `Concerto`, `Festival`, `Concerto em bar`, `Fado regular`, `DJ set`, `Recital`, or `Musical`.
 4. Only add an event after confirming it with an organiser, official venue, or official ticket seller.
 5. Add the official URLs, set `verifiedAt` to the date checked, and keep the capacity as `Não divulgado` unless the organiser confirms a figure.
-6. Remove cancelled events only after their date; before then, keep them with `availability: "Cancelado"`.
+6. Only show a poster when it is visible on that event's official page, official promoter/venue page, or its concrete official ticket page. Save that exact page in `posterSourceUrl` and set `posterVerifiedAt`. Never create, edit, or infer a flyer. If this confirmation is missing, leave out `image`: the site will show `Não existe cartaz oficial ainda.`
+7. Remove cancelled events only after their date; before then, keep them with `availability: "Cancelado"`.
 
 `sources.js` is the source watchlist. Discovery sites help find events, but are not sufficient confirmation by themselves.
 
@@ -30,3 +31,5 @@ The custom domain can be connected later from the same Cloudflare project.
 ## Important accuracy policy
 
 Every listing should show a source and verification date. Never estimate the percentage of tickets sold. Use only an organiser-provided number; otherwise use `Não divulgado`, `Disponível`, `Esgotado`, or `Cancelado`.
+
+The same direct-page rule applies to ticket links: an agenda or homepage is a source, not a ticket button. Recheck each event page and each ticket page before publishing an update, including availability and sold-out status.
