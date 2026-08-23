@@ -224,6 +224,15 @@ const officialPosters = {
   ,"casamusica-mario-biondi": ["https://casadamusica.com/wp-content/uploads/2026/05/20260930-mario-biondi-cartao.jpg", "https://casadamusica.com/event/mario-biondi/"]
   ,"casamusica-grant-lee": ["https://casadamusica.com/wp-content/uploads/2026/05/20261007-grant-lee-philips-cartao.jpg", "https://casadamusica.com/event/grant-lee-philips/"]
   ,"casamusica-rita-redshoes": ["https://casadamusica.com/wp-content/uploads/2026/05/20261024-rita-redshoes-cartao.jpg", "https://casadamusica.com/event/rita-redshoes/"]
+  ,"viriato-voz-rock": ["https://www.teatroviriato.com/contents/imported_images/calendario_a_voz_rock_1725023756.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/a-voz-do-rock-and-convidadas"]
+  ,"viriato-luis-lapa": ["https://www.teatroviriato.com/contents/imported_images/calendario_cantigas_lua_1578657789.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/luis-lapa-cantigas-da-lua"]
+  ,"viriato-nanook": ["https://www.teatroviriato.com/contents/imported_images/calendario_nanok1_1694195711.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/nanook-o-esquimo"]
+  ,"viriato-lagrimas-mar": ["https://www.teatroviriato.com/contents/imported_images/calendario_arnaldo_antunes_1694196828.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/lagrimas-no-mar"]
+  ,"viriato-kevin-morby": ["https://www.teatroviriato.com/contents/imported_images/calendario_kevin_morby_1719590972.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/kevin-morby"]
+  ,"viriato-ballake-piers": ["https://www.teatroviriato.com/contents/show/7f99d50edc9f59e5.webp", "https://www.teatroviriato.com/pt/programacao/espetaculo/ballake-sissoko-and-piers-faccini"]
+  ,"viriato-sophia": ["https://www.teatroviriato.com/contents/imported_images/calendario_sophia_1694440897.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/sophia-188"]
+  ,"viriato-manel-cruz": ["https://www.teatroviriato.com/contents/imported_images/calendario_manel_cruz_1694441113.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/manel-cruz"]
+  ,"viriato-carminho": ["https://www.teatroviriato.com/contents/imported_images/calendario_carminho_1725032276.jpg", "https://www.teatroviriato.com/pt/programacao/espetaculo/carminho"]
 };
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
@@ -293,14 +302,31 @@ const officialEventPages = {
   "casamusica-berlioz": ["https://casadamusica.com/event/berlioz-em-italia/", "https://casadamusica.com/event/berlioz-em-italia/", "Casa da Música — página do evento"],
   "casamusica-mario-biondi": ["https://casadamusica.com/event/mario-biondi/", "https://casadamusica.com/event/mario-biondi/", "Casa da Música — página do evento"],
   "casamusica-grant-lee": ["https://casadamusica.com/event/grant-lee-philips/", "https://casadamusica.com/event/grant-lee-philips/", "Casa da Música — página do evento"],
-  "casamusica-rita-redshoes": ["https://casadamusica.com/event/rita-redshoes/", "https://casadamusica.com/event/rita-redshoes/", "Casa da Música — página do evento"]
+  "casamusica-rita-redshoes": ["https://casadamusica.com/event/rita-redshoes/", "https://casadamusica.com/event/rita-redshoes/", "Casa da Música — página do evento"],
+  "viriato-voz-rock": ["https://www.teatroviriato.com/pt/programacao/espetaculo/a-voz-do-rock-and-convidadas", null, "Teatro Viriato — página do evento"],
+  "viriato-luis-lapa": ["https://www.teatroviriato.com/pt/programacao/espetaculo/luis-lapa-cantigas-da-lua", null, "Teatro Viriato — página do evento"],
+  "viriato-nanook": ["https://www.teatroviriato.com/pt/programacao/espetaculo/nanook-o-esquimo", null, "Teatro Viriato — página do evento"],
+  "viriato-lagrimas-mar": ["https://www.teatroviriato.com/pt/programacao/espetaculo/lagrimas-no-mar", null, "Teatro Viriato — página do evento"],
+  "viriato-kevin-morby": ["https://www.teatroviriato.com/pt/programacao/espetaculo/kevin-morby", null, "Teatro Viriato — página do evento"],
+  "viriato-ballake-piers": ["https://www.teatroviriato.com/pt/programacao/espetaculo/ballake-sissoko-and-piers-faccini", "https://caeviseu.bol.pt/Comprar/Bilhetes/160651-ballake_sissoko_piers_faccini-centro_artes_espectaculo_de_viseu_assoc_cult_pedag/Sessoes", "Teatro Viriato — página do evento"],
+  "viriato-sophia": ["https://www.teatroviriato.com/pt/programacao/espetaculo/sophia-188", null, "Teatro Viriato — página do evento"],
+  "viriato-manel-cruz": ["https://www.teatroviriato.com/pt/programacao/espetaculo/manel-cruz", null, "Teatro Viriato — página do evento"],
+  "viriato-carminho": ["https://www.teatroviriato.com/pt/programacao/espetaculo/carminho", null, "Teatro Viriato — página do evento"]
 };
 const auditedEventDetails = {
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
   "vul-kizomba-rua": { tickets: "Entrada gratuita; RSVP em breve" },
   "vul-afterglow": { tickets: "Registo obrigatório; bilhetes em breve" },
   "vul-riot": { tickets: "Bilhetes em breve" },
-  "vul-beleza-abstracta": { tickets: "Entrada gratuita (17:00–23:00); bilhetes em breve" }
+  "vul-beleza-abstracta": { tickets: "Entrada gratuita (17:00–23:00); bilhetes em breve" },
+  "viriato-voz-rock": { tickets: "Bilheteira oficial ainda não localizada" },
+  "viriato-luis-lapa": { tickets: "Bilheteira oficial ainda não localizada" },
+  "viriato-nanook": { tickets: "Bilheteira oficial ainda não localizada" },
+  "viriato-lagrimas-mar": { tickets: "Bilheteira oficial ainda não localizada" },
+  "viriato-kevin-morby": { tickets: "Bilheteira oficial ainda não localizada" },
+  "viriato-sophia": { tickets: "Bilheteira oficial ainda não localizada" },
+  "viriato-manel-cruz": { tickets: "Bilheteira oficial ainda não localizada" },
+  "viriato-carminho": { tickets: "Bilheteira oficial ainda não localizada" }
 };
 EVENTS.forEach(event => {
   const poster = officialPosters[event.id];
@@ -337,6 +363,9 @@ EVENTS.forEach(event => {
     event.availability = "Por confirmar";
   }
   if (event.source === "Casa da Música — página do evento" && !event.salesCheckedAt) {
+    event.availability = "Por confirmar";
+  }
+  if (event.source === "Teatro Viriato — página do evento" && !event.salesCheckedAt) {
     event.availability = "Por confirmar";
   }
 });
