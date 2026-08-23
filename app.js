@@ -1,4 +1,4 @@
-const state = { search: "", genre: "", district: "", city: "", type: "", page: 1 };
+const state = { search: "", date: "", genre: "", area: "", district: "", city: "", type: "", highlight: "", page: 1 };
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
@@ -8,6 +8,8 @@ const pageLabel = document.querySelector("#page-label");
 const previousPage = document.querySelector("#previous-page");
 const nextPage = document.querySelector("#next-page");
 const genreSelect = document.querySelector("#genre-filter");
+const dateSelect = document.querySelector("#date-filter");
+const areaSelect = document.querySelector("#area-filter");
 const districtSelect = document.querySelector("#district-filter");
 const citySelect = document.querySelector("#city-filter");
 const typeSelect = document.querySelector("#type-filter");
@@ -33,6 +35,7 @@ function addOptions(select, items) {
 }
 
 addOptions(genreSelect, unique(EVENTS.flatMap(event => event.genres)));
+addOptions(areaSelect, unique(EVENTS.map(event => event.area)));
 addOptions(districtSelect, unique(EVENTS.map(event => event.district)));
 addOptions(citySelect, unique(EVENTS.map(event => event.city)));
 addOptions(typeSelect, unique(EVENTS.map(eventType)));
@@ -138,7 +141,7 @@ function setupCustomSelect(select) {
   sync();
 }
 
-[genreSelect, typeSelect, districtSelect, citySelect].forEach(setupCustomSelect);
+[dateSelect, genreSelect, typeSelect, areaSelect, districtSelect, citySelect].forEach(setupCustomSelect);
 document.addEventListener("click", event => {
   if (!event.target.closest(".custom-select")) document.querySelectorAll(".custom-select.open").forEach(select => select.classList.remove("open"));
 });
@@ -172,6 +175,39 @@ const programmeAction = event => event.availability === "Esgotado"
     ? `<span class="festival-link-pending">Bilheteira a confirmar</span>`
     : `<a href="${event.ticketUrl}" target="_blank" rel="noopener">Detalhes ↗</a>`;
 
+const localIso = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const shiftedIso = days => {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return localIso(date);
+};
+const dateFilterRange = value => {
+  if (!value) return null;
+  const today = shiftedIso(0);
+  if (value === "today") return [today, today];
+  if (value === "week") return [today, shiftedIso(6)];
+  if (value === "month") return [today, shiftedIso(30)];
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  const weekday = date.getDay();
+  const untilFriday = weekday === 0 ? 5 : weekday <= 5 ? 5 - weekday : 0;
+  date.setDate(date.getDate() + untilFriday);
+  const start = localIso(date);
+  date.setDate(date.getDate() + 2);
+  return [start, localIso(date)];
+};
+const overlapsRange = (event, range) => !range || (event.date <= range[1] && (event.endDate || event.date) >= range[0]);
+const isFreeEvent = event => /entrada livre|gratuit[oa]|gr[aá]tis|\bfree\b/i.test(`${event.tickets} ${event.capacity} ${event.title}`);
+const isUnderground = event => event.genres.some(genre => /metal|hardcore|punk|doom|death/i.test(genre)) || /bar|local/i.test(eventType(event));
+const matchesHighlight = event => !state.highlight ||
+  (state.highlight === "free" && isFreeEvent(event)) ||
+  (state.highlight === "festival" && eventType(event) === "Festival") ||
+  (state.highlight === "underground" && isUnderground(event)) ||
+  (state.highlight === "sold" && availabilityLabel(event) === "Esgotado");
+const isSpecificEventPage = url => !genericTicketUrl(url);
+const reportUrl = event => `https://github.com/fabio-rafael-sorted/radareventos/issues/new?title=${encodeURIComponent(`Correção: ${event.title}`)}&body=${encodeURIComponent(`Evento: ${event.title}\nData: ${prettyDate(event.date)}\nFonte atual: ${event.sourceUrl}\n\nO que está errado ou falta atualizar?\n`)}`;
+
 function eventCard(event) {
   const [day, month] = dateParts(event.date);
   const endDay = event.endDate ? eventDate(event.endDate).getDate() : null;
@@ -180,10 +216,11 @@ function eventCard(event) {
   const statusClass = availability === "Esgotado" ? "sold" : availability === "Cancelado" ? "cancelled" : availability === "Por confirmar" ? "pending" : "";
   const children = festivalChildren(event).sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
   const groupedDays = [...new Set(children.map(child => child.date))];
-  const schedule = children.length ? `<div class="festival-program"><span class="detail-label">${event.endDate ? "Programa por dia / sessões" : "Alinhamento e horário"}</span>${groupedDays.map(date => `<section class="festival-day"><h4>${prettyDate(date)}</h4>${children.filter(child => child.date === date).map(child => `<div class="festival-slot">${child.image ? `<button class="festival-slot-art poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${child.title}"><img src="${child.image}" alt="Cartaz oficial de ${child.title}" loading="lazy"></button>` : ""}<time>${child.time || "Horário a confirmar"}</time><div><strong>${child.title.replace(/^.*?— /, "")}</strong><span>${child.venue}</span></div><em>${ticketStatus(child)}</em>${programmeAction(child)}</div>`).join("")}</section>`).join("")}</div>` : `<div class="single-program"><span class="detail-label">Alinhamento / horário</span><div class="festival-slot"><time>${event.time || "Horário a confirmar"}</time><div><strong>${event.lineup || event.title}</strong><span>${event.venue}</span></div><em>${ticketStatus(event)}</em>${programmeAction(event)}</div></div>`;
+  const schedule = children.length ? `<div class="festival-program"><span class="detail-label">${event.endDate ? "Programa por dia / sessões" : "Alinhamento e horário"}</span>${groupedDays.length > 1 ? `<div class="festival-day-tabs" role="tablist">${groupedDays.map((date, index) => `<button type="button" role="tab" data-festival-day="${event.id}-${date}" aria-selected="${index === 0}">${prettyDate(date)}</button>`).join("")}</div>` : ""}${groupedDays.map((date, index) => `<section class="festival-day" data-festival-day-panel="${event.id}-${date}"${index ? " hidden" : ""}><h4>${prettyDate(date)}</h4>${children.filter(child => child.date === date).map(child => `<div class="festival-slot">${child.image ? `<button class="festival-slot-art poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${child.title}"><img src="${child.image}" alt="Cartaz oficial de ${child.title}" loading="lazy"></button>` : ""}<time>${child.time || "Horário a confirmar"}</time><div><strong>${child.title.replace(/^.*?— /, "")}</strong><span>${child.venue}</span></div><em>${ticketStatus(child)}</em>${programmeAction(child)}</div>`).join("")}</section>`).join("")}</div>` : `<div class="single-program"><span class="detail-label">Alinhamento / horário</span><div class="festival-slot"><time>${event.time || "Horário a confirmar"}</time><div><strong>${event.lineup || event.title}</strong><span>${event.venue}</span></div><em>${ticketStatus(event)}</em>${programmeAction(event)}</div></div>`;
   const art = event.image ? `<button class="event-art poster-trigger" type="button" aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
   const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
   const sourceLabel = "Fonte";
+  const verification = `<div class="verification-strip" aria-label="Estado da verificação"><span class="verification-item ${event.salesCheckedAt ? "checked" : ""}"><b>Venda</b>${event.salesCheckedAt ? `Confirmada ${event.salesCheckedAt}` : availability}</span><span class="verification-item ${isSpecificEventPage(event.sourceUrl) ? "checked" : ""}"><b>Evento</b>${isSpecificEventPage(event.sourceUrl) ? "Página específica" : "Fonte de agenda"}</span><span class="verification-item ${!genericTicketUrl(event.ticketUrl) ? "checked" : ""}"><b>Bilheteira</b>${!genericTicketUrl(event.ticketUrl) ? "Página específica" : "Por localizar"}</span><span class="verification-item ${event.image ? "checked" : ""}"><b>Cartaz</b>${event.image ? "Oficial encontrado" : "Ainda não localizado"}</span></div>`;
   return `<details class="event-card">
     <summary>
       <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
@@ -196,7 +233,8 @@ function eventCard(event) {
       ${art}
       <div><span class="detail-label">Quando e onde</span><p>${fullDate} · ${event.time}<br>${event.venue}, ${event.city} · ${event.district}</p></div>
       <div><span class="detail-label">Entrada e lotação</span><p>${event.age}<br>Lotação: ${event.capacity}</p></div>
-      <div>${ticket}<p class="verified">Verificado: ${event.verifiedAt}<br><a href="${event.sourceUrl}" target="_blank" rel="noopener">${sourceLabel}: ${event.source}</a></p></div>
+      <div>${ticket}<p class="verified">Verificado: ${event.verifiedAt}<br><a href="${event.sourceUrl}" target="_blank" rel="noopener">${sourceLabel}: ${event.source}</a><br><a class="report-link" href="${reportUrl(event)}" target="_blank" rel="noopener">Informação errada? ↗</a></p></div>
+      ${verification}
       ${schedule}
     </div>
   </details>`;
@@ -204,14 +242,18 @@ function eventCard(event) {
 
 function filteredEvents() {
   const query = state.search.trim().toLocaleLowerCase("pt-PT");
+  const selectedRange = dateFilterRange(state.date);
   return EVENTS.filter(event => !event.seriesId).filter(event => {
     const group = [event, ...festivalChildren(event)];
     const text = group.flatMap(item => [item.title, item.venue, item.city, item.district, item.area, eventType(item), ...item.genres]).join(" ").toLocaleLowerCase("pt-PT");
     return (!query || text.includes(query)) &&
+      group.some(item => overlapsRange(item, selectedRange)) &&
       (!state.genre || group.some(item => item.genres.includes(state.genre))) &&
+      (!state.area || group.some(item => item.area === state.area)) &&
       (!state.district || group.some(item => item.district === state.district)) &&
       (!state.city || group.some(item => item.city === state.city)) &&
-      (!state.type || group.some(item => eventType(item) === state.type));
+      (!state.type || group.some(item => eventType(item) === state.type)) &&
+      matchesHighlight(event);
   }).sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -236,23 +278,47 @@ function renderSources() {
 }
 
 document.querySelector("#search").addEventListener("input", event => updateFilter("search", event.target.value));
+dateSelect.addEventListener("change", event => updateFilter("date", event.target.value));
 genreSelect.addEventListener("change", event => updateFilter("genre", event.target.value));
+areaSelect.addEventListener("change", event => updateFilter("area", event.target.value));
 districtSelect.addEventListener("change", event => updateFilter("district", event.target.value));
 citySelect.addEventListener("change", event => updateFilter("city", event.target.value));
 typeSelect.addEventListener("change", event => updateFilter("type", event.target.value));
 document.querySelector("#clear-filters").addEventListener("click", () => {
-  Object.assign(state, { search: "", genre: "", district: "", city: "", type: "", page: 1 });
+  Object.assign(state, { search: "", date: "", genre: "", area: "", district: "", city: "", type: "", highlight: "", page: 1 });
   document.querySelector("#search").value = "";
+  dateSelect.value = "";
   genreSelect.value = "";
+  areaSelect.value = "";
   districtSelect.value = "";
   citySelect.value = "";
   typeSelect.value = "";
-  [genreSelect, districtSelect, citySelect, typeSelect].forEach(select => select.dispatchEvent(new Event("change")));
+  document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
+  [dateSelect, genreSelect, areaSelect, districtSelect, citySelect, typeSelect].forEach(select => select.dispatchEvent(new Event("change")));
   render();
 });
+document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEventListener("click", () => {
+  const pick = button.dataset.quickPick;
+  const next = state.highlight === pick || (pick === "week" && state.date === "week") ? "" : pick;
+  state.highlight = pick === "week" ? "" : next;
+  state.date = pick === "week" && next ? "week" : state.date;
+  if (pick === "week" && !next) state.date = "";
+  dateSelect.value = state.date;
+  state.page = 1;
+  document.querySelectorAll("[data-quick-pick]").forEach(item => item.setAttribute("aria-pressed", String(item === button && Boolean(next))));
+  dateSelect.dispatchEvent(new Event("change"));
+}));
 previousPage.addEventListener("click", () => { state.page -= 1; render(); });
 nextPage.addEventListener("click", () => { state.page += 1; render(); });
 list.addEventListener("click", event => {
+  const dayTab = event.target.closest("[data-festival-day]");
+  if (dayTab) {
+    const programme = dayTab.closest(".festival-program");
+    const selected = dayTab.dataset.festivalDay;
+    programme.querySelectorAll("[data-festival-day]").forEach(tab => tab.setAttribute("aria-selected", String(tab === dayTab)));
+    programme.querySelectorAll("[data-festival-day-panel]").forEach(panel => { panel.hidden = panel.dataset.festivalDayPanel !== selected; });
+    return;
+  }
   const poster = event.target.closest(".poster-trigger");
   if (!poster) return;
   const image = poster.querySelector("img");

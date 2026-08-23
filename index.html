@@ -45,11 +45,21 @@
         </div>
         <div class="filter-grid">
           <label class="search-field"><span>Procurar</span><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" /></label>
+          <label><span>Quando</span><select id="date-filter"><option value="">Todas as datas</option><option value="today">Hoje</option><option value="weekend">Este fim de semana</option><option value="week">Próximos 7 dias</option><option value="month">Próximo mês</option></select></label>
           <label><span>Género</span><select id="genre-filter"><option value="">Todos os géneros</option></select></label>
           <label><span>Formato</span><select id="type-filter"><option value="">Todos os formatos</option></select></label>
+          <label><span>Área</span><select id="area-filter"><option value="">Todas as áreas</option></select></label>
           <label><span>Distrito</span><select id="district-filter"><option value="">Todo o país</option></select></label>
           <label><span>Cidade</span><select id="city-filter"><option value="">Todas as cidades</option></select></label>
           <button id="clear-filters" class="clear-button" type="button">Limpar seleção</button>
+        </div>
+        <div class="quick-picks" aria-label="Destaques rápidos">
+          <span>Destaques</span>
+          <button type="button" data-quick-pick="week">Próximos 7 dias</button>
+          <button type="button" data-quick-pick="free">Entrada livre</button>
+          <button type="button" data-quick-pick="festival">Festivais</button>
+          <button type="button" data-quick-pick="underground">Underground</button>
+          <button type="button" data-quick-pick="sold">Esgotados</button>
         </div>
       </section>
 
@@ -66,7 +76,7 @@
       <section class="drawers" aria-label="Mais informação">
         <details class="drawer">
           <summary><span>Como verificamos os eventos</span><i>+</i></summary>
-          <div class="drawer-content"><p>Incluímos toda a música pública: festivais, concertos, bares, Fado, DJ sets, recitais, ópera e musicais. Revistas, blogs, Reddit e Instagram ajudam-nos a encontrar sinais; antes de um evento aparecer como confirmado, procuramos o promotor, a sala ou a bilheteira oficial. A percentagem de lotação só aparece quando é divulgada pelo promotor.</p></div>
+          <div class="drawer-content"><p>Incluímos toda a música pública: festivais, concertos, bares, Fado, DJ sets, recitais, ópera e musicais. Revistas, blogs, Reddit e Instagram ajudam-nos a encontrar sinais. Um evento só surge como disponível quando a respetiva venda foi confirmada; os restantes ficam como “por confirmar”. A percentagem de lotação só aparece quando é divulgada pelo promotor.</p></div>
         </details>
         <details class="drawer">
           <summary><span>Fontes que acompanhamos</span><i>+</i></summary>
