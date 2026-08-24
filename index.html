@@ -50,34 +50,39 @@
           <div><p class="kicker">Explorar agenda</p><h2 id="browse-title">Encontra algo teu.</h2></div>
           <p id="result-count" class="result-count" aria-live="polite"></p>
         </div>
-        <div class="filter-grid">
-          <label class="search-field"><span>Procurar</span><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" /></label>
-          <label><span>Quando</span><select id="date-filter"><option value="">Todas as datas</option><option value="today">Hoje</option><option value="weekend">Este fim de semana</option><option value="week">Próximos 7 dias</option><option value="month">Próximo mês</option></select></label>
-          <label><span>Género</span><select id="genre-filter"><option value="">Todos os géneros</option></select></label>
-          <label><span>Formato</span><select id="type-filter"><option value="">Todos os formatos</option></select></label>
-          <button id="clear-filters" class="clear-button" type="button">Limpar seleção</button>
+        <div class="agenda-search">
+          <label class="agenda-search-input"><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" aria-label="Procurar artista, sala ou cidade" /></label>
+          <button id="filter-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="filter-panel"><span>Filtros</span><i aria-hidden="true">+</i></button>
         </div>
-        <div class="location-bar" aria-label="Filtros de localização">
-          <span>Onde</span>
-          <label><span>Área</span><select id="area-filter"><option value="">Todas as áreas</option></select></label>
-          <div class="multi-filter-wrap">
-            <button id="district-filter" class="multi-filter" type="button" aria-expanded="false"><span>Distrito</span><strong>Todos os distritos</strong><i>⌄</i></button>
-            <div id="district-menu" class="multi-select-menu" role="group" aria-label="Selecionar distritos"></div>
+        <div id="filter-panel" class="filter-panel" hidden>
+          <div class="filter-grid">
+            <label><span>Quando</span><select id="date-filter"><option value="">Todas as datas</option><option value="today">Hoje</option><option value="weekend">Este fim de semana</option><option value="week">Próximos 7 dias</option><option value="month">Próximo mês</option></select></label>
+            <label><span>Género</span><select id="genre-filter"><option value="">Todos os géneros</option></select></label>
+            <label><span>Formato</span><select id="type-filter"><option value="">Todos os formatos</option></select></label>
+            <button id="clear-filters" class="clear-button" type="button">Limpar seleção</button>
           </div>
-          <div class="multi-filter-wrap">
-            <button id="city-filter" class="multi-filter" type="button" aria-expanded="false"><span>Concelho / cidade</span><strong>Todos os concelhos</strong><i>⌄</i></button>
-            <div id="city-menu" class="multi-select-menu" role="group" aria-label="Selecionar concelhos e cidades"></div>
+          <div class="location-bar" aria-label="Filtros de localização">
+            <span>Onde</span>
+            <label><span>Área</span><select id="area-filter"><option value="">Todas as áreas</option></select></label>
+            <div class="multi-filter-wrap">
+              <button id="district-filter" class="multi-filter" type="button" aria-expanded="false"><span>Distrito</span><strong>Todos os distritos</strong><i>⌄</i></button>
+              <div id="district-menu" class="multi-select-menu" role="group" aria-label="Selecionar distritos"></div>
+            </div>
+            <div class="multi-filter-wrap">
+              <button id="city-filter" class="multi-filter" type="button" aria-expanded="false"><span>Concelho / cidade</span><strong>Todos os concelhos</strong><i>⌄</i></button>
+              <div id="city-menu" class="multi-select-menu" role="group" aria-label="Selecionar concelhos e cidades"></div>
+            </div>
           </div>
-        </div>
-        <div class="quick-picks" aria-label="Destaques rápidos">
-          <span>Destaques</span>
-          <button id="nearby-button" class="nearby-button" type="button">⌖ Perto de mim</button>
-          <button type="button" data-quick-pick="week">Próximos 7 dias</button>
-          <button type="button" data-quick-pick="free">Entrada livre</button>
-          <button type="button" data-quick-pick="festival">Festivais</button>
-          <button type="button" data-quick-pick="underground">Underground</button>
-          <button type="button" data-quick-pick="sold">Esgotados</button>
-          <small id="nearby-hint" aria-live="polite"></small>
+          <div class="quick-picks" aria-label="Destaques rápidos">
+            <span>Destaques</span>
+            <button id="nearby-button" class="nearby-button" type="button">⌖ Perto de mim</button>
+            <button type="button" data-quick-pick="week">Próximos 7 dias</button>
+            <button type="button" data-quick-pick="free">Entrada livre</button>
+            <button type="button" data-quick-pick="festival">Festivais</button>
+            <button type="button" data-quick-pick="underground">Underground</button>
+            <button type="button" data-quick-pick="sold">Esgotados</button>
+            <small id="nearby-hint" aria-live="polite"></small>
+          </div>
         </div>
       </section>
 

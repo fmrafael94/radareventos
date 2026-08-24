@@ -20,6 +20,8 @@ const posterLightboxImage = document.querySelector("#poster-lightbox-image");
 const nearbyButton = document.querySelector("#nearby-button");
 const nearbyHint = document.querySelector("#nearby-hint");
 const featuredRail = document.querySelector("#featured-rail");
+const filterToggle = document.querySelector("#filter-toggle");
+const filterPanel = document.querySelector("#filter-panel");
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -567,7 +569,6 @@ const matchesHighlight = event => !state.highlight ||
   (state.highlight === "festival" && eventType(event) === "Festival") ||
   (state.highlight === "underground" && isUnderground(event)) ||
   (state.highlight === "sold" && availabilityLabel(event) === "Esgotado");
-const isSpecificEventPage = url => !genericTicketUrl(url);
 const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl);
 const posterStyle = image => `style="--poster-image:url(&quot;${encodeURI(image)}&quot;)"`;
 const reportUrl = event => `https://github.com/fabio-rafael-sorted/radareventos/issues/new?title=${encodeURIComponent(`Correção: ${event.title}`)}&body=${encodeURIComponent(`Evento: ${event.title}\nData: ${prettyDate(event.date)}\nFonte atual: ${event.sourceUrl}\n\nO que está errado ou falta atualizar?\n`)}`;
@@ -599,7 +600,6 @@ function eventCard(event) {
   const art = hasOfficialPoster(event) ? `<button class="event-art poster-trigger" type="button" ${posterStyle(event.image)} aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
   const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
   const sourceLabel = "Fonte";
-  const verification = `<div class="verification-strip" aria-label="Estado da verificação"><span class="verification-item ${event.salesCheckedAt ? "checked" : ""}"><b>Venda</b>${event.salesCheckedAt ? `Confirmada ${event.salesCheckedAt}` : availability}</span><span class="verification-item ${isSpecificEventPage(event.sourceUrl) ? "checked" : ""}"><b>Evento</b>${isSpecificEventPage(event.sourceUrl) ? "Página específica" : "Fonte de agenda"}</span><span class="verification-item ${!genericTicketUrl(event.ticketUrl) ? "checked" : ""}"><b>Bilheteira</b>${!genericTicketUrl(event.ticketUrl) ? "Página específica" : "Por localizar"}</span><span class="verification-item ${hasOfficialPoster(event) ? "checked" : ""}"><b>Cartaz</b>${hasOfficialPoster(event) ? "Oficial confirmado" : "Ainda não localizado"}</span></div>`;
   return `<details class="event-card">
     <summary>
       <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
@@ -613,7 +613,6 @@ function eventCard(event) {
       <div><span class="detail-label">Quando e onde</span><p>${fullDate} · ${event.time}<br>${event.venue}, ${event.city} · ${event.district}</p></div>
       <div><span class="detail-label">Entrada e lotação</span><p>${event.age}<br>Lotação: ${event.capacity}</p></div>
       <div>${ticket}<p class="verified">Verificado: ${event.verifiedAt}<br><a href="${event.sourceUrl}" target="_blank" rel="noopener">${sourceLabel}: ${event.source}</a><br><a class="report-link" href="${reportUrl(event)}" target="_blank" rel="noopener">Informação errada? ↗</a></p></div>
-      ${verification}
       ${schedule}
     </div>
   </details>`;
@@ -649,6 +648,15 @@ function render() {
   pageLabel.textContent = `Página ${state.page} de ${pages}`;
   previousPage.disabled = state.page === 1;
   nextPage.disabled = state.page === pages;
+  syncFilterToggle();
+}
+
+function syncFilterToggle() {
+  const active = [state.date, state.genre, state.area, state.type, state.highlight].filter(Boolean).length + state.district.length + state.city.length;
+  const isOpen = !filterPanel.hidden;
+  filterToggle.querySelector("span").textContent = isOpen ? "Fechar filtros" : active ? `Filtros · ${active}` : "Filtros";
+  filterToggle.querySelector("i").textContent = isOpen ? "×" : "+";
+  filterToggle.classList.toggle("has-active", Boolean(active));
 }
 
 function updateFilter(key, value) { state[key] = value; state.page = 1; render(); }
@@ -657,6 +665,11 @@ function renderSources() {
 }
 
 document.querySelector("#search").addEventListener("input", event => updateFilter("search", event.target.value));
+filterToggle.addEventListener("click", () => {
+  filterPanel.hidden = !filterPanel.hidden;
+  filterToggle.setAttribute("aria-expanded", String(!filterPanel.hidden));
+  syncFilterToggle();
+});
 dateSelect.addEventListener("change", event => updateFilter("date", event.target.value));
 genreSelect.addEventListener("change", event => updateFilter("genre", event.target.value));
 areaSelect.addEventListener("change", event => updateFilter("area", event.target.value));
