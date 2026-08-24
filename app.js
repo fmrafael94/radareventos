@@ -253,7 +253,30 @@ const officialPosters = {
   ,"ccb-glenn-miller": ["https://www.ccb.pt/wp-content/uploads/2025/04/GMO_XMAS3_2000x940-2.jpg", "https://www.ccb.pt/evento/glenn-miller-orchestra-4/"]
   ,"ccb-cabaret-songs": ["https://www.ccb.pt/wp-content/uploads/2026/05/2000x940_CabaretSongs.jpg", "https://www.ccb.pt/evento/cabaret-songs/"]
   ,"ccb-bach-natal": ["https://www.ccb.pt/wp-content/uploads/2026/05/2000x940_ConcertoDeNatal.jpg", "https://www.ccb.pt/evento/concerto-de-natal-missa-em-si-menor-de-bach/"]
+  ,"amon-amarth": ["https://www.primeartists.eu/wp-content/uploads/2026/04/AmonAmarth-Evento-Main-2026.jpg", "https://www.primeartists.eu/amonamarth-2026/"]
+  ,"ezhel-lisboa-2026": ["https://www.primeartists.eu/wp-content/uploads/2026/01/Ezhel-Evento-Main-2026-1.jpg", "https://www.primeartists.eu/ezhel-2026/"]
+  ,"indie-music-fest": ["https://indiemusicfest.pt/wp-content/uploads/2026/04/Landing-Page-Indie-Music-Fest-2026.jpg", "https://indiemusicfest.pt/?page_id=882"]
+  ,"ccb-christian-loffler": ["https://www.ccb.pt/wp-content/uploads/2026/03/Christian_banner_ticketline_1200x628.jpg", "https://www.ccb.pt/evento/until-we-meet-again-misty-fest/"]
+  ,"sara-correia-porto-1": ["https://blueticketcdn.pt/imagesserver/E15763_36_PT.jpg?v=7156c1c69d889bc7401de39ab1df23fc", "https://www.wook.pt/en/bilheteira/eventos/sara-correia/32903842"]
+  ,"sara-correia-porto-2": ["https://blueticketcdn.pt/imagesserver/E15763_36_PT.jpg?v=7156c1c69d889bc7401de39ab1df23fc", "https://www.wook.pt/en/bilheteira/eventos/sara-correia/32903842"]
+  ,"rui-veloso-porto": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz145596_grande.jpg?v=1", "https://lisboaevents.bol.pt/Comprar/Bilhetes/169490-rui_veloso_trio-super_bock_arena/"]
+  ,"transvision-lisboa": ["https://www.clap-box.com/images/TransvisionVamp.jpg", "https://www.clap-box.com/"]
+  ,"transvision-porto": ["https://www.clap-box.com/images/TransvisionVamp.jpg", "https://www.clap-box.com/"]
+  ,"evanescence": ["https://blueticketcdn.pt/imagesserver/E15722_36_PT.jpg", "https://www.wook.pt/bilheteira/eventos/evanescence-2026-world-tour/32884851"]
+  ,"moonspell-sintra-2026": ["https://www.moonspell.com/galeria/tours/b9e0a2e983aa6f22debdf7e90f0d0e79.png", "https://www.moonspell.com/tours/"]
 };
+// A festival's official bill is also the correct artwork for its programme
+// sessions. These are deliberately shared — never replaced by made-up art.
+const sharedProgrammePosters = {
+  "festas-mar-cascais-2026": ["festas-mar-20-main","festas-mar-21-main","festas-mar-22-main","festas-mar-23-main","festas-mar-27-main","festas-mar-28-main","festas-mar-29-main","festas-mar-30-main","festas-mar-20-local","festas-mar-21-local","festas-mar-22-local","festas-mar-23-local","festas-mar-27-local","festas-mar-28-local","festas-mar-29-local","festas-mar-30-local"],
+  "corroios-2026": ["corroios-21-legendary-tigerman","corroios-22-folclore","corroios-23-quatro-meia","corroios-24-santamaria","corroios-25-ricardo-ribeiro","corroios-26-revolution-within","corroios-27-djs","corroios-28-vitor-kley","corroios-29-valete","corroios-30-diogo-picarra"],
+  "kalorama-2026": ["kalorama-2026-08-28","kalorama-2026-08-29","kalorama-2026-08-30"],
+  "outfest-2026": ["outfest-2026-10-01","outfest-2026-10-02","outfest-2026-10-03","outfest-2026-10-04"]
+};
+Object.entries(sharedProgrammePosters).forEach(([parentId, childIds]) => {
+  const poster = officialPosters[parentId];
+  if (poster) childIds.forEach(childId => { officialPosters[childId] = poster; });
+});
 const legacyOfficialPosterIds = new Set(["fanna-fi-allah","johnny-hooker","ruggero","secret-chord-allgema","einar-solberg","blood-red-shoes","mercury-rev","nazareth","for-the-glory","steve-seagulls","myrath","druga-rika","porangui","city-of-the-sun","tormentor","sbp4","faro-festival-f","under-doom-fest-2026","reign-fury-hardcore-fest-2026","under-doom-2026-09-25","under-doom-2026-09-26","iminente-2026-09-17","iminente-2026-09-18","iminente-2026-09-19","iminente-2026-09-20","festival-f-2026-09-03","festival-f-2026-09-04","festival-f-2026-09-05"]);
 const officialEventPages = {
   "ccb-big-bang": ["https://www.ccb.pt/evento/festival-big-bang-lx2026/2026-10-02/", "http://festivalbigbang.bol.pt/"],
@@ -350,7 +373,9 @@ const officialEventPages = {
   "ccb-galaxia-vivaldi": ["https://www.ccb.pt/evento/galaxia-vivaldi/", "https://www.bol.pt/Comprar/Bilhetes/180212/1956212/Sectores"],
   "ccb-glenn-miller": ["https://www.ccb.pt/evento/glenn-miller-orchestra-4/", "https://www.bol.pt/Comprar/Bilhetes/174071/1927123/Sectores"],
   "ccb-cabaret-songs": ["https://www.ccb.pt/evento/cabaret-songs/", "https://www.bol.pt/Comprar/Bilhetes/180217/1956220/Sectores"],
-  "ccb-bach-natal": ["https://www.ccb.pt/evento/concerto-de-natal-missa-em-si-menor-de-bach/", "https://www.bol.pt/Comprar/Bilhetes/180224/1956226/Sectores"]
+  "ccb-bach-natal": ["https://www.ccb.pt/evento/concerto-de-natal-missa-em-si-menor-de-bach/", "https://www.bol.pt/Comprar/Bilhetes/180224/1956226/Sectores"],
+  "evanescence": ["https://www.wook.pt/bilheteira/eventos/evanescence-2026-world-tour/32884851", "https://www.wook.pt/bilheteira/eventos/evanescence-2026-world-tour/32884851", "WOOK — página oficial do evento"],
+  "moonspell-sintra-2026": ["https://www.moonspell.com/tours/", "https://reservas-worten.byblueticket.pt/Eventos/15946", "Moonspell — página oficial / MEO Blueticket"]
 };
 const auditedEventDetails = {
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
