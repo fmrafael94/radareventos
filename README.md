@@ -1,6 +1,6 @@
 # Event Radar
 
-Static, database-free guide for every public music event in Portugal. It is designed to publish through Cloudflare Pages.
+Public music guide for Portugal. The confirmed agenda stays as a versioned static file; Cloudflare D1 is used only for private suggestions and corrections sent by visitors.
 
 ## What belongs in Event Radar
 
@@ -27,6 +27,12 @@ Include public concerts, festivals, DJ sets, bar and club gigs, free local shows
 5. Click **Save and Deploy**. Cloudflare gives you a free `*.pages.dev` address.
 
 The custom domain can be connected later from the same Cloudflare project.
+
+## Public suggestions, corrections and legal pages
+
+The site contains a public, moderated form for event suggestions and corrections. It is only activated after deploying the Cloudflare Pages Functions, binding a D1 database and configuring Turnstile. The setup is documented in [CLOUDFLARE_SETUP.md](CLOUDFLARE_SETUP.md).
+
+The footer links to Terms, Privacy and Cookie policies. Before publishing the form publicly, update the privacy page with the legal identity and privacy email of the project owner.
 
 ## Important accuracy policy
 

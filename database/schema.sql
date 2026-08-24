@@ -1,0 +1,19 @@
+-- Run once in Cloudflare D1 before enabling the public forms.
+CREATE TABLE IF NOT EXISTS feedback (
+  id TEXT PRIMARY KEY,
+  kind TEXT NOT NULL CHECK (kind IN ('suggestion', 'correction')),
+  event_id TEXT,
+  event_name TEXT,
+  event_date TEXT,
+  city TEXT,
+  official_url TEXT,
+  message TEXT NOT NULL,
+  sender_name TEXT,
+  sender_email TEXT,
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'published', 'rejected', 'closed')),
+  staff_note TEXT,
+  created_at TEXT NOT NULL,
+  reviewed_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS feedback_status_created_at ON feedback(status, created_at DESC);

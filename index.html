@@ -16,7 +16,7 @@
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Radar de Eventos, voltar ao início">Radar de Eventos</a>
       <p>Portugal · música pública</p>
-      <a class="submit-link" href="mailto:ola@eventradar.pt?subject=Novo%20evento%20para%20o%20Event%20Radar">Enviar evento <span>↗</span></a>
+      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Enviar evento <span>↗</span></button>
     </header>
 
     <main id="top" class="shell">
@@ -28,7 +28,6 @@
           <i class="atmosphere-grid"></i>
           <i class="atmosphere-beam beam-one"></i><i class="atmosphere-beam beam-two"></i><i class="atmosphere-beam beam-three"></i>
           <i class="atmosphere-glow glow-one"></i><i class="atmosphere-glow glow-two"></i>
-        </div>
         </div>
       </section>
 
@@ -108,10 +107,42 @@
       </section>
     </main>
 
-    <footer><span>event radar</span><p>Confirma sempre a informação na fonte oficial antes de comprar.</p></footer>
+    <footer>
+      <span>Radar de Eventos</span>
+      <nav aria-label="Informação legal"><a href="termos.html">Termos</a><a href="privacidade.html">Privacidade</a><a href="cookies.html">Cookies</a></nav>
+      <p>Confirma sempre a informação na fonte oficial antes de comprar.</p>
+    </footer>
     <dialog id="poster-lightbox" class="poster-lightbox" aria-label="Cartaz ampliado">
       <button class="poster-lightbox-close" type="button" aria-label="Fechar cartaz">×</button>
       <img id="poster-lightbox-image" alt="Cartaz oficial ampliado" />
+    </dialog>
+    <dialog id="feedback-dialog" class="feedback-dialog" aria-labelledby="feedback-title">
+      <button id="feedback-close" class="feedback-close" type="button" aria-label="Fechar">×</button>
+      <div class="feedback-intro">
+        <p class="kicker">Contribuir para a agenda</p>
+        <h2 id="feedback-title">Sugerir um evento.</h2>
+        <p id="feedback-context">Partilha um link oficial. A sugestão será sempre revista antes de aparecer na agenda.</p>
+      </div>
+      <form id="feedback-form" novalidate>
+        <input id="feedback-kind" name="kind" type="hidden" value="suggestion" />
+        <input id="feedback-event-id" name="eventId" type="hidden" />
+        <input id="feedback-event-title" name="eventTitle" type="hidden" />
+        <div class="feedback-grid">
+          <label><span>O teu nome <small>opcional</small></span><input name="name" type="text" maxlength="80" autocomplete="name" /></label>
+          <label><span>Email <small>para respondermos</small></span><input name="email" type="email" maxlength="254" autocomplete="email" /></label>
+        </div>
+        <label id="feedback-event-field"><span>Evento</span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" /></label>
+        <div class="feedback-grid">
+          <label><span>Data <small>opcional</small></span><input name="eventDate" type="date" /></label>
+          <label><span>Cidade / concelho <small>opcional</small></span><input name="city" type="text" maxlength="100" /></label>
+        </div>
+        <label><span>Link oficial <small>muito recomendado</small></span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
+        <label><span id="feedback-message-label">O que devemos adicionar?</span><textarea name="message" rows="4" maxlength="2500" required placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante."></textarea></label>
+        <label class="feedback-consent"><input name="privacyAcknowledged" type="checkbox" required /><span>Li a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e compreendo que estes dados serão usados apenas para analisar este pedido.</span></label>
+        <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>
+        <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>
+        <button id="feedback-submit" class="feedback-submit" type="submit">Enviar para revisão <span>↗</span></button>
+      </form>
     </dialog>
     <script src="events.js"></script>
     <script src="sources.js"></script>

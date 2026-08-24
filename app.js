@@ -22,6 +22,19 @@ const nearbyHint = document.querySelector("#nearby-hint");
 const featuredRail = document.querySelector("#featured-rail");
 const filterToggle = document.querySelector("#filter-toggle");
 const filterPanel = document.querySelector("#filter-panel");
+const feedbackDialog = document.querySelector("#feedback-dialog");
+const feedbackForm = document.querySelector("#feedback-form");
+const feedbackTitle = document.querySelector("#feedback-title");
+const feedbackContext = document.querySelector("#feedback-context");
+const feedbackKind = document.querySelector("#feedback-kind");
+const feedbackEventId = document.querySelector("#feedback-event-id");
+const feedbackEventTitle = document.querySelector("#feedback-event-title");
+const feedbackEventName = document.querySelector("#feedback-event-name");
+const feedbackEventField = document.querySelector("#feedback-event-field");
+const feedbackMessageLabel = document.querySelector("#feedback-message-label");
+const feedbackStatus = document.querySelector("#feedback-status");
+const feedbackSubmit = document.querySelector("#feedback-submit");
+const turnstileWrap = document.querySelector("#turnstile-wrap");
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -713,7 +726,7 @@ const matchesHighlight = event => !state.highlight ||
   (state.highlight === "sold" && availabilityLabel(event) === "Esgotado");
 const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl);
 const posterStyle = image => `style="--poster-image:url(&quot;${encodeURI(image)}&quot;)"`;
-const reportUrl = event => `https://github.com/fabio-rafael-sorted/radareventos/issues/new?title=${encodeURIComponent(`Correção: ${event.title}`)}&body=${encodeURIComponent(`Evento: ${event.title}\nData: ${prettyDate(event.date)}\nFonte atual: ${event.sourceUrl}\n\nO que está errado ou falta atualizar?\n`)}`;
+const feedbackAction = event => `<button class="report-link feedback-open" type="button" data-feedback-kind="correction" data-feedback-event-id="${event.id}" data-feedback-event-title="${encodeURIComponent(event.title)}">Informação errada?</button>`;
 
 function renderFeatured() {
   const today = shiftedIso(0);
@@ -754,7 +767,7 @@ function eventCard(event) {
       ${art}
       <div><span class="detail-label">Quando e onde</span><p>${fullDate} · ${event.time}<br>${event.venue}, ${event.city} · ${event.district}</p></div>
       <div><span class="detail-label">Entrada e lotação</span><p>Entrada: ${event.tickets}<br>${event.age}<br>Lotação: ${event.capacity}</p></div>
-      <div>${ticket}<p class="verified">Verificado: ${event.verifiedAt}<br><a href="${event.sourceUrl}" target="_blank" rel="noopener">${sourceLabel}: ${event.source}</a><br><a class="report-link" href="${reportUrl(event)}" target="_blank" rel="noopener">Informação errada? ↗</a></p></div>
+      <div>${ticket}<p class="verified">Verificado: ${event.verifiedAt}<br><a href="${event.sourceUrl}" target="_blank" rel="noopener">${sourceLabel}: ${event.source}</a><br>${feedbackAction(event)}</p></div>
       ${schedule}
     </div>
   </details>`;
@@ -885,6 +898,84 @@ posterLightbox.addEventListener("click", event => {
 });
 posterLightbox.querySelector(".poster-lightbox-close").addEventListener("click", () => posterLightbox.close());
 
+function setFeedbackMode(kind, eventId = "", eventTitle = "") {
+  const correction = kind === "correction";
+  feedbackForm.reset();
+  feedbackKind.value = correction ? "correction" : "suggestion";
+  feedbackEventId.value = eventId;
+  feedbackEventTitle.value = eventTitle;
+  feedbackEventName.value = eventTitle;
+  feedbackEventName.readOnly = correction;
+  feedbackEventField.hidden = correction;
+  feedbackTitle.textContent = correction ? "Corrigir esta informação." : "Sugerir um evento.";
+  feedbackContext.textContent = correction
+    ? `Vais corrigir: ${eventTitle}. Indica o que mudou e, se possível, deixa o link oficial que o confirma.`
+    : "Partilha um link oficial. A sugestão será sempre revista antes de aparecer na agenda.";
+  feedbackMessageLabel.textContent = correction ? "O que está errado ou desatualizado?" : "O que devemos adicionar?";
+  feedbackStatus.textContent = "";
+  feedbackSubmit.disabled = false;
+  feedbackSubmit.innerHTML = "Enviar para revisão <span>↗</span>";
+}
+
+function openFeedback(button) {
+  const kind = button.dataset.feedbackKind || "suggestion";
+  const eventId = button.dataset.feedbackEventId || "";
+  const eventTitle = button.dataset.feedbackEventTitle ? decodeURIComponent(button.dataset.feedbackEventTitle) : "";
+  setFeedbackMode(kind, eventId, eventTitle);
+  feedbackDialog.showModal();
+}
+
+async function configureTurnstile() {
+  try {
+    const response = await fetch("/api/config", { headers: { Accept: "application/json" } });
+    if (!response.ok) return;
+    const config = await response.json();
+    if (!config.turnstileSiteKey) return;
+    turnstileWrap.hidden = false;
+    turnstileWrap.innerHTML = `<div class="cf-turnstile" data-sitekey="${config.turnstileSiteKey}" data-theme="light"></div>`;
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    script.async = true;
+    script.defer = true;
+    document.head.append(script);
+  } catch {
+    // The public form only becomes live after the Cloudflare Function is deployed.
+  }
+}
+
+document.addEventListener("click", event => {
+  const trigger = event.target.closest(".feedback-open");
+  if (trigger) openFeedback(trigger);
+});
+document.querySelector("#feedback-close").addEventListener("click", () => feedbackDialog.close());
+feedbackDialog.addEventListener("click", event => {
+  if (event.target === feedbackDialog) feedbackDialog.close();
+});
+feedbackForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!feedbackForm.reportValidity()) return;
+  feedbackStatus.textContent = "A enviar…";
+  feedbackSubmit.disabled = true;
+  feedbackSubmit.textContent = "A enviar…";
+  try {
+    const response = await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(Object.fromEntries(new FormData(feedbackForm).entries()))
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
+    feedbackStatus.textContent = "Recebido. Obrigado por ajudares a manter a agenda certa.";
+    feedbackForm.reset();
+    feedbackSubmit.textContent = "Enviado ✓";
+  } catch (error) {
+    feedbackStatus.textContent = error.message || "Não foi possível enviar agora. Tenta novamente mais tarde.";
+    feedbackSubmit.disabled = false;
+    feedbackSubmit.innerHTML = "Tentar novamente <span>↗</span>";
+  }
+});
+
 renderSources();
 renderFeatured();
 render();
+configureTurnstile();
