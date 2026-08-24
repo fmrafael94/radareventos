@@ -1,0 +1,6 @@
+# Local/system files
+.DS_Store
+node_modules
+
+# Codex workspace instructions are local project metadata, not website content.
+AGENTS.md

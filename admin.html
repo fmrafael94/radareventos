@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Revisão — Radar de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <header class="admin-header">
+        <div><a class="admin-brand" href="index.html">Radar de Eventos</a><p>Área privada · revisão da comunidade</p></div>
+        <button id="refresh" class="secondary" type="button">Atualizar</button>
+      </header>
+      <section class="admin-intro">
+        <p class="eyebrow">Moderação</p>
+        <h1>Pedidos para rever.</h1>
+        <p>As sugestões, correções e cartazes ficam aqui até confirmares a fonte oficial e atualizares a agenda.</p>
+      </section>
+      <nav id="status-filters" class="status-filters" aria-label="Filtrar pedidos">
+        <button type="button" data-status="new" aria-pressed="true">Novos</button>
+        <button type="button" data-status="reviewing" aria-pressed="false">Em análise</button>
+        <button type="button" data-status="published" aria-pressed="false">Publicados</button>
+        <button type="button" data-status="rejected" aria-pressed="false">Rejeitados</button>
+        <button type="button" data-status="closed" aria-pressed="false">Fechados</button>
+      </nav>
+      <p id="admin-status" class="admin-status" role="status" aria-live="polite"></p>
+      <section id="reports" class="reports" aria-live="polite"></section>
+    </main>
+    <template id="empty-state"><p class="empty-state">Não há pedidos neste estado.</p></template>
+    <script src="admin.js"></script>
+  </body>
+</html>

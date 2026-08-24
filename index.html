@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Event Radar — música pública em Portugal." />
+    <title>Event Radar — Música em Portugal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="immersive.css" />
+    <link rel="stylesheet" href="midnight.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Radar de Eventos, voltar ao início">Radar de Eventos</a>
+      <p>Portugal · música pública</p>
+      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Enviar evento <span>↗</span></button>
+    </header>
+
+    <main id="top" class="shell">
+      <section class="intro">
+        <p class="kicker">A tua agenda de música</p>
+        <h1>Menos procura.<br /><em>Mais música.</em></h1>
+        <p>Todos os géneros. Todas as cidades. A música pública de Portugal, num só radar.</p>
+        <div class="hero-atmosphere" aria-hidden="true">
+          <i class="atmosphere-grid"></i>
+          <i class="atmosphere-beam beam-one"></i><i class="atmosphere-beam beam-two"></i><i class="atmosphere-beam beam-three"></i>
+          <i class="atmosphere-glow glow-one"></i><i class="atmosphere-glow glow-two"></i>
+        </div>
+      </section>
+
+      <section id="featured-events" class="featured-events" aria-labelledby="featured-title">
+        <div class="featured-heading">
+          <div>
+            <p id="featured-kicker" class="kicker">A seguir</p>
+            <h2 id="featured-title">Próximos eventos.</h2>
+            <p id="featured-description" class="featured-description">Dois eventos com entrada disponível, por ordem de data.</p>
+          </div>
+          <a href="#agenda">Ver agenda completa <span>↓</span></a>
+        </div>
+        <div id="featured-rail" class="featured-rail" aria-live="polite"></div>
+      </section>
+
+      <section id="agenda" class="browse-panel" aria-labelledby="browse-title">
+        <div class="browse-heading">
+          <div><p class="kicker">Explorar agenda</p><h2 id="browse-title">Encontra algo teu.</h2></div>
+          <p id="result-count" class="result-count" aria-live="polite"></p>
+        </div>
+        <div class="agenda-search">
+          <label class="agenda-search-input"><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" aria-label="Procurar artista, sala ou cidade" /></label>
+          <button id="filter-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="filter-panel"><span>Filtros</span><i aria-hidden="true">+</i></button>
+        </div>
+        <div id="filter-panel" class="filter-panel" hidden>
+          <div class="filter-grid">
+            <label><span>Quando</span><select id="date-filter"><option value="">Todas as datas</option><option value="today">Hoje</option><option value="weekend">Este fim de semana</option><option value="week">Próximos 7 dias</option><option value="month">Próximo mês</option></select></label>
+            <label><span>Género</span><select id="genre-filter"><option value="">Todos os géneros</option></select></label>
+            <label><span>Formato</span><select id="type-filter"><option value="">Todos os formatos</option></select></label>
+            <button id="clear-filters" class="clear-button" type="button">Limpar seleção</button>
+          </div>
+          <div class="location-bar" aria-label="Filtros de localização">
+            <span>Onde</span>
+            <label><span>Área</span><select id="area-filter"><option value="">Todas as áreas</option></select></label>
+            <div class="multi-filter-wrap">
+              <button id="district-filter" class="multi-filter" type="button" aria-expanded="false"><span>Distrito</span><strong>Todos os distritos</strong><i>⌄</i></button>
+              <div id="district-menu" class="multi-select-menu" role="group" aria-label="Selecionar distritos"></div>
+            </div>
+            <div class="multi-filter-wrap">
+              <button id="city-filter" class="multi-filter" type="button" aria-expanded="false"><span>Concelho / cidade</span><strong>Todos os concelhos</strong><i>⌄</i></button>
+              <div id="city-menu" class="multi-select-menu" role="group" aria-label="Selecionar concelhos e cidades"></div>
+            </div>
+          </div>
+          <div class="quick-picks" aria-label="Destaques rápidos">
+            <span>Destaques</span>
+            <button id="nearby-button" class="nearby-button" type="button">⌖ Perto de mim</button>
+            <button type="button" data-quick-pick="week">Próximos 7 dias</button>
+            <button type="button" data-quick-pick="free">Entrada livre</button>
+            <button type="button" data-quick-pick="festival">Festivais</button>
+            <button type="button" data-quick-pick="underground">Underground</button>
+            <button type="button" data-quick-pick="sold">Esgotados</button>
+            <small id="nearby-hint" aria-live="polite"></small>
+          </div>
+        </div>
+      </section>
+
+      <section class="agenda" aria-label="Eventos encontrados">
+        <div class="event-list-heading" aria-hidden="true"><span>Data</span><span>Evento</span><span>Formato</span><span>Bilhetes</span><span>Detalhes</span></div>
+        <div id="event-list" class="event-list"></div>
+        <p id="empty-state" class="empty-state" hidden>Não encontrámos eventos com esta seleção.</p>
+        <nav id="pagination" class="pagination" aria-label="Paginação de eventos" hidden>
+          <button id="previous-page" type="button">← Anterior</button>
+          <span id="page-label"></span>
+          <button id="next-page" type="button">Seguinte →</button>
+        </nav>
+      </section>
+
+      <section class="drawers" aria-label="Mais informação">
+        <details class="drawer">
+          <summary><span>Como verificamos os eventos</span><i>+</i></summary>
+          <div class="drawer-content"><p>Incluímos toda a música pública: festivais, concertos, bares, Fado, DJ sets, recitais, ópera e musicais. Revistas, blogs, Reddit e Instagram ajudam-nos a encontrar sinais. Um evento só surge como disponível quando a respetiva venda foi confirmada; os restantes ficam como “por confirmar”. A percentagem de lotação só aparece quando é divulgada pelo promotor.</p></div>
+        </details>
+        <details class="drawer">
+          <summary><span>Fontes que acompanhamos</span><i>+</i></summary>
+          <div id="source-groups" class="source-groups"></div>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <span>Radar de Eventos</span>
+      <nav aria-label="Informação legal"><a href="termos.html">Termos</a><a href="privacidade.html">Privacidade</a><a href="cookies.html">Cookies</a></nav>
+      <p>Confirma sempre a informação na fonte oficial antes de comprar.</p>
+    </footer>
+    <dialog id="poster-lightbox" class="poster-lightbox" aria-label="Cartaz ampliado">
+      <button class="poster-lightbox-close" type="button" aria-label="Fechar cartaz">×</button>
+      <img id="poster-lightbox-image" alt="Cartaz oficial ampliado" />
+    </dialog>
+    <dialog id="feedback-dialog" class="feedback-dialog" aria-labelledby="feedback-title">
+      <button id="feedback-close" class="feedback-close" type="button" aria-label="Fechar">×</button>
+      <div class="feedback-intro">
+        <p class="kicker">Contribuir para a agenda</p>
+        <h2 id="feedback-title">Sugerir um evento.</h2>
+        <p id="feedback-context">Partilha um link oficial. A sugestão será sempre revista antes de aparecer na agenda.</p>
+      </div>
+      <form id="feedback-form" novalidate>
+        <input id="feedback-kind" name="kind" type="hidden" value="suggestion" />
+        <input id="feedback-event-id" name="eventId" type="hidden" />
+        <input id="feedback-event-title" name="eventTitle" type="hidden" />
+        <div class="feedback-grid">
+          <label><span>O teu nome <small>opcional</small></span><input name="name" type="text" maxlength="80" autocomplete="name" /></label>
+          <label><span>Email <small>para respondermos</small></span><input name="email" type="email" maxlength="254" autocomplete="email" /></label>
+        </div>
+        <label id="feedback-event-field"><span>Evento</span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" /></label>
+        <div class="feedback-grid">
+          <label><span>Data <small>opcional</small></span><input name="eventDate" type="date" /></label>
+          <label><span>Cidade / concelho <small>opcional</small></span><input name="city" type="text" maxlength="100" /></label>
+        </div>
+        <label><span>Link oficial <small>muito recomendado</small></span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
+        <fieldset class="poster-contribution">
+          <legend>Cartaz oficial <small>opcional</small></legend>
+          <p>Ajuda-nos a confirmar o evento. Podes deixar o link do cartaz ou enviar a imagem que encontraste numa fonte oficial.</p>
+          <div class="feedback-grid">
+            <label><span>Link do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
+            <label><span>Enviar imagem</span><input name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG ou WebP · máximo 5 MB</small></label>
+          </div>
+        </fieldset>
+        <label><span id="feedback-message-label">O que devemos adicionar?</span><textarea name="message" rows="4" maxlength="2500" required placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante."></textarea></label>
+        <label class="feedback-consent"><input name="privacyAcknowledged" type="checkbox" required /><span>Li a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e compreendo que estes dados serão usados apenas para analisar este pedido.</span></label>
+        <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>
+        <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>
+        <button id="feedback-submit" class="feedback-submit" type="submit">Enviar para revisão <span>↗</span></button>
+      </form>
+    </dialog>
+    <script src="events.js"></script>
+    <script src="sources.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
