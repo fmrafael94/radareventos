@@ -36,6 +36,8 @@ const feedbackMessageLabel = document.querySelector("#feedback-message-label");
 const feedbackStatus = document.querySelector("#feedback-status");
 const feedbackSubmit = document.querySelector("#feedback-submit");
 const turnstileWrap = document.querySelector("#turnstile-wrap");
+const maxPosterUploadBytes = 2 * 1024 * 1024;
+const maxPosterDimension = 2400;
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -961,6 +963,48 @@ async function configureTurnstile() {
   }
 }
 
+const canvasToBlob = (canvas, quality) => new Promise(resolve => canvas.toBlob(resolve, "image/webp", quality));
+
+async function optimisePosterFile(file) {
+  if (!(file instanceof File) || !file.size) return file;
+  if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(file.type)) {
+    throw new Error("O cartaz deve ser JPG, PNG ou WebP.");
+  }
+  if (file.size > 15 * 1024 * 1024) {
+    throw new Error("Escolhe um cartaz com menos de 15 MB antes da otimização.");
+  }
+
+  const image = await createImageBitmap(file);
+  let scale = Math.min(1, maxPosterDimension / Math.max(image.width, image.height));
+  let blob;
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(image, 0, 0, width, height);
+
+    for (const quality of [0.92, 0.88, 0.84, 0.8]) {
+      blob = await canvasToBlob(canvas, quality);
+      if (blob && blob.size <= maxPosterUploadBytes) break;
+    }
+    if (blob && blob.size <= maxPosterUploadBytes) break;
+    scale *= 0.82;
+  }
+  image.close();
+  if (!blob || blob.size > maxPosterUploadBytes) {
+    throw new Error("Não foi possível reduzir este cartaz para 2 MB. Tenta uma imagem mais pequena.");
+  }
+
+  const filename = (file.name || "cartaz").replace(/\.[^.]+$/, "") + ".webp";
+  return new File([blob], filename, { type: "image/webp" });
+}
+
 document.addEventListener("click", event => {
   const trigger = event.target.closest(".feedback-open");
   if (trigger) openFeedback(trigger);
@@ -974,8 +1018,13 @@ feedbackForm.addEventListener("submit", async event => {
   if (!feedbackForm.reportValidity()) return;
   const data = new FormData(feedbackForm);
   const posterFile = data.get("posterFile");
-  if (posterFile instanceof File && posterFile.size > 5 * 1024 * 1024) {
-    feedbackStatus.textContent = "O cartaz não pode ter mais de 5 MB.";
+  try {
+    if (posterFile instanceof File && posterFile.size) {
+      feedbackStatus.textContent = "A otimizar o cartaz…";
+      data.set("posterFile", await optimisePosterFile(posterFile));
+    }
+  } catch (error) {
+    feedbackStatus.textContent = error.message || "Não foi possível otimizar o cartaz.";
     return;
   }
   feedbackStatus.textContent = "A enviar…";
