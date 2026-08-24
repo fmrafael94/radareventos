@@ -20,6 +20,7 @@ const posterLightboxImage = document.querySelector("#poster-lightbox-image");
 const nearbyButton = document.querySelector("#nearby-button");
 const nearbyHint = document.querySelector("#nearby-hint");
 const featuredRail = document.querySelector("#featured-rail");
+let featuredAutoscroll;
 const filterToggle = document.querySelector("#filter-toggle");
 const filterPanel = document.querySelector("#filter-panel");
 const feedbackDialog = document.querySelector("#feedback-dialog");
@@ -730,10 +731,12 @@ const feedbackAction = event => `<button class="report-link feedback-open" type=
 
 function renderFeatured() {
   const today = shiftedIso(0);
+  window.clearInterval(featuredAutoscroll);
   const featured = EVENTS
     .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today)
+    .filter(event => !["Bilhetes a confirmar", "Esgotado", "Cancelado"].includes(availabilityLabel(event)))
     .sort((a, b) => Math.max(eventDate(a.date).getTime(), eventDate(today).getTime()) - Math.max(eventDate(b.date).getTime(), eventDate(today).getTime()))
-    .slice(0, 5);
+    .slice(0, 2);
   featuredRail.innerHTML = featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     return `<article class="featured-card">
@@ -741,6 +744,21 @@ function renderFeatured() {
       <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${event.sourceUrl}" target="_blank" rel="noopener">Página oficial ↗</a></div>
     </article>`;
   }).join("");
+  featuredRail.setAttribute("aria-label", "Dois próximos eventos com entrada disponível");
+  startFeaturedAutoscroll();
+}
+
+function startFeaturedAutoscroll() {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const mobile = window.matchMedia("(max-width: 580px)").matches;
+  if (reducedMotion || !mobile || featuredRail.children.length < 2) return;
+  let activeIndex = 0;
+  const advance = () => {
+    activeIndex = (activeIndex + 1) % featuredRail.children.length;
+    featuredRail.children[activeIndex].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+  };
+  featuredAutoscroll = window.setInterval(advance, 6200);
+  featuredRail.addEventListener("pointerdown", () => window.clearInterval(featuredAutoscroll), { once: true });
 }
 
 function eventCard(event) {
@@ -755,7 +773,7 @@ function eventCard(event) {
   const art = hasOfficialPoster(event) ? `<button class="event-art poster-trigger" type="button" ${posterStyle(event.image)} aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
   const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : freeEntryOnly(event) ? `<span class="ticket-link ticket-free">Entrada livre</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
   const sourceLabel = "Fonte";
-  return `<details class="event-card">
+  return `<details class="event-card${groupedDays.length > 1 ? " has-multiple-days" : ""}">
     <summary>
       <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
       <span class="event-main"><span class="event-title">${event.title}</span><span class="event-venue">${event.venue} · ${event.city}</span></span>
