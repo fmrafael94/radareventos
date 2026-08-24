@@ -55,7 +55,18 @@ No formulário, uma pessoa pode deixar um link do cartaz e/ou enviar uma imagem 
 
 Depois disto, o formulário fica ativo. Sem estas duas chaves, mostra uma mensagem honesta a indicar que ainda está em preparação.
 
-## 6. Rever contribuições
+## 6. Criar a área privada de revisão
+
+O projeto inclui `admin.html`, uma área que mostra sugestões, correções, links oficiais e cartazes enviados. Ela não deve ficar acessível ao público.
+
+1. Depois do primeiro deploy, abre **Cloudflare Zero Trust** → **Access** → **Applications** → **Add an application**.
+2. Cria uma aplicação para `https://<a-tua-morada-pages>/admin.html` e outra para `https://<a-tua-morada-pages>/api/admin/*`.
+3. Em ambas, cria uma política **Allow** apenas para o teu email, usando o método de login de código por email.
+4. Não partilhes a morada `admin.html` nem a transformes num link público do site.
+
+As funções do painel também exigem o comprovativo do Cloudflare Access; sem essa proteção, recusam listar ou alterar pedidos.
+
+## 7. Rever contribuições
 
 Na D1, podes consultar os pedidos novos com:
 
@@ -65,7 +76,7 @@ SELECT * FROM feedback WHERE status = 'new' ORDER BY created_at DESC;
 
 Depois de rever, atualiza o estado para `reviewing`, `published`, `rejected` ou `closed`. Publicar uma sugestão continua a significar atualizar `events.js` com fonte oficial e data de verificação.
 
-## 7. Email e domínio (fazemos depois)
+## 8. Email e domínio (fazemos depois)
 
 Quando comprares o domínio, criaremos pelo menos:
 
@@ -74,6 +85,6 @@ Quando comprares o domínio, criaremos pelo menos:
 
 Esses endereços podem encaminhar para a tua caixa de email atual. Antes de ativar os formulários para o público, atualiza `privacidade.html` com o nome legal do responsável e esse contacto de privacidade.
 
-## 8. Ligar o domínio
+## 9. Ligar o domínio
 
 No projeto Pages: **Custom domains** → **Set up a domain**. Se o domínio principal estiver no Cloudflare, aceita a configuração de DNS sugerida. Depois confirma que tanto `www` como a versão sem `www` encaminham para uma única versão escolhida.
