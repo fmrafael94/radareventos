@@ -264,6 +264,9 @@ const officialPosters = {
   ,"transvision-porto": ["https://www.clap-box.com/images/TransvisionVamp.jpg", "https://www.clap-box.com/"]
   ,"evanescence": ["https://blueticketcdn.pt/imagesserver/E15722_36_PT.jpg", "https://www.wook.pt/bilheteira/eventos/evanescence-2026-world-tour/32884851"]
   ,"moonspell-sintra-2026": ["https://www.moonspell.com/galeria/tours/b9e0a2e983aa6f22debdf7e90f0d0e79.png", "https://www.moonspell.com/tours/"]
+  ,"semibreve-2026": ["https://www.gnration.pt/wp-content/uploads/2026/07/semibreve.jpg", "https://www.gnration.pt/event/2026/semibreve-4/"]
+  ,"casa-capitao-abertura": ["https://casa-capitao.com/wp-content/uploads/2025/07/Untitled-1-5.jpg", "https://casa-capitao.com/evento/festa-de-abertura/"]
+  ,"guimaraes-jazz-2026": ["https://img.bndlyr.com/nf1zldbhad/_assets/artemis_cjohn-abbott_2.jpeg?fit=cover&w=800&h=600", "https://www.ccvf.pt/en/detail-eventos/20261112-guimaraes-jazz-2026-geral/"]
 };
 // A festival's official bill is also the correct artwork for its programme
 // sessions. These are deliberately shared — never replaced by made-up art.
@@ -271,7 +274,8 @@ const sharedProgrammePosters = {
   "festas-mar-cascais-2026": ["festas-mar-20-main","festas-mar-21-main","festas-mar-22-main","festas-mar-23-main","festas-mar-27-main","festas-mar-28-main","festas-mar-29-main","festas-mar-30-main","festas-mar-20-local","festas-mar-21-local","festas-mar-22-local","festas-mar-23-local","festas-mar-27-local","festas-mar-28-local","festas-mar-29-local","festas-mar-30-local"],
   "corroios-2026": ["corroios-21-legendary-tigerman","corroios-22-folclore","corroios-23-quatro-meia","corroios-24-santamaria","corroios-25-ricardo-ribeiro","corroios-26-revolution-within","corroios-27-djs","corroios-28-vitor-kley","corroios-29-valete","corroios-30-diogo-picarra"],
   "kalorama-2026": ["kalorama-2026-08-28","kalorama-2026-08-29","kalorama-2026-08-30"],
-  "outfest-2026": ["outfest-2026-10-01","outfest-2026-10-02","outfest-2026-10-03","outfest-2026-10-04"]
+  "outfest-2026": ["outfest-2026-10-01","outfest-2026-10-02","outfest-2026-10-03","outfest-2026-10-04"],
+  "guimaraes-jazz-2026": ["guimaraes-jazz-toninho","guimaraes-jazz-beyond-miles","guimaraes-jazz-joao-tavares","guimaraes-jazz-rempis","guimaraes-jazz-artemis","guimaraes-jazz-esmae","guimaraes-jazz-filigrana","guimaraes-jazz-rosenwinkel","guimaraes-jazz-peter-evans","guimaraes-jazz-sonoscopia","guimaraes-jazz-lex-korten","guimaraes-jazz-kurt-elling"]
 };
 Object.entries(sharedProgrammePosters).forEach(([parentId, childIds]) => {
   const poster = officialPosters[parentId];
