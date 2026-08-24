@@ -473,6 +473,14 @@ const officialEventPages = {
   ,"rui-veloso-lisboa": ["https://www.sagrescampopequeno.pt/en/rui-veloso-trio", "https://centraldeartistas.bol.pt/Comprar/Bilhetes/169511/1832219/Sectores", "Sagres Campo Pequeno / Central de Artistas — página do evento"]
   ,"river-stone-fest-2026": ["https://riverstone.bol.pt/Comprar/Bilhetes/171321-x_river_stone_fest-river_stone_fest/", "https://riverstone.bol.pt/Comprar/Bilhetes/171321/1898666/14127/Lotacao", "River Stone Fest / BOL — página do evento"]
   ,"fever-fado-chiado": ["https://feverup.com/m/67022/en?seasonal=p06e4dp", "https://feverup.com/m/67022/en?seasonal=p06e4dp", "Fever — página oficial do evento"]
+  ,"faro-alternativo-2026": ["https://www.facebook.com/faroalternativofest/", null, "Faro Alternativo Fest — página oficial"]
+  ,"vialonga-fest-2026": ["https://www.facebook.com/vialongafest/", null, "Vialonga Fest — página oficial"]
+  ,"viseu-rock-fest-2026": ["https://www.facebook.com/viseurockfest/", null, "Viseu Rockfest — página oficial"]
+  ,"colapso-fest-2026": ["https://www.facebook.com/ColapsoFest/", null, "Metalpunk Coimbra Fest — página oficial"]
+  ,"black-box-fest-2026": ["https://www.facebook.com/BlackBoxFest/", "https://forms.gle/gfpRyg8mkNbDNSqv7", "Black Box Fest — página oficial"]
+  ,"heavy-duty-fest-2026": ["https://www.facebook.com/HeavyDutyFest/", null, "Heavy Duty Fest — página oficial"]
+  ,"portalegre-core-fest-set": ["https://www.portalegrecore.com/portalegre-core-fest", "https://www.portalegrecore.com/portalegre-core-fest", "Portalegre Core — página oficial do festival"]
+  ,"portalegre-core-fest-nov": ["https://www.portalegrecore.com/portalegre-core-fest", "https://www.portalegrecore.com/portalegre-core-fest", "Portalegre Core — página oficial do festival"]
 };
 const auditedEventDetails = {
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
@@ -496,6 +504,14 @@ const auditedEventDetails = {
   "leiria-em-casa-amalia": { tickets: "Bilheteira oficial ainda não localizada" },
   "leiria-diz-concerto": { tickets: "Bilheteira oficial ainda não localizada" },
   "leiria-orquestra-jazz": { tickets: "Bilheteira oficial ainda não localizada" }
+  ,"faro-alternativo-2026": { tickets: "Informação e bilhetes para a edição 2026 por confirmar", availability: "Por confirmar" }
+  ,"vialonga-fest-2026": { time: "17:00", venue: "Sociedade Recreativa da Granja", tickets: "Entrada livre", availability: "Disponível", lineup: "Last Piss Before Death · DALAI LUME · Lesados · Cobra ao Pescoço · chaosaddiction · FAEMINE · Endless2.0 · Vasco Rodrigues" }
+  ,"viseu-rock-fest-2026": { tickets: "Informação e bilhetes por confirmar", availability: "Por confirmar" }
+  ,"colapso-fest-2026": { tickets: "Informação e bilhetes por confirmar", availability: "Por confirmar" }
+  ,"black-box-fest-2026": { venue: "Sede dos Trovadores do Cano", tickets: "Pré-venda online", availability: "Disponível", lineup: "Cutterred Flesh · Totengott · Booby Trap · Warside · The Small Hours · Vomitous Iniquity · Viledög · Putrid Offal · Xerión · Sonneillon · Square · Nojo · Armatilha" }
+  ,"heavy-duty-fest-2026": { tickets: "Informação e bilhetes por confirmar", availability: "Por confirmar" }
+  ,"portalegre-core-fest-set": { time: "Portas 21:00 · concertos 21:30", tickets: "5 € por dia · sócios: entrada gratuita", availability: "Disponível", lineup: "Henriette B · Destroyers of All · Incordian · António Freitas DJ" }
+  ,"portalegre-core-fest-nov": { time: "Portas 21:00 · concertos 21:30", tickets: "5 € por dia · sócios: entrada gratuita", availability: "Disponível", lineup: "Alchemists · Empire of Disease · Vaneno · Black Flamingo DJ" }
 };
 EVENTS.forEach(event => {
   const poster = officialPosters[event.id];
@@ -649,12 +665,16 @@ const genericTicketUrl = value => {
 };
 // Only show a live availability label after checking the event's direct sale
 // page. Before that, a ticket link may exist but its remaining stock is unknown.
-const availabilityLabel = event => event.salesCheckedAt || ["Esgotado", "Cancelado", "Adiado"].includes(event.availability)
+const hasFreeEntry = event => /entrada livre|entrada gratuita|gratuit[oa]|gr[aá]tis|\bfree\b/i.test(`${event.tickets} ${event.capacity} ${event.title}`);
+const freeEntryOnly = event => /^\s*(entrada livre|entrada gratuita|gratuit[oa]|gr[aá]tis|free)\s*[.!]?\s*$/i.test(event.tickets || "");
+const availabilityLabel = event => freeEntryOnly(event)
+  ? "Entrada livre"
+  : event.salesCheckedAt || ["Esgotado", "Cancelado", "Adiado"].includes(event.availability)
   ? event.availability
   : "Bilhetes a confirmar";
 const ticketStatus = event => event.availability === "Esgotado"
   ? "Esgotado"
-  : genericTicketUrl(event.ticketUrl) ? "Bilheteira a confirmar" : event.tickets;
+  : hasFreeEntry(event) ? event.tickets : genericTicketUrl(event.ticketUrl) ? "Bilheteira a confirmar" : event.tickets;
 const programmeAction = event => event.availability === "Esgotado"
   ? `<span class="festival-link-pending">Esgotado</span>`
   : genericTicketUrl(event.ticketUrl)
@@ -684,7 +704,7 @@ const dateFilterRange = value => {
   return [start, localIso(date)];
 };
 const overlapsRange = (event, range) => !range || (event.date <= range[1] && (event.endDate || event.date) >= range[0]);
-const isFreeEvent = event => /entrada livre|gratuit[oa]|gr[aá]tis|\bfree\b/i.test(`${event.tickets} ${event.capacity} ${event.title}`);
+const isFreeEvent = freeEntryOnly;
 const isUnderground = event => event.genres.some(genre => /metal|hardcore|punk|doom|death/i.test(genre)) || /bar|local/i.test(eventType(event));
 const matchesHighlight = event => !state.highlight ||
   (state.highlight === "free" && isFreeEvent(event)) ||
@@ -720,7 +740,7 @@ function eventCard(event) {
   const groupedDays = [...new Set(children.map(child => child.date))];
   const schedule = children.length ? `<div class="festival-program"><span class="detail-label">${event.endDate ? "Programa por dia / sessões" : "Alinhamento e horário"}</span>${groupedDays.length > 1 ? `<div class="festival-day-tabs" role="tablist">${groupedDays.map((date, index) => `<button type="button" role="tab" data-festival-day="${event.id}-${date}" aria-selected="${index === 0}">${prettyDate(date)}</button>`).join("")}</div>` : ""}${groupedDays.map((date, index) => `<section class="festival-day" data-festival-day-panel="${event.id}-${date}"${index ? " hidden" : ""}><h4>${prettyDate(date)}</h4>${children.filter(child => child.date === date).map(child => `<div class="festival-slot">${hasOfficialPoster(child) ? `<button class="festival-slot-art poster-trigger" type="button" ${posterStyle(child.image)} aria-label="Ampliar cartaz oficial de ${child.title}"><img src="${child.image}" alt="Cartaz oficial de ${child.title}" loading="lazy"></button>` : ""}<time>${child.time || "Horário a confirmar"}</time><div><strong>${child.title.replace(/^.*?— /, "")}</strong><span>${child.venue}</span></div><em>${ticketStatus(child)}</em>${programmeAction(child)}</div>`).join("")}</section>`).join("")}</div>` : `<div class="single-program"><span class="detail-label">Alinhamento / horário</span><div class="festival-slot"><time>${event.time || "Horário a confirmar"}</time><div><strong>${event.lineup || event.title}</strong><span>${event.venue}</span></div><em>${ticketStatus(event)}</em>${programmeAction(event)}</div></div>`;
   const art = hasOfficialPoster(event) ? `<button class="event-art poster-trigger" type="button" ${posterStyle(event.image)} aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
-  const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
+  const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : freeEntryOnly(event) ? `<span class="ticket-link ticket-free">Entrada livre</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
   const sourceLabel = "Fonte";
   return `<details class="event-card">
     <summary>
@@ -733,7 +753,7 @@ function eventCard(event) {
     <div class="event-details has-program">
       ${art}
       <div><span class="detail-label">Quando e onde</span><p>${fullDate} · ${event.time}<br>${event.venue}, ${event.city} · ${event.district}</p></div>
-      <div><span class="detail-label">Entrada e lotação</span><p>${event.age}<br>Lotação: ${event.capacity}</p></div>
+      <div><span class="detail-label">Entrada e lotação</span><p>Entrada: ${event.tickets}<br>${event.age}<br>Lotação: ${event.capacity}</p></div>
       <div>${ticket}<p class="verified">Verificado: ${event.verifiedAt}<br><a href="${event.sourceUrl}" target="_blank" rel="noopener">${sourceLabel}: ${event.source}</a><br><a class="report-link" href="${reportUrl(event)}" target="_blank" rel="noopener">Informação errada? ↗</a></p></div>
       ${schedule}
     </div>

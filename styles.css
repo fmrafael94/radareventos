@@ -48,6 +48,7 @@ footer { display:flex; justify-content:space-between; max-width:1120px; margin:0
 .festival-slot span { margin-top:2px; color:var(--muted); font-size:9px; }
 .festival-slot a { color:var(--accent); font:600 9px "DM Mono",monospace; text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
 .ticket-pending { display:inline-block; border-color:var(--line); color:var(--muted); background:transparent; cursor:default; }
+.ticket-free { background:#dcefc0; color:#355223; cursor:default; }
 .festival-link-pending { color:var(--muted); font:500 9px "DM Mono",monospace; white-space:nowrap; }
 .poster-lightbox { width:min(92vw,940px); max-width:none; max-height:92vh; padding:0; overflow:visible; border:0; background:transparent; }
 .poster-lightbox::backdrop { background:rgba(0,0,0,.86); backdrop-filter:blur(5px); }
