@@ -243,23 +243,24 @@ footer nav a { color:var(--muted); font:500 9px "DM Mono",monospace; text-decora
 .report-link { padding:0; border:0; color:var(--accent); background:transparent; font:inherit; cursor:pointer; }
 @media (max-width:580px) { footer { grid-template-columns:1fr; gap:9px; } footer nav { justify-content:flex-start; } footer p { max-width:none; text-align:left; }.feedback-dialog { width:calc(100vw - 22px); border-radius:14px; }.feedback-dialog>div,.feedback-dialog form { padding-left:19px; padding-right:19px; }.feedback-intro { padding-top:25px; }.feedback-intro h2 { font-size:27px; }.feedback-grid { grid-template-columns:1fr; gap:14px; } }
 
-/* Mobile agenda: fewer, larger signals instead of a cramped wall of cards. */
-.featured-rail { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
-.featured-card { display:grid; grid-template-columns:128px minmax(0,1fr); gap:15px; min-height:174px; padding:11px; }
-.featured-poster { width:128px; aspect-ratio:4 / 5; align-self:stretch; }
-.featured-copy h3 { min-height:0; font-size:17px; line-height:1.12; }
-.featured-copy time { min-height:0; font-size:11px; }
+/* Five compact cards on wide screens; mobile turns the same five cards into a two-up carousel. */
+.featured-rail { grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+.featured-card { display:block; min-height:0; padding:8px; }
+.featured-poster { width:100%; aspect-ratio:1; align-self:auto; }
+.featured-copy h3 { min-height:33px; font-size:14px; line-height:1.1; }
+.featured-copy time { min-height:27px; font-size:10px; }
 
 @media (max-width:580px) {
   .featured-heading h2 { font-size:28px; }
   .featured-description { max-width:250px; font-size:12px; }
   .featured-rail { display:flex; gap:12px; overflow-x:auto; padding:1px 2px 8px; scroll-behavior:smooth; scroll-snap-type:x mandatory; scrollbar-width:none; }
   .featured-rail::-webkit-scrollbar { display:none; }
-  .featured-card { flex:0 0 calc(100% - 28px); grid-template-columns:116px minmax(0,1fr); min-height:182px; scroll-snap-align:start; scroll-snap-stop:always; }
-  .featured-poster { width:116px; }
-  .featured-copy p { margin-top:4px; font-size:9px; }
-  .featured-copy h3 { font-size:18px; }
-  .featured-copy time,.featured-copy a { font-size:11px; }
+  .featured-card { display:block; flex:0 0 calc((100% - 12px) / 2); min-height:0; padding:7px; scroll-snap-align:start; scroll-snap-stop:always; }
+  .featured-poster { width:100%; aspect-ratio:4 / 5; }
+  .featured-copy p { margin:7px 0 4px; font-size:8px; }
+  .featured-copy h3 { min-height:34px; font-size:14px; line-height:1.1; }
+  .featured-copy time { min-height:31px; margin-top:5px; font-size:9px; }
+  .featured-copy a { margin-top:7px; font-size:9px; }
 
   .event-card summary { min-height:80px; }
   .event-title { white-space:normal; font-size:15px; line-height:1.12; }

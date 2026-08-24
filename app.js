@@ -738,7 +738,7 @@ function renderFeatured() {
     .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today)
     .filter(event => !["Bilhetes a confirmar", "Esgotado", "Cancelado"].includes(availabilityLabel(event)))
     .sort((a, b) => Math.max(eventDate(a.date).getTime(), eventDate(today).getTime()) - Math.max(eventDate(b.date).getTime(), eventDate(today).getTime()))
-    .slice(0, 2);
+    .slice(0, 5);
   featuredRail.innerHTML = featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     return `<article class="featured-card">
@@ -746,7 +746,7 @@ function renderFeatured() {
       <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${event.sourceUrl}" target="_blank" rel="noopener">Página oficial ↗</a></div>
     </article>`;
   }).join("");
-  featuredRail.setAttribute("aria-label", "Dois próximos eventos com entrada disponível");
+  featuredRail.setAttribute("aria-label", "Cinco próximos eventos com entrada disponível");
   startFeaturedAutoscroll();
 }
 
