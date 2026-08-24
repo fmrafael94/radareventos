@@ -74,8 +74,8 @@ export async function onRequestPost(context) {
   let posterFileName = "";
   if (posterFile && typeof posterFile !== "string" && posterFile.size > 0) {
     const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-    if (!allowedTypes.has(posterFile.type) || posterFile.size > 5 * 1024 * 1024) {
-      return json({ message: "O cartaz deve ser JPG, PNG ou WebP e ter no máximo 5 MB." }, 400);
+    if (!allowedTypes.has(posterFile.type) || posterFile.size > 2 * 1024 * 1024) {
+      return json({ message: "O cartaz deve ser JPG, PNG ou WebP e ter no máximo 2 MB." }, 400);
     }
     if (!context.env.EVENT_POSTERS) {
       return json({ message: "O envio de imagens será ativado quando a publicação for concluída. Usa, por agora, o link do cartaz." }, 503);
