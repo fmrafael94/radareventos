@@ -24,7 +24,7 @@ window.SOURCE_GROUPS = [
     ["Xceed","Noites e clubes","https://xceed.me/"], ["Eventbrite Portugal","Eventos locais","https://www.eventbrite.pt/"], ["See Tickets","Bilheteira","https://www.seetickets.com/pt"],
     ["Live Nation Portugal","Promotor","https://www.livenation.pt/"], ["Last Tour Portugal","Promotor","https://lasttour.org/pt-pt/"],
     ["Música no Coração","Promotor","https://www.musicanocoracao.pt/"], ["Sons em Trânsito","Promotor","https://sonsemtransito.com/"], ["UAU","Promotor","https://www.uau.pt/"],
-    ["Hell Xis Agency","Promotor underground","https://www.instagram.com/hellxis/"], ["Prime Artists","Promotor","https://www.primeartists.eu/"], ["Born2Resist","Fonte sugerida — página oficial a localizar",null]
+    ["Hell Xis Agency","Promotor underground","https://www.instagram.com/hellxis/"], ["Prime Artists","Promotor","https://www.primeartists.eu/"], ["Born to Resist Events & Booking","Promotor underground","https://www.instagram.com/born_to_resist_events_booking/"]
   ]},
   { title:"Salas e agendas locais", sources:[
     ["RCA Club","Lisboa","https://www.rcaclub.com/agenda/"], ["Hard Club","Porto","https://www.hardclubporto.com/"],
