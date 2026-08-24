@@ -30,7 +30,19 @@ Não é preciso adicionar Google Analytics nem editar o código. Verás visitas,
 5. Seleciona a base criada e usa exatamente este nome de variável: `EVENT_RADAR_DB`.
 6. Faz novo deploy.
 
-## 4. Proteger o formulário contra spam
+Se já tinhas criado a base antes de esta opção de cartaz existir, executa também, uma única vez, o conteúdo de `database/migrations/0002_feedback_posters.sql`.
+
+## 4. Guardar cartazes enviados para revisão
+
+1. No Cloudflare, abre **Storage & Databases** → **R2** → **Create bucket**.
+2. Nome sugerido: `event-radar-posters`. Mantém o bucket privado: estes ficheiros são apenas material de revisão.
+3. No projeto Pages, abre **Settings** → **Bindings** → **Add** → **R2 bucket bindings**.
+4. Seleciona o bucket e usa exatamente este nome de variável: `EVENT_POSTERS`.
+5. Faz novo deploy.
+
+No formulário, uma pessoa pode deixar um link do cartaz e/ou enviar uma imagem JPG, PNG ou WebP até 5 MB. A imagem enviada não aparece automaticamente no site: fica guardada com a sugestão até ser revista.
+
+## 5. Proteger o formulário contra spam
 
 1. No Cloudflare, abre **Turnstile** → **Add widget**.
 2. Cria um widget chamado `Radar de Eventos — formulário público`.
@@ -43,7 +55,7 @@ Não é preciso adicionar Google Analytics nem editar o código. Verás visitas,
 
 Depois disto, o formulário fica ativo. Sem estas duas chaves, mostra uma mensagem honesta a indicar que ainda está em preparação.
 
-## 5. Rever contribuições
+## 6. Rever contribuições
 
 Na D1, podes consultar os pedidos novos com:
 
@@ -53,7 +65,7 @@ SELECT * FROM feedback WHERE status = 'new' ORDER BY created_at DESC;
 
 Depois de rever, atualiza o estado para `reviewing`, `published`, `rejected` ou `closed`. Publicar uma sugestão continua a significar atualizar `events.js` com fonte oficial e data de verificação.
 
-## 6. Email e domínio (fazemos depois)
+## 7. Email e domínio (fazemos depois)
 
 Quando comprares o domínio, criaremos pelo menos:
 
@@ -62,6 +74,6 @@ Quando comprares o domínio, criaremos pelo menos:
 
 Esses endereços podem encaminhar para a tua caixa de email atual. Antes de ativar os formulários para o público, atualiza `privacidade.html` com o nome legal do responsável e esse contacto de privacidade.
 
-## 7. Ligar o domínio
+## 8. Ligar o domínio
 
 No projeto Pages: **Custom domains** → **Set up a domain**. Se o domínio principal estiver no Cloudflare, aceita a configuração de DNS sugerida. Depois confirma que tanto `www` como a versão sem `www` encaminham para uma única versão escolhida.

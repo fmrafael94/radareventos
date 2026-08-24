@@ -137,6 +137,14 @@
           <label><span>Cidade / concelho <small>opcional</small></span><input name="city" type="text" maxlength="100" /></label>
         </div>
         <label><span>Link oficial <small>muito recomendado</small></span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
+        <fieldset class="poster-contribution">
+          <legend>Cartaz oficial <small>opcional</small></legend>
+          <p>Ajuda-nos a confirmar o evento. Podes deixar o link do cartaz ou enviar a imagem que encontraste numa fonte oficial.</p>
+          <div class="feedback-grid">
+            <label><span>Link do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
+            <label><span>Enviar imagem</span><input name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG ou WebP · máximo 5 MB</small></label>
+          </div>
+        </fieldset>
         <label><span id="feedback-message-label">O que devemos adicionar?</span><textarea name="message" rows="4" maxlength="2500" required placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante."></textarea></label>
         <label class="feedback-consent"><input name="privacyAcknowledged" type="checkbox" required /><span>Li a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e compreendo que estes dados serão usados apenas para analisar este pedido.</span></label>
         <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>

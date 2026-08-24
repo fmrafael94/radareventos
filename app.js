@@ -909,8 +909,8 @@ function setFeedbackMode(kind, eventId = "", eventTitle = "") {
   feedbackEventField.hidden = correction;
   feedbackTitle.textContent = correction ? "Corrigir esta informação." : "Sugerir um evento.";
   feedbackContext.textContent = correction
-    ? `Vais corrigir: ${eventTitle}. Indica o que mudou e, se possível, deixa o link oficial que o confirma.`
-    : "Partilha um link oficial. A sugestão será sempre revista antes de aparecer na agenda.";
+    ? `Vais corrigir: ${eventTitle}. Indica o que mudou e, se possível, deixa o link oficial ou o cartaz que o confirma.`
+    : "Partilha um link oficial e, se o tiveres, o cartaz oficial. A sugestão será sempre revista antes de aparecer na agenda.";
   feedbackMessageLabel.textContent = correction ? "O que está errado ou desatualizado?" : "O que devemos adicionar?";
   feedbackStatus.textContent = "";
   feedbackSubmit.disabled = false;
@@ -954,14 +954,20 @@ feedbackDialog.addEventListener("click", event => {
 feedbackForm.addEventListener("submit", async event => {
   event.preventDefault();
   if (!feedbackForm.reportValidity()) return;
+  const data = new FormData(feedbackForm);
+  const posterFile = data.get("posterFile");
+  if (posterFile instanceof File && posterFile.size > 5 * 1024 * 1024) {
+    feedbackStatus.textContent = "O cartaz não pode ter mais de 5 MB.";
+    return;
+  }
   feedbackStatus.textContent = "A enviar…";
   feedbackSubmit.disabled = true;
   feedbackSubmit.textContent = "A enviar…";
   try {
     const response = await fetch("/api/feedback", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(Object.fromEntries(new FormData(feedbackForm).entries()))
+      headers: { Accept: "application/json" },
+      body: data
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
