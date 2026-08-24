@@ -23,7 +23,8 @@ window.SOURCE_GROUPS = [
     ["Shotgun","Clubes e eletrónica","https://shotgun.live/pt-pt"], ["DICE","Concertos","https://dice.fm/"], ["Resident Advisor","Eletrónica","https://ra.co/events/pt/lisbon"],
     ["Xceed","Noites e clubes","https://xceed.me/"], ["Eventbrite Portugal","Eventos locais","https://www.eventbrite.pt/"], ["See Tickets","Bilheteira","https://www.seetickets.com/pt"],
     ["Live Nation Portugal","Promotor","https://www.livenation.pt/"], ["Last Tour Portugal","Promotor","https://lasttour.org/pt-pt/"],
-    ["Música no Coração","Promotor","https://www.musicanocoracao.pt/"], ["Sons em Trânsito","Promotor","https://sonsemtransito.com/"], ["UAU","Promotor","https://www.uau.pt/"]
+    ["Música no Coração","Promotor","https://www.musicanocoracao.pt/"], ["Sons em Trânsito","Promotor","https://sonsemtransito.com/"], ["UAU","Promotor","https://www.uau.pt/"],
+    ["Hell Xis Agency","Promotor underground","https://www.instagram.com/hellxis/"], ["Prime Artists","Promotor","https://www.primeartists.eu/"], ["Born2Resist","Fonte sugerida — página oficial a localizar",null]
   ]},
   { title:"Salas e agendas locais", sources:[
     ["RCA Club","Lisboa","https://www.rcaclub.com/agenda/"], ["Hard Club","Porto","https://www.hardclubporto.com/"],
