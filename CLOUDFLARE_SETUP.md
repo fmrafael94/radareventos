@@ -1,4 +1,4 @@
-# Publicar o Radar de Eventos no Cloudflare
+# Publicar o Desvio no Cloudflare
 
 Este projeto é uma página estática com duas pequenas funções privadas:
 
@@ -45,7 +45,7 @@ No formulário, uma pessoa pode deixar um link do cartaz e/ou enviar uma imagem 
 ## 5. Proteger o formulário contra spam
 
 1. No Cloudflare, abre **Turnstile** → **Add widget**.
-2. Cria um widget chamado `Radar de Eventos — formulário público`.
+2. Cria um widget chamado `Desvio — formulário público`.
 3. Adiciona primeiro a morada exata recebida no Pages (por exemplo, `radareventos.pages.dev`); depois acrescenta o domínio próprio.
 4. Copia a **Sitekey** e a **Secret key**.
 5. No projeto Pages, abre **Settings** → **Environment variables** e cria:

@@ -1,8 +1,8 @@
-# Event Radar
+# Desvio — O teu radar de eventos
 
 Public music guide for Portugal. The confirmed agenda stays as a versioned static file; Cloudflare D1 is used only for private suggestions and corrections sent by visitors.
 
-## What belongs in Event Radar
+## What belongs in Desvio
 
 Include public concerts, festivals, DJ sets, bar and club gigs, free local shows, Fado sessions, recitals, opera and musical theatre. Exclude private/invite-only events, workshops without a public performance, karaoke, and events where music is only background entertainment.
 

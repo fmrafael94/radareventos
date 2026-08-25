@@ -1,4 +1,4 @@
-/* Event Radar's visual layer: no imagery, just live signal and depth. */
+/* Desvio's visual layer: no imagery, just live signal and depth. */
 body {
   background:
     radial-gradient(circle at 8% 12%, rgba(196,230,90,.13), transparent 25rem),

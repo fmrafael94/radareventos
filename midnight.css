@@ -1,4 +1,4 @@
-/* Midnight Radar: high contrast, clean type and an actual scanning field. */
+/* Midnight Desvio: high contrast, clean type and an actual scanning field. */
 :root { --ink:#f5f8f4; --muted:#a4aea8; --cream:#070a09; --white:#0e1411; --line:rgba(226,241,231,.16); --lime:#b9ff4d; --blue:#16211c; --accent:#ff6e50; }
 body { color:var(--ink); background:radial-gradient(circle at 14% -10%,#16291b,transparent 33rem),radial-gradient(circle at 100% 22%,#131f1a,transparent 35rem),#070a09; font-family:"DM Sans",Arial,sans-serif; }
 .site-header { border-color:rgba(230,244,232,.12); }.brand { letter-spacing:-.045em; }.site-header>p { color:#7f9186; }.submit-link { color:var(--lime); }.submit-link:hover { color:#fff; }
@@ -65,7 +65,7 @@ body { color:var(--ink); background:linear-gradient(135deg,#f5f2e9 0%,#eef1e8 48
 @media (max-width:900px) { .featured-rail { grid-template-columns:1fr; }.featured-card { grid-template-columns:92px minmax(0,1fr); min-height:125px; }.featured-poster { width:92px; }.featured-poster img { height:112px; } }
 @media (max-width:700px) { .intro { min-height:326px; }.signal-field { right:-20px; opacity:.37; }.intro-stat { background:rgba(27,67,47,.44); }.featured-events { margin-top:23px; }.featured-heading h2 { font-size:23px; }.featured-heading>a { white-space:nowrap; }.featured-card { padding:8px; } }
 
-/* The brand remains Radar de Eventos, but the decorative sonar is retired. */
+/* The Desvio identity keeps the decorative sonar as a subtle signature. */
 .signal-field { display:none!important; }
 .intro::after { display:none; }
 .intro { min-height:246px; }
