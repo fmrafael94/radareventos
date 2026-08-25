@@ -1,4 +1,4 @@
-const state = { search: "", date: "", genre: "", area: "", district: [], city: [], type: "", highlight: "", page: 1 };
+const state = { search: "", date: "", genre: [], area: [], district: [], city: [], type: "", highlight: "", page: 1 };
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
@@ -7,9 +7,11 @@ const pagination = document.querySelector("#pagination");
 const pageLabel = document.querySelector("#page-label");
 const previousPage = document.querySelector("#previous-page");
 const nextPage = document.querySelector("#next-page");
-const genreSelect = document.querySelector("#genre-filter");
+const genreFilter = document.querySelector("#genre-filter");
 const dateSelect = document.querySelector("#date-filter");
-const areaSelect = document.querySelector("#area-filter");
+const areaFilter = document.querySelector("#area-filter");
+const genreMenu = document.querySelector("#genre-menu");
+const areaMenu = document.querySelector("#area-menu");
 const districtFilter = document.querySelector("#district-filter");
 const cityFilter = document.querySelector("#city-filter");
 const districtMenu = document.querySelector("#district-menu");
@@ -68,8 +70,6 @@ function addOptions(select, items) {
   });
 }
 
-addOptions(genreSelect, unique(EVENTS.flatMap(event => event.genres)));
-addOptions(areaSelect, unique(EVENTS.map(event => event.area)));
 addOptions(typeSelect, unique(EVENTS.map(eventType)));
 
 // Festival programmes use one parent event in the agenda. Their daily
@@ -623,30 +623,36 @@ function setupCustomSelect(select) {
   sync();
 }
 
-[dateSelect, genreSelect, typeSelect, areaSelect].forEach(setupCustomSelect);
+ [dateSelect, typeSelect].forEach(setupCustomSelect);
 const multiFilterSync = [];
-function setupMultiFilter(button, menu, values, key, allLabel) {
+function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => {}) {
+  let availableValues = unique(values);
   const sync = () => {
     const selected = state[key];
     button.querySelector("strong").textContent = selected.length ? `${selected.length} selecionado${selected.length === 1 ? "" : "s"}` : allLabel;
     button.classList.toggle("has-value", Boolean(selected.length));
     [...menu.children].forEach(option => option.setAttribute("aria-pressed", String(selected.includes(option.dataset.value))));
   };
-  values.forEach(value => {
-    const option = document.createElement("button");
-    option.type = "button";
-    option.className = "multi-select-option";
-    option.dataset.value = value;
-    option.textContent = value;
-    option.setAttribute("aria-pressed", "false");
-    option.addEventListener("click", () => {
-      state[key] = state[key].includes(value) ? state[key].filter(item => item !== value) : [...state[key], value];
-      state.page = 1;
-      sync();
-      render();
+  const rebuild = () => {
+    menu.innerHTML = "";
+    availableValues.forEach(value => {
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "multi-select-option";
+      option.dataset.value = value;
+      option.textContent = value;
+      option.setAttribute("aria-pressed", "false");
+      option.addEventListener("click", () => {
+        state[key] = state[key].includes(value) ? state[key].filter(item => item !== value) : [...state[key], value];
+        state.page = 1;
+        onChange();
+        sync();
+        render();
+      });
+      menu.append(option);
     });
-    menu.append(option);
-  });
+    sync();
+  };
   button.addEventListener("click", () => {
     const open = !menu.classList.contains("open");
     document.querySelectorAll(".multi-select-menu.open").forEach(other => other.classList.remove("open"));
@@ -654,15 +660,31 @@ function setupMultiFilter(button, menu, values, key, allLabel) {
     button.setAttribute("aria-expanded", String(open));
   });
   multiFilterSync.push(sync);
-  sync();
+  rebuild();
+  return {
+    sync,
+    refresh(nextValues) {
+      availableValues = unique(nextValues);
+      state[key] = state[key].filter(value => availableValues.includes(value));
+      rebuild();
+    }
+  };
 }
-setupMultiFilter(districtFilter, districtMenu, unique(EVENTS.map(event => event.district)), "district", "Todos os distritos");
-setupMultiFilter(cityFilter, cityMenu, unique(EVENTS.map(event => event.city)), "city", "Todos os concelhos");
+const cityValuesForLocation = () => unique(EVENTS.filter(event =>
+  (!state.area.length || state.area.includes(event.area)) &&
+  (!state.district.length || state.district.includes(event.district))
+).map(event => event.city));
+let cityMultiFilter;
+const refreshLocationOptions = () => cityMultiFilter.refresh(cityValuesForLocation());
+const genreMultiFilter = setupMultiFilter(genreFilter, genreMenu, EVENTS.flatMap(event => event.genres), "genre", "Todos os géneros");
+const areaMultiFilter = setupMultiFilter(areaFilter, areaMenu, EVENTS.map(event => event.area), "area", "Todas as áreas", refreshLocationOptions);
+const districtMultiFilter = setupMultiFilter(districtFilter, districtMenu, EVENTS.map(event => event.district), "district", "Todos os distritos", refreshLocationOptions);
+cityMultiFilter = setupMultiFilter(cityFilter, cityMenu, cityValuesForLocation(), "city", "Todos os concelhos");
 document.addEventListener("click", event => {
   if (!event.target.closest(".custom-select")) document.querySelectorAll(".custom-select.open").forEach(select => select.classList.remove("open"));
   if (!event.target.closest(".multi-filter-wrap")) {
     document.querySelectorAll(".multi-select-menu.open").forEach(menu => menu.classList.remove("open"));
-    [districtFilter, cityFilter].forEach(button => button.setAttribute("aria-expanded", "false"));
+    [genreFilter, areaFilter, districtFilter, cityFilter].forEach(button => button.setAttribute("aria-expanded", "false"));
   }
 });
 // A link is only presented as a ticket button when it points to a concrete
@@ -741,8 +763,9 @@ function renderFeatured() {
     .slice(0, 5);
   featuredRail.innerHTML = featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
-    return `<article class="featured-card">
-      <button class="featured-poster poster-trigger" type="button" ${posterStyle(event.image)} aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"></button>
+    return `<article class="featured-card" data-event-id="${event.id}">
+      <button class="featured-open" type="button" data-open-featured-event="${event.id}" aria-label="Abrir detalhes de ${event.title}"></button>
+      <span class="featured-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"></span>
       <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${event.sourceUrl}" target="_blank" rel="noopener">Página oficial ↗</a></div>
     </article>`;
   }).join("");
@@ -769,13 +792,19 @@ function eventCard(event) {
   const fullDate = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
   const availability = availabilityLabel(event);
   const statusClass = availability === "Esgotado" ? "sold" : availability === "Cancelado" ? "cancelled" : availability === "Bilhetes a confirmar" ? "pending" : "";
-  const children = festivalChildren(event).sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
+  // Keep an ongoing festival in the agenda, but never offer a past day in its
+  // programme. The parent still overlaps today, while the timetable starts at
+  // the next useful date for the visitor.
+  const today = shiftedIso(0);
+  const children = festivalChildren(event)
+    .filter(child => child.date >= today)
+    .sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
   const groupedDays = [...new Set(children.map(child => child.date))];
   const schedule = children.length ? `<div class="festival-program"><span class="detail-label">${event.endDate ? "Programa por dia / sessões" : "Alinhamento e horário"}</span>${groupedDays.length > 1 ? `<div class="festival-day-tabs" role="tablist">${groupedDays.map((date, index) => `<button type="button" role="tab" data-festival-day="${event.id}-${date}" aria-selected="${index === 0}">${prettyDate(date)}</button>`).join("")}</div>` : ""}${groupedDays.map((date, index) => `<section class="festival-day" data-festival-day-panel="${event.id}-${date}"${index ? " hidden" : ""}><h4>${prettyDate(date)}</h4>${children.filter(child => child.date === date).map(child => `<div class="festival-slot">${hasOfficialPoster(child) ? `<button class="festival-slot-art poster-trigger" type="button" ${posterStyle(child.image)} aria-label="Ampliar cartaz oficial de ${child.title}"><img src="${child.image}" alt="Cartaz oficial de ${child.title}" loading="lazy"></button>` : ""}<time>${child.time || "Horário a confirmar"}</time><div><strong>${child.title.replace(/^.*?— /, "")}</strong><span>${child.venue}</span></div><em>${ticketStatus(child)}</em>${programmeAction(child)}</div>`).join("")}</section>`).join("")}</div>` : `<div class="single-program"><span class="detail-label">Alinhamento / horário</span><div class="festival-slot"><time>${event.time || "Horário a confirmar"}</time><div><strong>${event.lineup || event.title}</strong><span>${event.venue}</span></div><em>${ticketStatus(event)}</em>${programmeAction(event)}</div></div>`;
   const art = hasOfficialPoster(event) ? `<button class="event-art poster-trigger" type="button" ${posterStyle(event.image)} aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
   const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : freeEntryOnly(event) ? `<span class="ticket-link ticket-free">Entrada livre</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
   const sourceLabel = "Fonte";
-  return `<details class="event-card${groupedDays.length > 1 ? " has-multiple-days" : ""}">
+  return `<details class="event-card${groupedDays.length > 1 ? " has-multiple-days" : ""}" data-event-id="${event.id}">
     <summary>
       <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
       <span class="event-main"><span class="event-title">${event.title}</span><span class="event-venue">${event.venue} · ${event.city}</span></span>
@@ -801,8 +830,8 @@ function filteredEvents() {
     const text = group.flatMap(item => [item.title, item.venue, item.city, item.district, item.area, eventType(item), ...item.genres]).join(" ").toLocaleLowerCase("pt-PT");
     return (!query || text.includes(query)) &&
       group.some(item => overlapsRange(item, selectedRange)) &&
-      (!state.genre || group.some(item => item.genres.includes(state.genre))) &&
-      (!state.area || group.some(item => item.area === state.area)) &&
+      (!state.genre.length || group.some(item => item.genres.some(genre => state.genre.includes(genre)))) &&
+      (!state.area.length || group.some(item => state.area.includes(item.area))) &&
       (!state.district.length || group.some(item => state.district.includes(item.district))) &&
       (!state.city.length || group.some(item => state.city.includes(item.city))) &&
       (!state.type || group.some(item => eventType(item) === state.type)) &&
@@ -827,7 +856,7 @@ function render() {
 }
 
 function syncFilterToggle() {
-  const active = [state.date, state.genre, state.area, state.type, state.highlight].filter(Boolean).length + state.district.length + state.city.length;
+  const active = [state.date, state.type, state.highlight].filter(Boolean).length + state.genre.length + state.area.length + state.district.length + state.city.length;
   const isOpen = !filterPanel.hidden;
   filterToggle.querySelector("span").textContent = isOpen ? "Fechar filtros" : active ? `Filtros · ${active}` : "Filtros";
   filterToggle.querySelector("i").textContent = isOpen ? "×" : "+";
@@ -835,30 +864,53 @@ function syncFilterToggle() {
 }
 
 function updateFilter(key, value) { state[key] = value; state.page = 1; render(); }
+function resetAgendaSelection() {
+  Object.assign(state, { search: "", date: "", genre: [], area: [], district: [], city: [], type: "", highlight: "", page: 1 });
+  document.querySelector("#search").value = "";
+  dateSelect.value = "";
+  typeSelect.value = "";
+  document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
+  refreshLocationOptions();
+  multiFilterSync.forEach(sync => sync());
+  [dateSelect, typeSelect].forEach(select => select.dispatchEvent(new Event("change")));
+}
+function openFeaturedEvent(id) {
+  let matches = filteredEvents();
+  let index = matches.findIndex(event => event.id === id);
+  // A featured event should always be reachable, even if the visitor left a
+  // restrictive agenda selection on before returning to the top of the page.
+  if (index === -1) {
+    resetAgendaSelection();
+    matches = filteredEvents();
+    index = matches.findIndex(event => event.id === id);
+  }
+  if (index === -1) return;
+  state.page = Math.floor(index / perPage) + 1;
+  render();
+  const target = list.querySelector(`[data-event-id="${id}"]`);
+  if (!target) return;
+  target.open = true;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 function renderSources() {
   document.querySelector("#source-groups").innerHTML = SOURCE_GROUPS.map(group => `<article class="source-group"><h3>${group.title}</h3>${group.sources.map(([name, type, url]) => url ? `<a href="${url}" target="_blank" rel="noopener">${name}<span>${type}</span></a>` : `<p class="source-pending"><b>${name}</b><span>${type}</span></p>`).join("")}</article>`).join("");
 }
 
 document.querySelector("#search").addEventListener("input", event => updateFilter("search", event.target.value));
+featuredRail.addEventListener("click", event => {
+  if (event.target.closest(".featured-copy a")) return;
+  const card = event.target.closest(".featured-card");
+  if (card) openFeaturedEvent(card.dataset.eventId);
+});
 filterToggle.addEventListener("click", () => {
   filterPanel.hidden = !filterPanel.hidden;
   filterToggle.setAttribute("aria-expanded", String(!filterPanel.hidden));
   syncFilterToggle();
 });
 dateSelect.addEventListener("change", event => updateFilter("date", event.target.value));
-genreSelect.addEventListener("change", event => updateFilter("genre", event.target.value));
-areaSelect.addEventListener("change", event => updateFilter("area", event.target.value));
 typeSelect.addEventListener("change", event => updateFilter("type", event.target.value));
 document.querySelector("#clear-filters").addEventListener("click", () => {
-  Object.assign(state, { search: "", date: "", genre: "", area: "", district: [], city: [], type: "", highlight: "", page: 1 });
-  document.querySelector("#search").value = "";
-  dateSelect.value = "";
-  genreSelect.value = "";
-  areaSelect.value = "";
-  typeSelect.value = "";
-  document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
-  multiFilterSync.forEach(sync => sync());
-  [dateSelect, genreSelect, areaSelect, typeSelect].forEach(select => select.dispatchEvent(new Event("change")));
+  resetAgendaSelection();
   render();
 });
 document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEventListener("click", () => {
@@ -884,12 +936,13 @@ nearbyButton.addEventListener("click", () => {
       const kilometres = distanceTo(coords.latitude, coords.longitude, latitude, longitude);
       return kilometres < closest[1] ? [name, kilometres] : closest;
     }, ["", Infinity]);
-    state.area = area;
+    state.area = [area];
     state.page = 1;
-    areaSelect.value = area;
+    refreshLocationOptions();
+    areaMultiFilter.sync();
     nearbyHint.textContent = `${area} · cerca de ${Math.round(distance)} km`;
     nearbyButton.disabled = false;
-    areaSelect.dispatchEvent(new Event("change"));
+    render();
   }, () => {
     nearbyHint.textContent = "Ativa a localização para ver eventos próximos.";
     nearbyButton.disabled = false;

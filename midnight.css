@@ -278,3 +278,51 @@ footer nav a { color:var(--muted); font:500 9px "DM Mono",monospace; text-decora
   .festival-slot strong { font-size:13px; line-height:1.25; }
   .festival-slot span { font-size:11px; line-height:1.35; }
 }
+
+/* Mobile QA: keep long programmes inside the card and make the filter rhythm
+   intentional instead of leaving a blank half-row below the first controls. */
+html,body { overflow-x:clip; }
+
+@media (max-width:580px) {
+  .filter-panel .filter-grid label:nth-child(3) { grid-column:1 / -1; }
+  .filter-panel .filter-grid > .multi-filter-wrap { min-width:0; min-height:57px; }
+  .filter-panel .location-bar { grid-template-columns:1fr 1fr; }
+  .multi-select-menu { width:min(100%,calc(100vw - 58px)); max-height:min(280px,55vh); }
+
+  /* A programme must stay inside its open card. Long day labels used to give
+     the grid an intrinsic width larger than a phone screen. */
+  html, body { width:100%; max-width:100%; overflow-x:hidden; }
+  .event-card,
+  .event-details,
+  .event-details.has-program,
+  .event-details.has-program > *,
+  .festival-program,
+  .single-program,
+  .festival-day,
+  .festival-slot { min-width:0!important; max-width:100%!important; }
+  .event-details.has-program { display:grid!important; grid-template-columns:minmax(0,1fr)!important; width:100%!important; }
+  .event-details.has-program > *,
+  .festival-program,
+  .single-program,
+  .festival-day,
+  .festival-slot { min-width:0; max-width:100%; }
+  .festival-program,
+  .single-program { grid-column:1 / -1!important; width:100%!important; overflow:hidden; }
+  .festival-day-tabs { display:flex; width:100%!important; max-width:100%; min-width:0!important; overflow-x:auto!important; overflow-y:hidden; overscroll-behavior-x:contain; }
+  .festival-slot strong,
+  .festival-slot span,
+  .event-details p { overflow-wrap:anywhere; }
+}
+
+/* The featured card is a shortcut into the detailed agenda entry. Its poster
+   and external official link retain their own, more specific actions. */
+.featured-card { position:relative; }
+.featured-open { position:absolute; z-index:0; inset:0; width:100%; border:0; border-radius:inherit; background:transparent; cursor:pointer; }
+.featured-open:focus-visible { outline:3px solid rgba(72,105,69,.48); outline-offset:3px; }
+.featured-poster,.featured-copy { position:relative; z-index:1; }
+.featured-poster { cursor:pointer; }
+.featured-copy { pointer-events:none; }
+.featured-copy a { pointer-events:auto; }
+.submit-link span { position:relative; display:inline-block; width:9px; height:10px; margin-left:3px; font-size:0; vertical-align:-1px; }
+.submit-link span::before { content:""; position:absolute; top:1px; right:0; width:6px; height:6px; border-top:1.5px solid currentColor; border-right:1.5px solid currentColor; }
+.submit-link span::after { content:""; position:absolute; top:6px; left:1px; width:8px; height:1.5px; background:currentColor; transform:rotate(-45deg); transform-origin:right center; }
