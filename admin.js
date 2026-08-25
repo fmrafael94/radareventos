@@ -40,6 +40,9 @@ async function loadReports() {
     const response = await fetch(`/api/admin/feedback?status=${encodeURIComponent(activeStatus)}`, { headers: { Accept: "application/json" } });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar os pedidos.");
+    if (!Array.isArray(result.items)) {
+      throw new Error("A área de revisão ainda está a ser configurada. Até ligares o domínio próprio e o acesso privado, revê os pedidos pela base de dados D1.");
+    }
     reports.innerHTML = result.items.length ? result.items.map(reportCard).join("") : document.querySelector("#empty-state").innerHTML;
     adminStatus.textContent = result.items.length ? `${result.items.length} pedido${result.items.length === 1 ? "" : "s"}.` : "";
   } catch (error) {
