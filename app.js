@@ -902,6 +902,15 @@ featuredRail.addEventListener("click", event => {
   const card = event.target.closest(".featured-card");
   if (card) openFeaturedEvent(card.dataset.eventId);
 });
+// Keep the agenda calm: opening one event closes the previous detail card.
+// This also applies when a featured card sends the visitor directly to it.
+list.addEventListener("toggle", event => {
+  const opened = event.target;
+  if (!(opened instanceof HTMLDetailsElement) || !opened.open) return;
+  list.querySelectorAll(".event-card[open]").forEach(card => {
+    if (card !== opened) card.open = false;
+  });
+}, true);
 filterToggle.addEventListener("click", () => {
   filterPanel.hidden = !filterPanel.hidden;
   filterToggle.setAttribute("aria-expanded", String(!filterPanel.hidden));

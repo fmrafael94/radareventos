@@ -323,6 +323,5 @@ html,body { overflow-x:clip; }
 .featured-poster { cursor:pointer; }
 .featured-copy { pointer-events:none; }
 .featured-copy a { pointer-events:auto; }
-.submit-link span { position:relative; display:inline-block; width:9px; height:10px; margin-left:3px; font-size:0; vertical-align:-1px; }
-.submit-link span::before { content:""; position:absolute; top:1px; right:0; width:6px; height:6px; border-top:1.5px solid currentColor; border-right:1.5px solid currentColor; }
-.submit-link span::after { content:""; position:absolute; top:6px; left:1px; width:8px; height:1.5px; background:currentColor; transform:rotate(-45deg); transform-origin:right center; }
+.submit-link span { display:inline; margin-left:3px; font:400 1.1em/1 Arial,sans-serif; vertical-align:-.03em; }
+.submit-link span::before,.submit-link span::after { content:none; }
