@@ -1,6 +1,6 @@
 # Publicar o Desvio no Cloudflare
 
-Este projeto é uma página estática com duas pequenas funções privadas:
+Este projeto é uma página estática com pequenas funções no Cloudflare Worker:
 
 - `GET /api/config` entrega a chave pública do anti-spam ao formulário.
 - `POST /api/feedback` valida o anti-spam e guarda sugestões/correções na D1.
@@ -10,10 +10,9 @@ Nada enviado pelo público é publicado automaticamente.
 ## 1. Criar e publicar o projeto
 
 1. Envia este repositório para GitHub.
-2. No Cloudflare, abre **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**.
-3. Escolhe o repositório `radareventos`.
-4. Define **Framework preset** como `None`, **Build command** vazio e **Build output directory** como `/`.
-5. Faz o primeiro deploy. Vais receber uma morada `*.pages.dev` para testar antes de comprares o domínio.
+2. No Cloudflare, abre **Workers & Pages** → **Create application** → **Workers** → **Connect to Git**.
+3. Escolhe o repositório `radareventos`. O ficheiro `wrangler.jsonc` já define o site e as rotas da API.
+4. Faz o primeiro deploy. Vais receber uma morada `*.workers.dev` para testar antes de comprares o domínio.
 
 ## 2. Ativar métricas sem cookies
 
