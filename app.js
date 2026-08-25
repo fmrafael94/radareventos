@@ -1,4 +1,4 @@
-const state = { search: "", date: "", genre: [], area: [], district: [], city: [], type: "", highlight: "", page: 1 };
+const state = { search: "", date: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 };
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
@@ -12,11 +12,12 @@ const dateSelect = document.querySelector("#date-filter");
 const areaFilter = document.querySelector("#area-filter");
 const genreMenu = document.querySelector("#genre-menu");
 const areaMenu = document.querySelector("#area-menu");
+const typeFilter = document.querySelector("#type-filter");
+const typeMenu = document.querySelector("#type-menu");
 const districtFilter = document.querySelector("#district-filter");
 const cityFilter = document.querySelector("#city-filter");
 const districtMenu = document.querySelector("#district-menu");
 const cityMenu = document.querySelector("#city-menu");
-const typeSelect = document.querySelector("#type-filter");
 const posterLightbox = document.querySelector("#poster-lightbox");
 const posterLightboxImage = document.querySelector("#poster-lightbox-image");
 const nearbyButton = document.querySelector("#nearby-button");
@@ -60,17 +61,6 @@ const distanceTo = (fromLat, fromLon, toLat, toLon) => {
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(radians(fromLat)) * Math.cos(radians(toLat)) * Math.sin(dLon / 2) ** 2;
   return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
-
-function addOptions(select, items) {
-  items.forEach(item => {
-    const option = document.createElement("option");
-    option.value = item;
-    option.textContent = item;
-    select.append(option);
-  });
-}
-
-addOptions(typeSelect, unique(EVENTS.map(eventType)));
 
 // Festival programmes use one parent event in the agenda. Their daily
 // performances remain attached to the parent and are shown when it opens.
@@ -623,7 +613,7 @@ function setupCustomSelect(select) {
   sync();
 }
 
- [dateSelect, typeSelect].forEach(setupCustomSelect);
+[dateSelect].forEach(setupCustomSelect);
 const multiFilterSync = [];
 function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => {}) {
   let availableValues = unique(values);
@@ -645,7 +635,7 @@ function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => 
       option.addEventListener("click", () => {
         state[key] = state[key].includes(value) ? state[key].filter(item => item !== value) : [...state[key], value];
         state.page = 1;
-        onChange();
+        onChange(key);
         sync();
         render();
       });
@@ -670,21 +660,39 @@ function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => 
     }
   };
 }
-const cityValuesForLocation = () => unique(EVENTS.filter(event =>
-  (!state.area.length || state.area.includes(event.area)) &&
-  (!state.district.length || state.district.includes(event.district))
-).map(event => event.city));
+const locationEvents = (skip = "") => EVENTS.filter(event =>
+  (skip === "area" || !state.area.length || state.area.includes(event.area)) &&
+  (skip === "district" || !state.district.length || state.district.includes(event.district)) &&
+  (skip === "city" || !state.city.length || state.city.includes(event.city))
+);
+const locationValues = (key, skip = "") => unique(locationEvents(skip).map(event => event[key]));
+let areaMultiFilter;
+let districtMultiFilter;
 let cityMultiFilter;
-const refreshLocationOptions = () => cityMultiFilter.refresh(cityValuesForLocation());
+// The last choice leads the chain. Incompatible choices in the other two
+// controls disappear instead of creating an impossible location combination.
+const refreshLocationOptions = (changedKey = "") => {
+  const priority = changedKey === "area"
+    ? ["district", "city", "area"]
+    : changedKey === "district"
+      ? ["area", "city", "district"]
+      : changedKey === "city"
+        ? ["area", "district", "city"]
+        : ["area", "district", "city"];
+  const filters = { area: areaMultiFilter, district: districtMultiFilter, city: cityMultiFilter };
+  priority.forEach(key => filters[key]?.refresh(locationValues(key, key)));
+};
 const genreMultiFilter = setupMultiFilter(genreFilter, genreMenu, EVENTS.flatMap(event => event.genres), "genre", "Todos os géneros");
-const areaMultiFilter = setupMultiFilter(areaFilter, areaMenu, EVENTS.map(event => event.area), "area", "Todas as áreas", refreshLocationOptions);
-const districtMultiFilter = setupMultiFilter(districtFilter, districtMenu, EVENTS.map(event => event.district), "district", "Todos os distritos", refreshLocationOptions);
-cityMultiFilter = setupMultiFilter(cityFilter, cityMenu, cityValuesForLocation(), "city", "Todos os concelhos");
+const typeMultiFilter = setupMultiFilter(typeFilter, typeMenu, EVENTS.map(eventType), "type", "Todos os formatos");
+areaMultiFilter = setupMultiFilter(areaFilter, areaMenu, EVENTS.map(event => event.area), "area", "Todas as áreas", refreshLocationOptions);
+districtMultiFilter = setupMultiFilter(districtFilter, districtMenu, EVENTS.map(event => event.district), "district", "Todos os distritos", refreshLocationOptions);
+cityMultiFilter = setupMultiFilter(cityFilter, cityMenu, EVENTS.map(event => event.city), "city", "Todos os concelhos", refreshLocationOptions);
+refreshLocationOptions();
 document.addEventListener("click", event => {
   if (!event.target.closest(".custom-select")) document.querySelectorAll(".custom-select.open").forEach(select => select.classList.remove("open"));
   if (!event.target.closest(".multi-filter-wrap")) {
     document.querySelectorAll(".multi-select-menu.open").forEach(menu => menu.classList.remove("open"));
-    [genreFilter, areaFilter, districtFilter, cityFilter].forEach(button => button.setAttribute("aria-expanded", "false"));
+    [genreFilter, typeFilter, areaFilter, districtFilter, cityFilter].forEach(button => button.setAttribute("aria-expanded", "false"));
   }
 });
 // A link is only presented as a ticket button when it points to a concrete
@@ -834,7 +842,7 @@ function filteredEvents() {
       (!state.area.length || group.some(item => state.area.includes(item.area))) &&
       (!state.district.length || group.some(item => state.district.includes(item.district))) &&
       (!state.city.length || group.some(item => state.city.includes(item.city))) &&
-      (!state.type || group.some(item => eventType(item) === state.type)) &&
+      (!state.type.length || group.some(item => state.type.includes(eventType(item)))) &&
       matchesHighlight(event);
   }).sort((a, b) => a.date.localeCompare(b.date));
 }
@@ -856,7 +864,7 @@ function render() {
 }
 
 function syncFilterToggle() {
-  const active = [state.date, state.type, state.highlight].filter(Boolean).length + state.genre.length + state.area.length + state.district.length + state.city.length;
+  const active = [state.date, state.highlight].filter(Boolean).length + state.genre.length + state.type.length + state.area.length + state.district.length + state.city.length;
   const isOpen = !filterPanel.hidden;
   filterToggle.querySelector("span").textContent = isOpen ? "Fechar filtros" : active ? `Filtros · ${active}` : "Filtros";
   filterToggle.querySelector("i").textContent = isOpen ? "×" : "+";
@@ -865,14 +873,13 @@ function syncFilterToggle() {
 
 function updateFilter(key, value) { state[key] = value; state.page = 1; render(); }
 function resetAgendaSelection() {
-  Object.assign(state, { search: "", date: "", genre: [], area: [], district: [], city: [], type: "", highlight: "", page: 1 });
+  Object.assign(state, { search: "", date: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
   document.querySelector("#search").value = "";
   dateSelect.value = "";
-  typeSelect.value = "";
   document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
   refreshLocationOptions();
   multiFilterSync.forEach(sync => sync());
-  [dateSelect, typeSelect].forEach(select => select.dispatchEvent(new Event("change")));
+  [dateSelect].forEach(select => select.dispatchEvent(new Event("change")));
 }
 function openFeaturedEvent(id) {
   let matches = filteredEvents();
@@ -917,7 +924,6 @@ filterToggle.addEventListener("click", () => {
   syncFilterToggle();
 });
 dateSelect.addEventListener("change", event => updateFilter("date", event.target.value));
-typeSelect.addEventListener("change", event => updateFilter("type", event.target.value));
 document.querySelector("#clear-filters").addEventListener("click", () => {
   resetAgendaSelection();
   render();

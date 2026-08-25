@@ -284,7 +284,8 @@ footer nav a { color:var(--muted); font:500 9px "DM Mono",monospace; text-decora
 html,body { overflow-x:clip; }
 
 @media (max-width:580px) {
-  .filter-panel .filter-grid label:nth-child(3) { grid-column:1 / -1; }
+  .filter-panel .filter-grid label:nth-child(3),
+  .filter-panel .filter-grid > .multi-filter-wrap:nth-child(3) { grid-column:1 / -1; }
   .filter-panel .filter-grid > .multi-filter-wrap { min-width:0; min-height:57px; }
   .filter-panel .location-bar { grid-template-columns:1fr 1fr; }
   .multi-select-menu { width:min(100%,calc(100vw - 58px)); max-height:min(280px,55vh); }
