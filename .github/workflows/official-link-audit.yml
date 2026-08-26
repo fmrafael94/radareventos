@@ -1,0 +1,28 @@
+name: Verificação de links oficiais
+
+on:
+  workflow_dispatch:
+  schedule:
+    # De duas em duas horas, fora da hora cheia para não sobrecarregar fontes.
+    - cron: "17 */2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verificar todas as páginas oficiais e bilheteiras diretas
+        run: node scripts/audit-official-links.mjs --mode=two-hour
+      - name: Guardar relatório de revisão
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-link-audit
+          path: reports/official-link-audit.json
+          retention-days: 14
