@@ -3,6 +3,7 @@ const adminStatus = document.querySelector("#admin-status");
 const viewFilters = document.querySelector("#review-views");
 const communityFilters = document.querySelector("#status-filters");
 const automationFilters = document.querySelector("#automation-status-filters");
+const filterContext = document.querySelector("#filter-context");
 let activeView = "community";
 let activeCommunityStatus = "new";
 let activeAutomationStatus = "new";
@@ -86,7 +87,7 @@ async function loadAutomationReviews() {
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar a revisão automática.");
     if (!Array.isArray(result.items)) throw new Error("A revisão automática ainda não está configurada.");
     reports.innerHTML = result.items.length ? result.items.map(automationCard).join("") : "<p class=\"empty-state\">Não há sinais neste estado.</p>";
-    adminStatus.textContent = result.items.length ? `${result.items.length} sinal${result.items.length === 1 ? "" : "is"} para rever.` : "";
+    adminStatus.textContent = result.items.length ? `${result.items.length} sinal${result.items.length === 1 ? "" : "s"} para rever.` : "";
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar a revisão automática.";
   }
@@ -94,6 +95,15 @@ async function loadAutomationReviews() {
 
 function loadActiveView() {
   return activeView === "automation" ? loadAutomationReviews() : loadReports();
+}
+
+function updateReviewControls() {
+  const automated = activeView === "automation";
+  communityFilters.hidden = automated;
+  automationFilters.hidden = !automated;
+  filterContext.textContent = automated
+    ? "Resultados das rondas — confirma sempre na fonte oficial"
+    : "Pedidos enviados por utilizadores";
 }
 
 communityFilters.addEventListener("click", event => {
@@ -117,8 +127,7 @@ viewFilters.addEventListener("click", event => {
   if (!button) return;
   activeView = button.dataset.view;
   viewFilters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
-  communityFilters.hidden = activeView !== "community";
-  automationFilters.hidden = activeView !== "automation";
+  updateReviewControls();
   loadActiveView();
 });
 
@@ -181,4 +190,5 @@ reports.addEventListener("click", async event => {
 });
 
 document.querySelector("#refresh").addEventListener("click", loadActiveView);
+updateReviewControls();
 loadActiveView();
