@@ -24,5 +24,17 @@ export async function onRequestGet(context) {
       return [];
     }
   });
-  return json({ items });
+  const { results: overrideRows } = await context.env.EVENT_RADAR_DB.prepare(`
+    SELECT event_id, patch_json FROM event_overrides
+    ORDER BY updated_at DESC LIMIT 500
+  `).all();
+  const overrides = overrideRows.flatMap(row => {
+    try {
+      const patch = JSON.parse(row.patch_json);
+      return row.event_id && patch && typeof patch === "object" ? [{ id: row.event_id, patch }] : [];
+    } catch {
+      return [];
+    }
+  });
+  return json({ items, overrides });
 }

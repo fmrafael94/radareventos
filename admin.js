@@ -54,7 +54,7 @@ function automationCard(item) {
     </details>
     <div class="report-actions">
       <button type="button" data-automation-status="reviewing">Guardar / em análise</button>
-      <button type="button" data-automation-status="resolved">Aceitar após confirmar</button>
+      <button type="button" data-automation-status="resolved"${isLink ? " data-apply-to-agenda=\"true\"" : ""}>${isLink ? "Aceitar e aplicar à agenda" : "Aceitar após confirmar"}</button>
       <button type="button" data-automation-status="ignored" class="secondary">Recusar</button>
     </div>
   </article>`;
@@ -135,6 +135,7 @@ reports.addEventListener("click", async event => {
         body: JSON.stringify({
           id: card.dataset.id,
           status: automationButton.dataset.automationStatus,
+          applyToAgenda: automationButton.dataset.applyToAgenda === "true",
           proposalTitle: card.querySelector('[name="proposalTitle"]')?.value,
           proposalUrl: card.querySelector('[name="proposalUrl"]')?.value,
           editorNote: card.querySelector('[name="editorNote"]')?.value

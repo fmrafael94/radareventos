@@ -11,6 +11,7 @@ export function ensureAutomationReviewStore(db) {
         dedupe_key TEXT NOT NULL UNIQUE,
         category TEXT NOT NULL CHECK (category IN ('link', 'source')),
         event_id TEXT,
+        target_kind TEXT,
         title TEXT NOT NULL,
         detail TEXT,
         url TEXT NOT NULL,
@@ -51,12 +52,13 @@ async function upsert(db, item) {
   const id = reviewId(item.key);
   await db.prepare(`
     INSERT INTO automation_reviews (
-      id, dedupe_key, category, event_id, title, detail, url, result,
+      id, dedupe_key, category, event_id, target_kind, title, detail, url, result,
       proposal_title, proposal_url,
       status, first_seen_at, last_seen_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'), datetime('now'))
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'), datetime('now'))
     ON CONFLICT(dedupe_key) DO UPDATE SET
       event_id = excluded.event_id,
+      target_kind = excluded.target_kind,
       title = excluded.title,
       detail = excluded.detail,
       url = excluded.url,
@@ -68,7 +70,7 @@ async function upsert(db, item) {
       END,
       resolved_at = NULL
   `).bind(
-    id, item.key, item.category, item.eventId || null, item.title,
+    id, item.key, item.category, item.eventId || null, item.targetKind || null, item.title,
     item.detail || null, item.url, item.result || null, item.title, item.url
   ).run();
 }
@@ -103,6 +105,7 @@ export async function ingestAutomationReport(db, reportKind, report) {
         key,
         category: "link",
         eventId: text(item.id, 180),
+        targetKind: text(item.kind, 60),
         title: text(item.title, 240) || "Evento sem título",
         detail: `${text(item.kind, 60) || "Link"} devolveu ${resultLabel(item)}. Confirma manualmente: algumas plataformas bloqueiam verificações automáticas.`,
         url,

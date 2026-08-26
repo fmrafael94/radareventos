@@ -1210,9 +1210,17 @@ async function loadApprovedCloudflareEvents() {
     if (!response.ok) return;
     const result = await response.json();
     if (!Array.isArray(result.items)) return;
+    const overrides = Array.isArray(result.overrides) ? result.overrides : [];
+    let changed = false;
+    overrides.forEach(override => {
+      const existing = EVENTS.find(event => event.id === override.id);
+      if (!existing || !override.patch || typeof override.patch !== "object") return;
+      Object.assign(existing, override.patch);
+      changed = true;
+    });
     const known = new Set(EVENTS.map(event => event.id));
     const additions = result.items.filter(event => event && event.id && event.title && event.date && event.sourceUrl && !known.has(event.id));
-    if (!additions.length) return;
+    if (!additions.length && !changed) return;
     additions.forEach(event => {
       event.type = event.type || "Concerto";
       event.genres = Array.isArray(event.genres) && event.genres.length ? event.genres : ["Outro"];
