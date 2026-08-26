@@ -8,7 +8,7 @@
     {
       "binding": "EVENT_RADAR_DB",
       "database_name": "event-radar-feedback",
-      "database_id": "6b5ab17f-3f75-4112-a418-2d4d2be7b70e"
+      "database_id": "ac69a6f5-f94d-441c-9592-3396ec0b209c"
     }
   ],
   "r2_buckets": [
