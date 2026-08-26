@@ -1,7 +1,11 @@
 const reports = document.querySelector("#reports");
 const adminStatus = document.querySelector("#admin-status");
-const filters = document.querySelector("#status-filters");
-let activeStatus = "new";
+const viewFilters = document.querySelector("#review-views");
+const communityFilters = document.querySelector("#status-filters");
+const automationFilters = document.querySelector("#automation-status-filters");
+let activeView = "community";
+let activeCommunityStatus = "new";
+let activeAutomationStatus = "new";
 
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 const dateTime = value => value ? new Intl.DateTimeFormat("pt-PT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(`${value.replace(" ", "T")}Z`)) : "—";
@@ -34,11 +38,33 @@ function reportCard(item) {
   </article>`;
 }
 
+function automationCard(item) {
+  const isLink = item.category === "link";
+  const result = item.result ? `<span class="automation-result">Resultado automático: ${escapeHtml(item.result)}</span>` : "";
+  return `<article class="report automation-report" data-id="${escapeHtml(item.id)}">
+    <div class="report-meta"><span class="kind">${isLink ? "Link para confirmar" : "Fonte a explorar"}</span><time>Visto: ${dateTime(item.last_seen_at)}</time></div>
+    <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.detail || "Requer confirmação manual.")}</p></div></div>
+    <dl><div><dt>${isLink ? "Página ou bilheteira" : "Fonte"}</dt><dd><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Abrir e confirmar ↗</a></dd></div><div><dt>Sinal</dt><dd>${result || "Sem resultado"}</dd></div></dl>
+    <p class="automation-note">Este sinal foi criado por uma ronda automática. Confirma a página diretamente antes de alterar ou publicar qualquer evento.</p>
+    <details class="automation-editor"><summary>Editar proposta</summary>
+      <p>Esta proposta fica guardada aqui até decidires. Só deves aceitar depois de confirmares uma fonte oficial.</p>
+      <label><span>${isLink ? "Evento" : "Nome da fonte"}</span><input name="proposalTitle" maxlength="240" value="${escapeHtml(item.proposal_title || item.title)}" /></label>
+      <label><span>${isLink ? "Link confirmado / substituto" : "Página a consultar"}</span><input name="proposalUrl" type="url" maxlength="1600" value="${escapeHtml(item.proposal_url || item.url)}" /></label>
+      <label><span>Nota da revisão</span><textarea name="editorNote" maxlength="1500" placeholder="O que confirmaste? Que alteração deve ser feita?">${escapeHtml(item.editor_note || "")}</textarea></label>
+    </details>
+    <div class="report-actions">
+      <button type="button" data-automation-status="reviewing">Guardar / em análise</button>
+      <button type="button" data-automation-status="resolved"${isLink ? " data-apply-to-agenda=\"true\"" : ""}>${isLink ? "Aceitar e aplicar à agenda" : "Aceitar após confirmar"}</button>
+      <button type="button" data-automation-status="ignored" class="secondary">Recusar</button>
+    </div>
+  </article>`;
+}
+
 async function loadReports() {
   adminStatus.textContent = "A carregar pedidos…";
   reports.innerHTML = "";
   try {
-    const response = await fetch(`/api/admin/feedback?status=${encodeURIComponent(activeStatus)}`, { headers: { Accept: "application/json" } });
+    const response = await fetch(`/api/admin/feedback?status=${encodeURIComponent(activeCommunityStatus)}`, { headers: { Accept: "application/json" } });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar os pedidos.");
     if (!Array.isArray(result.items)) {
@@ -51,15 +77,80 @@ async function loadReports() {
   }
 }
 
-filters.addEventListener("click", event => {
+async function loadAutomationReviews() {
+  adminStatus.textContent = "A carregar revisão automática…";
+  reports.innerHTML = "";
+  try {
+    const response = await fetch(`/api/admin/automation-reviews?status=${encodeURIComponent(activeAutomationStatus)}`, { headers: { Accept: "application/json" } });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível carregar a revisão automática.");
+    if (!Array.isArray(result.items)) throw new Error("A revisão automática ainda não está configurada.");
+    reports.innerHTML = result.items.length ? result.items.map(automationCard).join("") : "<p class=\"empty-state\">Não há sinais neste estado.</p>";
+    adminStatus.textContent = result.items.length ? `${result.items.length} sinal${result.items.length === 1 ? "" : "is"} para rever.` : "";
+  } catch (error) {
+    adminStatus.textContent = error.message || "Não foi possível carregar a revisão automática.";
+  }
+}
+
+function loadActiveView() {
+  return activeView === "automation" ? loadAutomationReviews() : loadReports();
+}
+
+communityFilters.addEventListener("click", event => {
   const button = event.target.closest("[data-status]");
   if (!button) return;
-  activeStatus = button.dataset.status;
-  filters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  activeCommunityStatus = button.dataset.status;
+  communityFilters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
   loadReports();
 });
 
+automationFilters.addEventListener("click", event => {
+  const button = event.target.closest("[data-status]");
+  if (!button) return;
+  activeAutomationStatus = button.dataset.status;
+  automationFilters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  loadAutomationReviews();
+});
+
+viewFilters.addEventListener("click", event => {
+  const button = event.target.closest("[data-view]");
+  if (!button) return;
+  activeView = button.dataset.view;
+  viewFilters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  communityFilters.hidden = activeView !== "community";
+  automationFilters.hidden = activeView !== "automation";
+  loadActiveView();
+});
+
 reports.addEventListener("click", async event => {
+  const automationButton = event.target.closest("[data-automation-status]");
+  if (automationButton) {
+    const card = automationButton.closest(".report");
+    const buttons = card.querySelectorAll("button");
+    buttons.forEach(item => { item.disabled = true; });
+    try {
+      const response = await fetch("/api/admin/automation-reviews", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          id: card.dataset.id,
+          status: automationButton.dataset.automationStatus,
+          applyToAgenda: automationButton.dataset.applyToAgenda === "true",
+          proposalTitle: card.querySelector('[name="proposalTitle"]')?.value,
+          proposalUrl: card.querySelector('[name="proposalUrl"]')?.value,
+          editorNote: card.querySelector('[name="editorNote"]')?.value
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "Não foi possível atualizar o sinal.");
+      adminStatus.textContent = "Sinal atualizado.";
+      loadAutomationReviews();
+    } catch (error) {
+      adminStatus.textContent = error.message || "Não foi possível atualizar o sinal.";
+      buttons.forEach(item => { item.disabled = false; });
+    }
+    return;
+  }
   const button = event.target.closest("[data-next-status]");
   if (!button) return;
   const card = button.closest(".report");
@@ -89,5 +180,5 @@ reports.addEventListener("click", async event => {
   }
 });
 
-document.querySelector("#refresh").addEventListener("click", loadReports);
-loadReports();
+document.querySelector("#refresh").addEventListener("click", loadActiveView);
+loadActiveView();

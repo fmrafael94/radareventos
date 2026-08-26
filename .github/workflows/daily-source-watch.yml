@@ -19,6 +19,16 @@ jobs:
           node-version: 22
       - name: Fazer ronda das fontes conhecidas
         run: node scripts/watch-sources.mjs --limit=30
+      - name: Enviar fontes a explorar para o admin
+        if: ${{ secrets.DESVIO_AUDIT_INGEST_URL != '' && secrets.DESVIO_AUDIT_INGEST_TOKEN != '' }}
+        env:
+          AUDIT_INGEST_URL: ${{ secrets.DESVIO_AUDIT_INGEST_URL }}
+          AUDIT_INGEST_TOKEN: ${{ secrets.DESVIO_AUDIT_INGEST_TOKEN }}
+        run: |
+          curl --fail --silent --show-error --request POST "$AUDIT_INGEST_URL" \
+            --header "Authorization: Bearer $AUDIT_INGEST_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data-binary "{\"kind\":\"source_watch\",\"report\":$(cat reports/source-watch.json)}"
       - name: Guardar fila de pesquisa
         uses: actions/upload-artifact@v4
         with:

@@ -55,7 +55,6 @@ window.SOURCE_GROUPS = [
     ["Time Out Lisboa","Editorial","https://www.timeout.pt/lisboa/pt/musica"], ["Noite e Música","Editorial","https://www.noitemusicamagazine.pt/agenda"],
     ["Arte Sonora","Editorial","https://artesonora.pt/"], ["Noise Culture","Editorial","https://noiseculture.pt/"],
     ["MIC.PT","Música portuguesa","https://mic.pt/agenda"], ["Agenda Porto","Comunitária","https://www.agenda-porto.pt/"],
-    ["r/porto","Comunidade","https://www.reddit.com/r/porto/"], ["r/MetalPortugal","Comunidade","https://www.reddit.com/r/MetalPortugal/"],
     ["Música Sem Capa","Instagram","https://www.instagram.com/musicasemcapa/"], ["Ferro Bar","Instagram","https://www.instagram.com/ferrobar/"],
     ["Moshpit","Metal, punk e pesado","https://moshpit.pt/"], ["Rimas e Batidas","Hip-Hop e eletrónica","https://www.rimasebatidas.pt/"],
     ["BLITZ","Música e anúncios","https://blitz.pt/"], ["Gerador","Cultura e eventos","https://gerador.eu/"], ["Wherever","Lisboa e Porto","https://wherever.pt/"]

@@ -20,6 +20,13 @@ export function ensureEventStore(db) {
         updated_at TEXT NOT NULL
       )`),
       db.prepare("CREATE INDEX IF NOT EXISTS event_registry_audit_due ON event_registry(publication_status, next_audit_at)"),
+      db.prepare(`CREATE TABLE IF NOT EXISTS event_overrides (
+        event_id TEXT PRIMARY KEY,
+        patch_json TEXT NOT NULL,
+        source_url TEXT,
+        verified_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`),
       db.prepare(`CREATE TABLE IF NOT EXISTS event_audits (
         id TEXT PRIMARY KEY,
         event_id TEXT NOT NULL,
