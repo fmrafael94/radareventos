@@ -1196,3 +1196,36 @@ renderSources();
 renderFeatured();
 render();
 configureTurnstile();
+
+// Community suggestions only arrive here after the private review area has
+// confirmed a direct official source. The bundled list remains the fast,
+// free-to-serve catalogue; D1 adds newly approved records without exposing a
+// raw public submission.
+async function loadApprovedCloudflareEvents() {
+  try {
+    const response = await fetch("/api/events", { headers: { Accept: "application/json" } });
+    if (!response.ok) return;
+    const result = await response.json();
+    if (!Array.isArray(result.items)) return;
+    const known = new Set(EVENTS.map(event => event.id));
+    const additions = result.items.filter(event => event && event.id && event.title && event.date && event.sourceUrl && !known.has(event.id));
+    if (!additions.length) return;
+    additions.forEach(event => {
+      event.type = event.type || "Concerto";
+      event.genres = Array.isArray(event.genres) && event.genres.length ? event.genres : ["Outro"];
+      event.area = event.area || "A confirmar";
+      event.district = event.district || "A confirmar";
+      event.city = event.city || "A confirmar";
+      EVENTS.push(event);
+    });
+    genreMultiFilter.refresh(EVENTS.flatMap(event => event.genres));
+    typeMultiFilter.refresh(EVENTS.map(eventType));
+    refreshLocationOptions();
+    renderFeatured();
+    render();
+  } catch {
+    // The static agenda is intentionally a complete offline-safe fallback.
+  }
+}
+
+loadApprovedCloudflareEvents();

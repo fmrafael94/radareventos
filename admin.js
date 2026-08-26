@@ -23,10 +23,11 @@ function reportCard(item) {
       <div><dt>Contacto</dt><dd>${escapeHtml(item.sender_name || "Anónimo")}${item.sender_email ? ` · <a href="mailto:${escapeHtml(item.sender_email)}">${escapeHtml(item.sender_email)}</a>` : ""}</dd></div>
       ${item.poster_file_name ? `<div><dt>Ficheiro enviado</dt><dd>${escapeHtml(item.poster_file_name)}</dd></div>` : ""}
     </dl>
+    ${item.kind === "suggestion" ? `<fieldset class="event-review-fields"><legend>Dados para publicação</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${escapeHtml(item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${escapeHtml(item.event_date || "")}" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${escapeHtml(item.city || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${escapeHtml(item.official_url || "")}" /></label></fieldset>` : ""}
     <label class="staff-note"><span>Nota privada</span><textarea maxlength="1500" placeholder="O que verificaste ou o que falta confirmar?">${escapeHtml(item.staff_note || "")}</textarea></label>
     <div class="report-actions">
       <button type="button" data-next-status="reviewing">Em análise</button>
-      <button type="button" data-next-status="published">Marcar publicado</button>
+      <button type="button" data-next-status="published">${item.kind === "suggestion" ? "Publicar após confirmar" : "Concluir correção"}</button>
       <button type="button" data-next-status="rejected" class="reject">Rejeitar</button>
       <button type="button" data-next-status="closed" class="secondary">Fechar</button>
     </div>
@@ -68,7 +69,15 @@ reports.addEventListener("click", async event => {
     const response = await fetch("/api/admin/feedback", {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ id: card.dataset.id, status: button.dataset.nextStatus, staffNote: card.querySelector("textarea").value })
+      body: JSON.stringify({
+        id: card.dataset.id,
+        status: button.dataset.nextStatus,
+        staffNote: card.querySelector("textarea").value,
+        eventName: card.querySelector('[name="eventName"]')?.value,
+        eventDate: card.querySelector('[name="eventDate"]')?.value,
+        city: card.querySelector('[name="city"]')?.value,
+        officialUrl: card.querySelector('[name="officialUrl"]')?.value
+      })
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível atualizar o pedido.");
