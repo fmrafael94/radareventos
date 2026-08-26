@@ -21,10 +21,10 @@ jobs:
       - name: Verificar todas as páginas oficiais e bilheteiras diretas
         run: node scripts/audit-official-links.mjs --mode=two-hour
       - name: Enviar itens que precisam de revisão para o admin
-        if: ${{ secrets.DESVIO_AUDIT_INGEST_URL != '' && secrets.DESVIO_AUDIT_INGEST_TOKEN != '' }}
         env:
           AUDIT_INGEST_URL: ${{ secrets.DESVIO_AUDIT_INGEST_URL }}
           AUDIT_INGEST_TOKEN: ${{ secrets.DESVIO_AUDIT_INGEST_TOKEN }}
+        if: ${{ env.AUDIT_INGEST_URL != '' && env.AUDIT_INGEST_TOKEN != '' }}
         run: |
           curl --fail --silent --show-error --request POST "$AUDIT_INGEST_URL" \
             --header "Authorization: Bearer $AUDIT_INGEST_TOKEN" \
