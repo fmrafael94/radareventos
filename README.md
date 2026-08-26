@@ -39,3 +39,20 @@ The footer links to Terms, Privacy and Cookie policies. Before publishing the fo
 Every listing should show a source and verification date. Never estimate the percentage of tickets sold. Use only an organiser-provided number; otherwise use `Não divulgado`, `Disponível`, `Esgotado`, or `Cancelado`.
 
 The same direct-page rule applies to ticket links: an agenda or homepage is a source, not a ticket button. Recheck each event page and each ticket page before publishing an update, including availability and sold-out status.
+
+## Revisão automática no admin
+
+As duas GitHub Actions produzem uma fila de trabalho privada, sem publicar ou alterar eventos sozinhas:
+
+- de 2 em 2 horas, `Verificação de links oficiais` confirma se as páginas oficiais e bilheteiras diretas respondem;
+- diariamente, `Ronda diária de fontes` coloca fontes a explorar na fila.
+
+Para fazer os resultados aparecerem em `admin.html`:
+
+1. No Worker do Cloudflare, cria o secret `AUDIT_INGEST_TOKEN` com uma palavra-passe longa e aleatória.
+2. No repositório GitHub, abre **Settings → Secrets and variables → Actions** e cria estes dois secrets:
+   - `DESVIO_AUDIT_INGEST_URL`: `https://radareventos.fmrafael94.workers.dev/api/internal/audit-report` (substitui pelo domínio `https://odesvio.pt/api/internal/audit-report` quando estiver ativo);
+   - `DESVIO_AUDIT_INGEST_TOKEN`: exatamente a mesma palavra-passe do Worker.
+3. Executa cada workflow uma vez manualmente. Os sinais entram em **Revisão automática** no admin.
+
+Um resultado `403` ou `429` pode significar uma proteção anti-bot da plataforma, e não uma página avariada. A fila serve para decidir manualmente: *em análise*, *resolvido* ou *ignorado*.

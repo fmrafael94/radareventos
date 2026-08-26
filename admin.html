@@ -19,14 +19,24 @@
       <section class="admin-intro">
         <p class="eyebrow">Moderação</p>
         <h1>Pedidos para rever.</h1>
-        <p>As sugestões, correções e cartazes ficam aqui até confirmares a fonte oficial e atualizares a agenda.</p>
+        <p>Centraliza sugestões de utilizadores e sinais encontrados pelas rondas automáticas. Nada entra na agenda sem confirmação humana e uma fonte oficial.</p>
       </section>
-      <nav id="status-filters" class="status-filters" aria-label="Filtrar pedidos">
+      <nav id="review-views" class="review-views" aria-label="Escolher tipo de revisão">
+        <button type="button" data-view="community" aria-pressed="true">Utilizadores</button>
+        <button type="button" data-view="automation" aria-pressed="false">Revisão automática</button>
+      </nav>
+      <nav id="status-filters" class="status-filters" aria-label="Filtrar pedidos de utilizadores">
         <button type="button" data-status="new" aria-pressed="true">Novos</button>
         <button type="button" data-status="reviewing" aria-pressed="false">Em análise</button>
         <button type="button" data-status="published" aria-pressed="false">Publicados</button>
         <button type="button" data-status="rejected" aria-pressed="false">Rejeitados</button>
         <button type="button" data-status="closed" aria-pressed="false">Fechados</button>
+      </nav>
+      <nav id="automation-status-filters" class="status-filters" aria-label="Filtrar revisão automática" hidden>
+        <button type="button" data-status="new" aria-pressed="true">Por rever</button>
+        <button type="button" data-status="reviewing" aria-pressed="false">Em análise</button>
+        <button type="button" data-status="resolved" aria-pressed="false">Resolvidos</button>
+        <button type="button" data-status="ignored" aria-pressed="false">Ignorados</button>
       </nav>
       <p id="admin-status" class="admin-status" role="status" aria-live="polite"></p>
       <section id="reports" class="reports" aria-live="polite"></section>
