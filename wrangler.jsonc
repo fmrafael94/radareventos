@@ -4,6 +4,9 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-08-25",
   "keep_vars": true,
+  "vars": {
+    "TURNSTILE_SITEKEY": "0x4AAAAAAEb5SRCl-A_PcNBx"
+  },
   "d1_databases": [
     {
       "binding": "EVENT_RADAR_DB",
