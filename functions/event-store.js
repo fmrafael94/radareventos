@@ -5,8 +5,8 @@ let schemaReady;
 // Worker instance; every statement is idempotent, so a fresh deployment is safe.
 export function ensureEventStore(db) {
   if (!schemaReady) {
-    schemaReady = db.exec(`
-      CREATE TABLE IF NOT EXISTS event_registry (
+    schemaReady = db.batch([
+      db.prepare(`CREATE TABLE IF NOT EXISTS event_registry (
         id TEXT PRIMARY KEY,
         payload_json TEXT NOT NULL,
         origin_kind TEXT NOT NULL CHECK (origin_kind IN ('official_source')),
@@ -18,9 +18,9 @@ export function ensureEventStore(db) {
         next_audit_at TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS event_registry_audit_due ON event_registry(publication_status, next_audit_at);
-      CREATE TABLE IF NOT EXISTS event_audits (
+      )`),
+      db.prepare("CREATE INDEX IF NOT EXISTS event_registry_audit_due ON event_registry(publication_status, next_audit_at)"),
+      db.prepare(`CREATE TABLE IF NOT EXISTS event_audits (
         id TEXT PRIMARY KEY,
         event_id TEXT NOT NULL,
         checked_url TEXT NOT NULL,
@@ -28,16 +28,16 @@ export function ensureEventStore(db) {
         outcome TEXT NOT NULL CHECK (outcome IN ('reachable', 'unreachable', 'error')),
         http_status INTEGER,
         created_at TEXT NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS event_audits_event_created ON event_audits(event_id, created_at DESC);
-      CREATE TABLE IF NOT EXISTS automation_runs (
+      )`),
+      db.prepare("CREATE INDEX IF NOT EXISTS event_audits_event_created ON event_audits(event_id, created_at DESC)"),
+      db.prepare(`CREATE TABLE IF NOT EXISTS automation_runs (
         id TEXT PRIMARY KEY,
         kind TEXT NOT NULL,
         outcome TEXT NOT NULL,
         checked_count INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL
-      );
-    `).catch(error => {
+      )`)
+    ]).catch(error => {
       schemaReady = undefined;
       throw error;
     });
