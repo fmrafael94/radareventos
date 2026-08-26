@@ -3,6 +3,19 @@
   "name": "radareventos",
   "main": "src/worker.js",
   "compatibility_date": "2026-08-25",
+  "d1_databases": [
+    {
+      "binding": "EVENT_RADAR_DB",
+      "database_name": "event-radar-feedback",
+      "database_id": "6b5ab17f-3f75-4112-a418-2d4d2be7b70e"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "EVENT_POSTERS",
+      "bucket_name": "event-radar-posters"
+    }
+  ],
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
