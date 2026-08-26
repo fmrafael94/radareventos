@@ -368,16 +368,19 @@ html,body { overflow-x:clip; }
 .featured-poster,
 .event-art.poster-trigger,
 .festival-slot-art.poster-trigger {
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
+  display:grid!important;
+  place-items:center!important;
+  box-sizing:border-box;
+  padding:0!important;
+  text-align:center!important;
   overflow:hidden;
 }
 .featured-poster img,
 .event-art.poster-trigger img,
 .festival-slot-art.poster-trigger img {
   display:block;
-  flex:0 0 auto;
+  grid-area:1 / 1;
+  place-self:center!important;
   width:auto!important;
   height:auto!important;
   max-width:88%!important;
@@ -385,6 +388,8 @@ html,body { overflow-x:clip; }
   object-fit:contain!important;
   object-position:center center!important;
   margin:auto!important;
+  transform:none!important;
+  translate:none!important;
   border-radius:3px;
 }
 
