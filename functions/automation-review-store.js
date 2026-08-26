@@ -15,6 +15,9 @@ export function ensureAutomationReviewStore(db) {
         detail TEXT,
         url TEXT NOT NULL,
         result TEXT,
+        proposal_title TEXT,
+        proposal_url TEXT,
+        editor_note TEXT,
         status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'resolved', 'ignored')),
         first_seen_at TEXT NOT NULL,
         last_seen_at TEXT NOT NULL,
@@ -49,8 +52,9 @@ async function upsert(db, item) {
   await db.prepare(`
     INSERT INTO automation_reviews (
       id, dedupe_key, category, event_id, title, detail, url, result,
+      proposal_title, proposal_url,
       status, first_seen_at, last_seen_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'), datetime('now'))
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'), datetime('now'))
     ON CONFLICT(dedupe_key) DO UPDATE SET
       event_id = excluded.event_id,
       title = excluded.title,
@@ -65,7 +69,7 @@ async function upsert(db, item) {
       resolved_at = NULL
   `).bind(
     id, item.key, item.category, item.eventId || null, item.title,
-    item.detail || null, item.url, item.result || null
+    item.detail || null, item.url, item.result || null, item.title, item.url
   ).run();
 }
 

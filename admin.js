@@ -46,10 +46,16 @@ function automationCard(item) {
     <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.detail || "Requer confirmação manual.")}</p></div></div>
     <dl><div><dt>${isLink ? "Página ou bilheteira" : "Fonte"}</dt><dd><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Abrir e confirmar ↗</a></dd></div><div><dt>Sinal</dt><dd>${result || "Sem resultado"}</dd></div></dl>
     <p class="automation-note">Este sinal foi criado por uma ronda automática. Confirma a página diretamente antes de alterar ou publicar qualquer evento.</p>
+    <details class="automation-editor"><summary>Editar proposta</summary>
+      <p>Esta proposta fica guardada aqui até decidires. Só deves aceitar depois de confirmares uma fonte oficial.</p>
+      <label><span>${isLink ? "Evento" : "Nome da fonte"}</span><input name="proposalTitle" maxlength="240" value="${escapeHtml(item.proposal_title || item.title)}" /></label>
+      <label><span>${isLink ? "Link confirmado / substituto" : "Página a consultar"}</span><input name="proposalUrl" type="url" maxlength="1600" value="${escapeHtml(item.proposal_url || item.url)}" /></label>
+      <label><span>Nota da revisão</span><textarea name="editorNote" maxlength="1500" placeholder="O que confirmaste? Que alteração deve ser feita?">${escapeHtml(item.editor_note || "")}</textarea></label>
+    </details>
     <div class="report-actions">
-      <button type="button" data-automation-status="reviewing">Em análise</button>
-      <button type="button" data-automation-status="resolved">Resolvido</button>
-      <button type="button" data-automation-status="ignored" class="secondary">Ignorar</button>
+      <button type="button" data-automation-status="reviewing">Guardar / em análise</button>
+      <button type="button" data-automation-status="resolved">Aceitar após confirmar</button>
+      <button type="button" data-automation-status="ignored" class="secondary">Recusar</button>
     </div>
   </article>`;
 }
@@ -126,7 +132,13 @@ reports.addEventListener("click", async event => {
       const response = await fetch("/api/admin/automation-reviews", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ id: card.dataset.id, status: automationButton.dataset.automationStatus })
+        body: JSON.stringify({
+          id: card.dataset.id,
+          status: automationButton.dataset.automationStatus,
+          proposalTitle: card.querySelector('[name="proposalTitle"]')?.value,
+          proposalUrl: card.querySelector('[name="proposalUrl"]')?.value,
+          editorNote: card.querySelector('[name="editorNote"]')?.value
+        })
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "Não foi possível atualizar o sinal.");
