@@ -131,6 +131,7 @@
         <p class="kicker">Contribuir para a agenda</p>
         <h2 id="feedback-title">Sugerir um evento.</h2>
         <p id="feedback-context">Partilha um link oficial. A sugestão será sempre revista antes de aparecer na agenda.</p>
+        <p id="feedback-draft-note" class="feedback-draft-note" hidden></p>
       </div>
       <form id="feedback-form" novalidate>
         <input id="feedback-kind" name="kind" type="hidden" value="suggestion" />
@@ -154,7 +155,7 @@
             <label><span>Enviar imagem</span><input name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG ou WebP · otimizada automaticamente para até 2 MB</small></label>
           </div>
         </fieldset>
-        <label><span id="feedback-message-label">O que devemos adicionar?</span><textarea name="message" rows="4" maxlength="2500" required placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante."></textarea></label>
+        <label><span id="feedback-message-label">O que devemos adicionar? <small>opcional se enviares um link ou cartaz</small></span><textarea name="message" rows="4" maxlength="2500" placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante."></textarea></label>
         <label class="feedback-consent"><input name="privacyAcknowledged" type="checkbox" required /><span>Li a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e compreendo que estes dados serão usados apenas para analisar este pedido.</span></label>
         <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>
         <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>

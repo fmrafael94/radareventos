@@ -39,8 +39,10 @@ const feedbackMessageLabel = document.querySelector("#feedback-message-label");
 const feedbackStatus = document.querySelector("#feedback-status");
 const feedbackSubmit = document.querySelector("#feedback-submit");
 const turnstileWrap = document.querySelector("#turnstile-wrap");
+const feedbackDraftNote = document.querySelector("#feedback-draft-note");
 const maxPosterUploadBytes = 2 * 1024 * 1024;
 const maxPosterDimension = 2400;
+const feedbackDraftPrefix = "desvio-feedback-draft:";
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -988,21 +990,89 @@ posterLightbox.querySelector(".poster-lightbox-close").addEventListener("click",
 
 function setFeedbackMode(kind, eventId = "", eventTitle = "") {
   const correction = kind === "correction";
-  feedbackForm.reset();
+  const context = `${correction ? "correction" : "suggestion"}:${eventId}`;
+  const contextChanged = feedbackForm.dataset.draftContext !== context;
+  if (contextChanged) feedbackForm.reset();
   feedbackKind.value = correction ? "correction" : "suggestion";
   feedbackEventId.value = eventId;
   feedbackEventTitle.value = eventTitle;
-  feedbackEventName.value = eventTitle;
+  if (contextChanged || correction) feedbackEventName.value = eventTitle;
   feedbackEventName.readOnly = correction;
   feedbackEventField.hidden = correction;
   feedbackTitle.textContent = correction ? "Corrigir esta informação." : "Sugerir um evento.";
   feedbackContext.textContent = correction
     ? `Vais corrigir: ${eventTitle}. Indica o que mudou e, se possível, deixa o link oficial ou o cartaz que o confirma.`
-    : "Partilha um link oficial e, se o tiveres, o cartaz oficial. A sugestão será sempre revista antes de aparecer na agenda.";
-  feedbackMessageLabel.textContent = correction ? "O que está errado ou desatualizado?" : "O que devemos adicionar?";
+    : "Podes enviar apenas o cartaz ou acrescentar o que souberes. A sugestão será sempre revista antes de aparecer na agenda.";
+  feedbackMessageLabel.innerHTML = correction
+    ? "O que está errado ou desatualizado? <small>opcional se enviares um link ou cartaz</small>"
+    : "O que devemos adicionar? <small>opcional se enviares um link ou cartaz</small>";
+  feedbackForm.dataset.draftContext = context;
+  if (contextChanged) restoreFeedbackDraft();
+  refreshFeedbackDraftNote();
   feedbackStatus.textContent = "";
   feedbackSubmit.disabled = false;
   feedbackSubmit.innerHTML = "Enviar para revisão <span>↗</span>";
+}
+
+function feedbackDraftKey() {
+  return `${feedbackDraftPrefix}${feedbackForm.dataset.draftContext || "suggestion:"}`;
+}
+
+function feedbackHasContent() {
+  const fieldNames = ["name", "email", "eventName", "eventDate", "city", "officialUrl", "posterUrl", "message"];
+  const hasText = fieldNames.some(name => String(feedbackForm.elements[name]?.value || "").trim());
+  const hasPoster = feedbackForm.elements.posterFile?.files?.length > 0;
+  const hasConsent = Boolean(feedbackForm.elements.privacyAcknowledged?.checked);
+  return hasText || hasPoster || hasConsent;
+}
+
+function refreshFeedbackDraftNote() {
+  const hasDraft = feedbackHasContent() || Boolean(localStorage.getItem(feedbackDraftKey()));
+  feedbackDraftNote.hidden = !hasDraft;
+  if (hasDraft) feedbackDraftNote.textContent = "Rascunho guardado só neste dispositivo. Podes fechar e continuar mais tarde.";
+}
+
+function saveFeedbackDraft() {
+  if (!feedbackForm.dataset.draftContext || !feedbackHasContent()) {
+    if (feedbackForm.dataset.draftContext) localStorage.removeItem(feedbackDraftKey());
+    refreshFeedbackDraftNote();
+    return;
+  }
+  const fields = ["name", "email", "eventName", "eventDate", "city", "officialUrl", "posterUrl", "message"];
+  const values = Object.fromEntries(fields.map(name => [name, feedbackForm.elements[name]?.value || ""]));
+  values.privacyAcknowledged = Boolean(feedbackForm.elements.privacyAcknowledged?.checked);
+  try {
+    localStorage.setItem(feedbackDraftKey(), JSON.stringify(values));
+  } catch {
+    // A full or private browser storage should never block a contribution.
+  }
+  refreshFeedbackDraftNote();
+}
+
+function restoreFeedbackDraft() {
+  let values;
+  try {
+    values = JSON.parse(localStorage.getItem(feedbackDraftKey()) || "null");
+  } catch {
+    values = null;
+  }
+  if (!values || typeof values !== "object") return;
+  Object.entries(values).forEach(([name, value]) => {
+    const field = feedbackForm.elements[name];
+    if (!field) return;
+    if (name === "privacyAcknowledged") field.checked = Boolean(value);
+    else if (!(field.readOnly && field.value)) field.value = String(value || "");
+  });
+}
+
+function discardFeedbackDraft() {
+  try { localStorage.removeItem(feedbackDraftKey()); } catch {}
+}
+
+function requestFeedbackClose() {
+  if (feedbackHasContent() && !window.confirm("O teu rascunho fica guardado neste dispositivo. Queres fechar o formulário?")) return;
+  saveFeedbackDraft();
+  feedbackDialog.close();
 }
 
 function openFeedback(button) {
@@ -1077,10 +1147,14 @@ document.addEventListener("click", event => {
   const trigger = event.target.closest(".feedback-open");
   if (trigger) openFeedback(trigger);
 });
-document.querySelector("#feedback-close").addEventListener("click", () => feedbackDialog.close());
-feedbackDialog.addEventListener("click", event => {
-  if (event.target === feedbackDialog) feedbackDialog.close();
+document.querySelector("#feedback-close").addEventListener("click", requestFeedbackClose);
+feedbackDialog.addEventListener("cancel", event => {
+  if (!feedbackHasContent()) return;
+  event.preventDefault();
+  requestFeedbackClose();
 });
+feedbackForm.addEventListener("input", saveFeedbackDraft);
+feedbackForm.addEventListener("change", saveFeedbackDraft);
 feedbackForm.addEventListener("submit", async event => {
   event.preventDefault();
   if (!feedbackForm.reportValidity()) return;
@@ -1107,7 +1181,9 @@ feedbackForm.addEventListener("submit", async event => {
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
     feedbackStatus.textContent = "Recebido. Obrigado por ajudares a manter a agenda certa.";
+    discardFeedbackDraft();
     feedbackForm.reset();
+    refreshFeedbackDraftNote();
     feedbackSubmit.textContent = "Enviado ✓";
   } catch (error) {
     feedbackStatus.textContent = error.message || "Não foi possível enviar agora. Tenta novamente mais tarde.";

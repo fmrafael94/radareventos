@@ -326,3 +326,49 @@ html,body { overflow-x:clip; }
 .featured-copy a { pointer-events:auto; }
 .submit-link span { display:inline; margin-left:3px; font:400 1.1em/1 Arial,sans-serif; vertical-align:-.03em; }
 .submit-link span::before,.submit-link span::after { content:none; }
+
+/* Posters keep their original artwork visible while a softened version of the
+   same image fills the frame. This removes the hard empty bands left by very
+   wide or vertical official artwork without cropping the actual poster. */
+.featured-poster,
+.poster-trigger {
+  isolation:isolate;
+  background:var(--poster-image) center/cover no-repeat!important;
+}
+.featured-poster::before,
+.poster-trigger::before {
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:-28px;
+  background:var(--poster-image) center/cover no-repeat;
+  filter:blur(22px) saturate(.9) brightness(.72);
+  opacity:.92;
+  transform:scale(1.08);
+}
+.featured-poster::after,
+.poster-trigger::after {
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(18,23,20,.16));
+  pointer-events:none;
+}
+.featured-poster img,
+.poster-trigger img {
+  position:relative;
+  z-index:1;
+  background:transparent!important;
+  filter:drop-shadow(0 8px 16px rgba(16,20,17,.3));
+}
+
+.feedback-draft-note {
+  margin:12px 0 0;
+  padding:8px 10px;
+  border-left:2px solid #78965b;
+  border-radius:0 7px 7px 0;
+  color:#51604f;
+  background:rgba(224,235,205,.62);
+  font:500 10px/1.45 "DM Sans",Arial,sans-serif;
+}

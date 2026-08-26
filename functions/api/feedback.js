@@ -45,15 +45,21 @@ export async function onRequestPost(context) {
 
   const kind = field("kind", 20) === "correction" ? "correction" : "suggestion";
   const eventName = field("eventName", 180) || field("eventTitle", 180);
-  const message = field("message", 2500);
+  const submittedMessage = field("message", 2500);
   const email = field("email", 254).toLowerCase();
   const officialUrl = validUrl(field("officialUrl", 1000));
   const posterUrl = validUrl(field("posterUrl", 1000));
   const eventDate = field("eventDate", 10);
   const city = field("city", 100);
 
-  if (!message || (!eventName && kind === "suggestion")) {
-    return json({ message: "Indica o evento e a informação que devemos rever." }, 400);
+  const posterFile = value("posterFile");
+  const hasPosterFile = posterFile && typeof posterFile !== "string" && posterFile.size > 0;
+  const hasContribution = Boolean(submittedMessage || eventName || officialUrl || posterUrl || hasPosterFile);
+  if (!hasContribution) {
+    return json({ message: "Escreve uma nota, deixa um link ou envia um cartaz para revisão." }, 400);
+  }
+  if (value("privacyAcknowledged") !== "on") {
+    return json({ message: "Confirma que leste a Política de Privacidade." }, 400);
   }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return json({ message: "Confirma o endereço de email." }, 400);
@@ -69,7 +75,6 @@ export async function onRequestPost(context) {
   }
   if (!verified) return json({ message: "Confirma a verificação anti-spam e tenta novamente." }, 400);
 
-  const posterFile = value("posterFile");
   let posterObjectKey = "";
   let posterFileName = "";
   if (posterFile && typeof posterFile !== "string" && posterFile.size > 0) {
@@ -88,6 +93,13 @@ export async function onRequestPost(context) {
     });
   }
 
+  const message = submittedMessage || (hasPosterFile
+    ? "Cartaz oficial enviado para revisão."
+    : posterUrl
+      ? "Link de cartaz enviado para revisão."
+      : officialUrl
+        ? "Link oficial enviado para revisão."
+        : "Sugestão enviada para revisão.");
   const id = crypto.randomUUID();
   await context.env.EVENT_RADAR_DB.prepare(`
     INSERT INTO feedback (
