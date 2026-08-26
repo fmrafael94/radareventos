@@ -1,0 +1,27 @@
+name: Ronda diária de fontes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "37 8 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fazer ronda das fontes conhecidas
+        run: node scripts/watch-sources.mjs --limit=30
+      - name: Guardar fila de pesquisa
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-source-watch
+          path: reports/source-watch.json
+          retention-days: 14
