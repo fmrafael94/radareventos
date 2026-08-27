@@ -224,6 +224,8 @@ footer nav a { color:var(--muted); font:500 9px "DM Mono",monospace; text-decora
 .feedback-type-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 .feedback-type-choice { display:grid; gap:5px; min-height:118px; padding:15px; border:1px solid #c8cec5; border-radius:9px; color:#36533c; background:#f1f4ea; text-align:left; cursor:pointer; transition:transform .15s,background .15s,border-color .15s; }
 .feedback-type-choice:hover,.feedback-type-choice:focus-visible { border-color:#5d874f; background:#e4eed9; outline:0; transform:translateY(-2px); }
+.feedback-type-choice[aria-pressed="true"] { border-color:#315e3c; color:#fffefa; background:#315e3c; box-shadow:0 5px 11px rgba(49,94,60,.14); }
+.feedback-type-choice[aria-pressed="true"] small { color:#d9e5d9; }
 .feedback-type-choice b { font:700 16px/1.05 "Space Grotesk",sans-serif; letter-spacing:-.045em; }
 .feedback-type-choice small { color:#647167; font:500 11px/1.45 "DM Sans",Arial,sans-serif; }
 #feedback-fields { display:grid; gap:14px; }
