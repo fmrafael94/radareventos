@@ -54,6 +54,7 @@ export async function onRequestPost(context) {
 
   const posterFile = value("posterFile");
   const hasPosterFile = posterFile && typeof posterFile !== "string" && posterFile.size > 0;
+  const senderName = field("name", 80);
   const hasContribution = Boolean(submittedMessage || eventName || officialUrl || posterUrl || hasPosterFile);
   if (!hasContribution) {
     return json({ message: "Escreve uma nota, deixa um link ou envia um cartaz para revisão." }, 400);
@@ -63,6 +64,14 @@ export async function onRequestPost(context) {
   }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return json({ message: "Confirma o endereço de email." }, 400);
+  }
+  if (kind === "suggestion") {
+    if (!senderName || !email || !eventName || !eventDate || !city || !officialUrl || !submittedMessage) {
+      return json({ message: "Preenche todos os campos obrigatórios para sugerir um evento." }, 400);
+    }
+    if (!posterUrl && !hasPosterFile) {
+      return json({ message: "Inclui o link do cartaz ou envia uma imagem oficial." }, 400);
+    }
   }
 
   const token = field("cf-turnstile-response", 2048);
@@ -119,7 +128,7 @@ export async function onRequestPost(context) {
     posterObjectKey || null,
     posterFileName || null,
     message,
-    field("name", 80) || null,
+    senderName || null,
     email || null
   ).run();
 
