@@ -35,6 +35,13 @@ const feedbackEventId = document.querySelector("#feedback-event-id");
 const feedbackEventTitle = document.querySelector("#feedback-event-title");
 const feedbackEventName = document.querySelector("#feedback-event-name");
 const feedbackEventField = document.querySelector("#feedback-event-field");
+const feedbackTypePicker = document.querySelector("#feedback-type-picker");
+const feedbackFields = document.querySelector("#feedback-fields");
+const feedbackNameLabel = document.querySelector("#feedback-name-label");
+const feedbackEventDetails = document.querySelector("#feedback-event-details");
+const feedbackPromoterDetails = document.querySelector("#feedback-promoter-details");
+const feedbackPosterField = document.querySelector("#feedback-poster-field");
+const feedbackOfficialLabel = document.querySelector("#feedback-official-label");
 const feedbackMessageLabel = document.querySelector("#feedback-message-label");
 const feedbackStatus = document.querySelector("#feedback-status");
 const feedbackSubmit = document.querySelector("#feedback-submit");
@@ -992,27 +999,41 @@ posterLightbox.addEventListener("click", event => {
 posterLightbox.querySelector(".poster-lightbox-close").addEventListener("click", () => posterLightbox.close());
 
 function setFeedbackMode(kind, eventId = "", eventTitle = "") {
+  const promoter = kind === "promoter";
   const correction = kind === "correction";
-  const context = `${correction ? "correction" : "suggestion"}:${eventId}`;
+  const context = `${correction ? "correction" : promoter ? "promoter" : "suggestion"}:${eventId}`;
   const contextChanged = feedbackForm.dataset.draftContext !== context;
   if (contextChanged) feedbackForm.reset();
-  feedbackKind.value = correction ? "correction" : "suggestion";
+  feedbackKind.value = correction ? "correction" : promoter ? "promoter" : "suggestion";
   feedbackEventId.value = eventId;
   feedbackEventTitle.value = eventTitle;
   if (contextChanged || correction) feedbackEventName.value = eventTitle;
   feedbackEventName.readOnly = correction;
   feedbackEventField.hidden = correction;
-  ["name", "email", "eventDate", "city", "officialUrl", "message"].forEach(name => {
+  feedbackTypePicker.hidden = true;
+  feedbackFields.hidden = false;
+  feedbackEventDetails.hidden = promoter;
+  feedbackPromoterDetails.hidden = !promoter;
+  feedbackPosterField.hidden = promoter;
+  feedbackForm.elements.posterUrl.setCustomValidity("");
+  ["name", "email", "officialUrl", "message"].forEach(name => {
     feedbackForm.elements[name].required = !correction;
   });
+  ["eventDate", "city"].forEach(name => { feedbackForm.elements[name].required = !correction && !promoter; });
+  ["promoterLocation", "genres", "instagramUrl", "agendaUrl"].forEach(name => { feedbackForm.elements[name].required = promoter; });
   feedbackEventName.required = !correction;
-  feedbackTitle.textContent = correction ? "Corrigir esta informação." : "Sugerir um evento.";
+  feedbackTitle.textContent = correction ? "Corrigir esta informação." : promoter ? "Adicionar uma página." : "Sugerir um evento.";
   feedbackContext.textContent = correction
     ? `Vais corrigir: ${eventTitle}. Indica o que mudou e deixa uma fonte oficial que o confirme.`
-    : "Preenche todos os dados e inclui uma fonte oficial. A sugestão será sempre revista antes de aparecer na agenda.";
+    : promoter
+      ? "Ajuda-nos a encontrar a tua agenda. A página será sempre confirmada por uma pessoa antes de entrar nas fontes do Desvio."
+      : "Preenche todos os dados e inclui uma fonte oficial. A sugestão será sempre revista antes de aparecer na agenda.";
+  feedbackNameLabel.textContent = promoter ? "Nome da promotora, sala ou projeto" : "Evento";
+  feedbackEventName.placeholder = promoter ? "Ex.: Nome da promotora ou sala" : "Artista, festival ou nome do evento";
+  feedbackOfficialLabel.textContent = promoter ? "Site oficial" : "Link oficial";
   feedbackMessageLabel.innerHTML = correction
     ? "O que está errado ou desatualizado?"
-    : "O que devemos adicionar?";
+    : promoter ? "Conta-nos brevemente o que programas" : "O que devemos adicionar?";
   feedbackForm.dataset.draftContext = context;
   if (contextChanged) restoreFeedbackDraft();
   refreshFeedbackDraftNote();
@@ -1021,12 +1042,23 @@ function setFeedbackMode(kind, eventId = "", eventTitle = "") {
   feedbackSubmit.innerHTML = "Enviar para revisão <span>↗</span>";
 }
 
+function showFeedbackPicker() {
+  feedbackForm.reset();
+  feedbackForm.dataset.draftContext = "";
+  feedbackTypePicker.hidden = false;
+  feedbackFields.hidden = true;
+  feedbackTitle.textContent = "Contribuir para o Desvio.";
+  feedbackContext.textContent = "Escolhe o que queres enviar. Todas as submissões são verificadas por uma pessoa antes de serem publicadas.";
+  feedbackDraftNote.hidden = true;
+  feedbackStatus.textContent = "";
+}
+
 function feedbackDraftKey() {
   return `${feedbackDraftPrefix}${feedbackForm.dataset.draftContext || "suggestion:"}`;
 }
 
 function feedbackHasContent() {
-  const fieldNames = ["name", "email", "eventName", "eventDate", "city", "officialUrl", "posterUrl", "message"];
+  const fieldNames = ["name", "email", "eventName", "eventDate", "city", "promoterLocation", "genres", "instagramUrl", "agendaUrl", "officialUrl", "posterUrl", "message"];
   const hasText = fieldNames.some(name => String(feedbackForm.elements[name]?.value || "").trim());
   const hasPoster = feedbackForm.elements.posterFile?.files?.length > 0;
   const hasConsent = Boolean(feedbackForm.elements.privacyAcknowledged?.checked);
@@ -1045,7 +1077,7 @@ function saveFeedbackDraft() {
     refreshFeedbackDraftNote();
     return;
   }
-  const fields = ["name", "email", "eventName", "eventDate", "city", "officialUrl", "posterUrl", "message"];
+  const fields = ["name", "email", "eventName", "eventDate", "city", "promoterLocation", "genres", "instagramUrl", "agendaUrl", "officialUrl", "posterUrl", "message"];
   const values = Object.fromEntries(fields.map(name => [name, feedbackForm.elements[name]?.value || ""]));
   values.privacyAcknowledged = Boolean(feedbackForm.elements.privacyAcknowledged?.checked);
   try {
@@ -1086,7 +1118,8 @@ function openFeedback(button) {
   const kind = button.dataset.feedbackKind || "suggestion";
   const eventId = button.dataset.feedbackEventId || "";
   const eventTitle = button.dataset.feedbackEventTitle ? decodeURIComponent(button.dataset.feedbackEventTitle) : "";
-  setFeedbackMode(kind, eventId, eventTitle);
+  if (kind === "choose") showFeedbackPicker();
+  else setFeedbackMode(kind, eventId, eventTitle);
   feedbackDialog.showModal();
 }
 
@@ -1153,6 +1186,8 @@ async function optimisePosterFile(file) {
 document.addEventListener("click", event => {
   const trigger = event.target.closest(".feedback-open");
   if (trigger) openFeedback(trigger);
+  const choice = event.target.closest("[data-feedback-choice]");
+  if (choice) setFeedbackMode(choice.dataset.feedbackChoice);
 });
 document.querySelector("#feedback-close").addEventListener("click", requestFeedbackClose);
 feedbackDialog.addEventListener("cancel", event => {

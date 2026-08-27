@@ -16,7 +16,7 @@
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início">Desvio</a>
       <p>Música em Portugal</p>
-      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Enviar evento <span>→</span></button>
+      <button class="submit-link feedback-open" type="button" data-feedback-kind="choose">Enviar ao Desvio <span>→</span></button>
     </header>
 
     <main id="top" class="shell">
@@ -119,7 +119,7 @@
     <footer>
       <span>Desvio — Menos procura. Mais música.</span>
       <nav aria-label="Informação legal"><a href="termos.html" target="_blank" rel="noopener">Termos</a><a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a><a href="cookies.html" target="_blank" rel="noopener">Cookies</a></nav>
-      <p>Confirma sempre a informação na fonte oficial antes de comprar.</p>
+      <p>És promotor ou geres uma sala? <button class="report-link feedback-open" type="button" data-feedback-kind="promoter">Junta a tua agenda ao Desvio.</button></p>
     </footer>
     <dialog id="poster-lightbox" class="poster-lightbox" aria-label="Cartaz ampliado">
       <button class="poster-lightbox-close" type="button" aria-label="Fechar cartaz">×</button>
@@ -137,17 +137,27 @@
         <input id="feedback-kind" name="kind" type="hidden" value="suggestion" />
         <input id="feedback-event-id" name="eventId" type="hidden" />
         <input id="feedback-event-title" name="eventTitle" type="hidden" />
+        <div id="feedback-type-picker" class="feedback-type-picker">
+          <button class="feedback-type-choice" type="button" data-feedback-choice="suggestion"><b>Sugerir um evento</b><small>Um concerto, festival ou noite que deve entrar na agenda.</small></button>
+          <button class="feedback-type-choice" type="button" data-feedback-choice="promoter"><b>Adicionar página de promotora</b><small>Uma promotora, sala ou projeto com agenda pública.</small></button>
+        </div>
+        <div id="feedback-fields" hidden>
         <div class="feedback-grid">
           <label><span>O teu nome</span><input name="name" type="text" maxlength="80" autocomplete="name" required /></label>
           <label><span>Email <small>para respondermos</small></span><input name="email" type="email" maxlength="254" autocomplete="email" required /></label>
         </div>
-        <label id="feedback-event-field"><span>Evento</span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" required /></label>
-        <div class="feedback-grid">
+        <label id="feedback-event-field"><span id="feedback-name-label">Evento</span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" required /></label>
+        <div id="feedback-event-details" class="feedback-grid">
           <label><span>Data</span><input name="eventDate" type="date" required /></label>
           <label><span>Cidade / concelho</span><input name="city" type="text" maxlength="100" required /></label>
         </div>
-        <label><span>Link oficial</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" required /></label>
-        <fieldset class="poster-contribution">
+        <div id="feedback-promoter-details" class="feedback-promoter-details" hidden>
+          <div class="feedback-grid"><label><span>Cidade / área</span><input name="promoterLocation" type="text" maxlength="100" placeholder="Ex.: Lisboa / Grande Lisboa" /></label><label><span>Géneros</span><input name="genres" type="text" maxlength="180" placeholder="Ex.: eletrónica, hip-hop, rock" /></label></div>
+          <label><span>Instagram</span><input name="instagramUrl" type="url" maxlength="1000" placeholder="https://instagram.com/..." inputmode="url" /></label>
+          <label><span>Página da agenda</span><input name="agendaUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
+        </div>
+        <label><span id="feedback-official-label">Link oficial</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" required /></label>
+        <fieldset id="feedback-poster-field" class="poster-contribution">
           <legend>Cartaz oficial</legend>
           <p>Obrigatório: deixa o link do cartaz ou envia a imagem encontrada numa fonte oficial.</p>
           <div class="feedback-grid">
@@ -160,6 +170,7 @@
         <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>
         <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>
         <button id="feedback-submit" class="feedback-submit" type="submit">Enviar para revisão <span>↗</span></button>
+        </div>
       </form>
     </dialog>
     <script src="events.js"></script>
