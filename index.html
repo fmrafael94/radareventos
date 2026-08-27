@@ -138,24 +138,24 @@
         <input id="feedback-event-id" name="eventId" type="hidden" />
         <input id="feedback-event-title" name="eventTitle" type="hidden" />
         <div class="feedback-grid">
-          <label><span>O teu nome <small>opcional</small></span><input name="name" type="text" maxlength="80" autocomplete="name" /></label>
-          <label><span>Email <small>para respondermos</small></span><input name="email" type="email" maxlength="254" autocomplete="email" /></label>
+          <label><span>O teu nome</span><input name="name" type="text" maxlength="80" autocomplete="name" required /></label>
+          <label><span>Email <small>para respondermos</small></span><input name="email" type="email" maxlength="254" autocomplete="email" required /></label>
         </div>
-        <label id="feedback-event-field"><span>Evento</span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" /></label>
+        <label id="feedback-event-field"><span>Evento</span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" required /></label>
         <div class="feedback-grid">
-          <label><span>Data <small>opcional</small></span><input name="eventDate" type="date" /></label>
-          <label><span>Cidade / concelho <small>opcional</small></span><input name="city" type="text" maxlength="100" /></label>
+          <label><span>Data</span><input name="eventDate" type="date" required /></label>
+          <label><span>Cidade / concelho</span><input name="city" type="text" maxlength="100" required /></label>
         </div>
-        <label><span>Link oficial <small>muito recomendado</small></span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
+        <label><span>Link oficial</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" required /></label>
         <fieldset class="poster-contribution">
-          <legend>Cartaz oficial <small>opcional</small></legend>
-          <p>Ajuda-nos a confirmar o evento. Podes deixar o link do cartaz ou enviar a imagem que encontraste numa fonte oficial.</p>
+          <legend>Cartaz oficial</legend>
+          <p>Obrigatório: deixa o link do cartaz ou envia a imagem encontrada numa fonte oficial.</p>
           <div class="feedback-grid">
             <label><span>Link do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
             <label><span>Enviar imagem</span><input name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG ou WebP · otimizada automaticamente para até 2 MB</small></label>
           </div>
         </fieldset>
-        <label><span id="feedback-message-label">O que devemos adicionar? <small>opcional se enviares um link ou cartaz</small></span><textarea name="message" rows="4" maxlength="2500" placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante."></textarea></label>
+        <label><span id="feedback-message-label">O que devemos adicionar?</span><textarea name="message" rows="4" maxlength="2500" placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante." required></textarea></label>
         <label class="feedback-consent"><input name="privacyAcknowledged" type="checkbox" required /><span>Li a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e compreendo que estes dados serão usados apenas para analisar este pedido.</span></label>
         <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>
         <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>

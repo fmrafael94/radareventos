@@ -1002,13 +1002,17 @@ function setFeedbackMode(kind, eventId = "", eventTitle = "") {
   if (contextChanged || correction) feedbackEventName.value = eventTitle;
   feedbackEventName.readOnly = correction;
   feedbackEventField.hidden = correction;
+  ["name", "email", "eventDate", "city", "officialUrl", "message"].forEach(name => {
+    feedbackForm.elements[name].required = !correction;
+  });
+  feedbackEventName.required = !correction;
   feedbackTitle.textContent = correction ? "Corrigir esta informação." : "Sugerir um evento.";
   feedbackContext.textContent = correction
-    ? `Vais corrigir: ${eventTitle}. Indica o que mudou e, se possível, deixa o link oficial ou o cartaz que o confirma.`
-    : "Podes enviar apenas o cartaz ou acrescentar o que souberes. A sugestão será sempre revista antes de aparecer na agenda.";
+    ? `Vais corrigir: ${eventTitle}. Indica o que mudou e deixa uma fonte oficial que o confirme.`
+    : "Preenche todos os dados e inclui uma fonte oficial. A sugestão será sempre revista antes de aparecer na agenda.";
   feedbackMessageLabel.innerHTML = correction
-    ? "O que está errado ou desatualizado? <small>opcional se enviares um link ou cartaz</small>"
-    : "O que devemos adicionar? <small>opcional se enviares um link ou cartaz</small>";
+    ? "O que está errado ou desatualizado?"
+    : "O que devemos adicionar?";
   feedbackForm.dataset.draftContext = context;
   if (contextChanged) restoreFeedbackDraft();
   refreshFeedbackDraftNote();
@@ -1160,13 +1164,19 @@ feedbackForm.addEventListener("input", saveFeedbackDraft);
 feedbackForm.addEventListener("change", saveFeedbackDraft);
 feedbackForm.addEventListener("submit", async event => {
   event.preventDefault();
+  const suggestion = feedbackKind.value === "suggestion";
+  const posterUrl = String(feedbackForm.elements.posterUrl.value || "").trim();
+  const posterFile = feedbackForm.elements.posterFile.files?.[0];
+  feedbackForm.elements.posterUrl.setCustomValidity(suggestion && !posterUrl && !posterFile
+    ? "Inclui o link do cartaz ou envia uma imagem oficial."
+    : "");
   if (!feedbackForm.reportValidity()) return;
   const data = new FormData(feedbackForm);
-  const posterFile = data.get("posterFile");
+  const submittedPosterFile = data.get("posterFile");
   try {
-    if (posterFile instanceof File && posterFile.size) {
+    if (submittedPosterFile instanceof File && submittedPosterFile.size) {
       feedbackStatus.textContent = "A otimizar o cartaz…";
-      data.set("posterFile", await optimisePosterFile(posterFile));
+      data.set("posterFile", await optimisePosterFile(submittedPosterFile));
     }
   } catch (error) {
     feedbackStatus.textContent = error.message || "Não foi possível otimizar o cartaz.";
