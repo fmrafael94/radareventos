@@ -43,7 +43,8 @@ export async function onRequestPost(context) {
   const value = name => payload.get(name);
   const field = (name, limit) => text(value(name), limit);
 
-  const kind = field("kind", 20) === "correction" ? "correction" : "suggestion";
+  const requestedKind = field("kind", 20);
+  const kind = requestedKind === "correction" ? "correction" : requestedKind === "promoter" ? "promoter" : "suggestion";
   const eventName = field("eventName", 180) || field("eventTitle", 180);
   const submittedMessage = field("message", 2500);
   const email = field("email", 254).toLowerCase();
@@ -51,6 +52,10 @@ export async function onRequestPost(context) {
   const posterUrl = validUrl(field("posterUrl", 1000));
   const eventDate = field("eventDate", 10);
   const city = field("city", 100);
+  const promoterLocation = field("promoterLocation", 100);
+  const genres = field("genres", 180);
+  const instagramUrl = validUrl(field("instagramUrl", 1000));
+  const agendaUrl = validUrl(field("agendaUrl", 1000));
 
   const posterFile = value("posterFile");
   const hasPosterFile = posterFile && typeof posterFile !== "string" && posterFile.size > 0;
@@ -71,6 +76,11 @@ export async function onRequestPost(context) {
     }
     if (!posterUrl && !hasPosterFile) {
       return json({ message: "Inclui o link do cartaz ou envia uma imagem oficial." }, 400);
+    }
+  }
+  if (kind === "promoter") {
+    if (!senderName || !email || !eventName || !promoterLocation || !genres || !officialUrl || !instagramUrl || !agendaUrl || !submittedMessage) {
+      return json({ message: "Preenche todos os campos para adicionar uma página ao Desvio." }, 400);
     }
   }
 
@@ -102,7 +112,9 @@ export async function onRequestPost(context) {
     });
   }
 
-  const message = submittedMessage || (hasPosterFile
+  const message = kind === "promoter"
+    ? `Área: ${promoterLocation}\nGéneros: ${genres}\nInstagram: ${instagramUrl}\nAgenda: ${agendaUrl}\n\n${submittedMessage}`
+    : submittedMessage || (hasPosterFile
     ? "Cartaz oficial enviado para revisão."
     : posterUrl
       ? "Link de cartaz enviado para revisão."
@@ -118,11 +130,11 @@ export async function onRequestPost(context) {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
   `).bind(
     id,
-    kind,
-    field("eventId", 120) || null,
+    kind === "promoter" ? "suggestion" : kind,
+    kind === "promoter" ? "promoter-page" : field("eventId", 120) || null,
     eventName || null,
     eventDate || null,
-    city || null,
+    (kind === "promoter" ? promoterLocation : city) || null,
     officialUrl || null,
     posterUrl || null,
     posterObjectKey || null,

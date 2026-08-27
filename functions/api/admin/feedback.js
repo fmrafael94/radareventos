@@ -26,7 +26,7 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const status = statuses.has(url.searchParams.get("status")) ? url.searchParams.get("status") : "new";
   const { results } = await context.env.EVENT_RADAR_DB.prepare(`
-    SELECT id, kind, event_name, event_date, city, official_url, poster_url,
+    SELECT id, kind, event_id, event_name, event_date, city, official_url, poster_url,
       poster_object_key, poster_file_name, message, sender_name, sender_email,
       status, staff_note, created_at, reviewed_at
     FROM feedback WHERE status = ? ORDER BY created_at DESC LIMIT 100
@@ -45,7 +45,7 @@ export async function onRequestPatch(context) {
   if (!id || !statuses.has(status)) return json({ message: "Pedido inválido." }, 400);
 
   const feedback = await context.env.EVENT_RADAR_DB.prepare(`
-    SELECT id, kind, event_name, event_date, city, official_url
+    SELECT id, kind, event_id, event_name, event_date, city, official_url
     FROM feedback WHERE id = ?
   `).bind(id).first();
   if (!feedback) return json({ message: "Pedido não encontrado." }, 404);
@@ -56,7 +56,7 @@ export async function onRequestPatch(context) {
     city: text(payload.city, 100) || feedback.city || "",
     officialUrl: validUrl(text(payload.officialUrl, 1000) || feedback.official_url || "")
   };
-  if (status === "published" && feedback.kind === "suggestion") {
+  if (status === "published" && feedback.kind === "suggestion" && feedback.event_id !== "promoter-page") {
     if (!reviewValues.eventName || !/^\d{4}-\d{2}-\d{2}$/.test(reviewValues.eventDate) || !reviewValues.city || !reviewValues.officialUrl) {
       return json({ message: "Para publicar, confirma título, data, cidade e uma página oficial direta." }, 400);
     }
