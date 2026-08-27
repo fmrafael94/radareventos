@@ -16,7 +16,7 @@
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início">Desvio</a>
       <p>Música em Portugal</p>
-      <button class="submit-link feedback-open" type="button" data-feedback-kind="choose">Enviar ao Desvio <span>→</span></button>
+      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Enviar ao Desvio <span>→</span></button>
     </header>
 
     <main id="top" class="shell">
@@ -119,7 +119,7 @@
     <footer>
       <span>Desvio — Menos procura. Mais música.</span>
       <nav aria-label="Informação legal"><a href="termos.html" target="_blank" rel="noopener">Termos</a><a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a><a href="cookies.html" target="_blank" rel="noopener">Cookies</a></nav>
-      <p>És promotor ou geres uma sala? <button class="report-link feedback-open" type="button" data-feedback-kind="promoter">Junta a tua agenda ao Desvio.</button></p>
+      <p>És promotor ou geres uma sala? <button class="report-link feedback-open" type="button" data-feedback-kind="suggestion">Junta a tua agenda ao Desvio.</button></p>
     </footer>
     <dialog id="poster-lightbox" class="poster-lightbox" aria-label="Cartaz ampliado">
       <button class="poster-lightbox-close" type="button" aria-label="Fechar cartaz">×</button>
@@ -138,8 +138,8 @@
         <input id="feedback-event-id" name="eventId" type="hidden" />
         <input id="feedback-event-title" name="eventTitle" type="hidden" />
         <div id="feedback-type-picker" class="feedback-type-picker">
-          <button class="feedback-type-choice" type="button" data-feedback-choice="suggestion"><b>Sugerir um evento</b><small>Um concerto, festival ou noite que deve entrar na agenda.</small></button>
-          <button class="feedback-type-choice" type="button" data-feedback-choice="promoter"><b>Adicionar página de promotora</b><small>Uma promotora, sala ou projeto com agenda pública.</small></button>
+          <button class="feedback-type-choice" type="button" data-feedback-choice="suggestion" aria-pressed="true"><b>Sugerir um evento</b><small>Um concerto, festival ou noite que deve entrar na agenda.</small></button>
+          <button class="feedback-type-choice" type="button" data-feedback-choice="promoter" aria-pressed="false"><b>Adicionar página de promotora</b><small>Uma promotora, sala ou projeto com agenda pública.</small></button>
         </div>
         <div id="feedback-fields" hidden>
         <div class="feedback-grid">

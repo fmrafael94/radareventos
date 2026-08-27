@@ -1010,7 +1010,10 @@ function setFeedbackMode(kind, eventId = "", eventTitle = "") {
   if (contextChanged || correction) feedbackEventName.value = eventTitle;
   feedbackEventName.readOnly = correction;
   feedbackEventField.hidden = correction;
-  feedbackTypePicker.hidden = true;
+  feedbackTypePicker.hidden = correction;
+  feedbackTypePicker.querySelectorAll("[data-feedback-choice]").forEach(button => {
+    button.setAttribute("aria-pressed", String(button.dataset.feedbackChoice === feedbackKind.value));
+  });
   feedbackFields.hidden = false;
   feedbackEventDetails.hidden = promoter;
   feedbackPromoterDetails.hidden = !promoter;
@@ -1040,17 +1043,6 @@ function setFeedbackMode(kind, eventId = "", eventTitle = "") {
   feedbackStatus.textContent = "";
   feedbackSubmit.disabled = false;
   feedbackSubmit.innerHTML = "Enviar para revisão <span>↗</span>";
-}
-
-function showFeedbackPicker() {
-  feedbackForm.reset();
-  feedbackForm.dataset.draftContext = "";
-  feedbackTypePicker.hidden = false;
-  feedbackFields.hidden = true;
-  feedbackTitle.textContent = "Contribuir para o Desvio.";
-  feedbackContext.textContent = "Escolhe o que queres enviar. Todas as submissões são verificadas por uma pessoa antes de serem publicadas.";
-  feedbackDraftNote.hidden = true;
-  feedbackStatus.textContent = "";
 }
 
 function feedbackDraftKey() {
@@ -1118,8 +1110,7 @@ function openFeedback(button) {
   const kind = button.dataset.feedbackKind || "suggestion";
   const eventId = button.dataset.feedbackEventId || "";
   const eventTitle = button.dataset.feedbackEventTitle ? decodeURIComponent(button.dataset.feedbackEventTitle) : "";
-  if (kind === "choose") showFeedbackPicker();
-  else setFeedbackMode(kind, eventId, eventTitle);
+  setFeedbackMode(kind, eventId, eventTitle);
   feedbackDialog.showModal();
 }
 
