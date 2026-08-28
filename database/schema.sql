@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS feedback (
   poster_url TEXT,
   poster_object_key TEXT,
   poster_file_name TEXT,
+  image_moderation_status TEXT NOT NULL DEFAULT 'not_applicable' CHECK (image_moderation_status IN ('not_applicable', 'approved', 'review', 'rejected')),
+  image_moderation_reason TEXT,
   message TEXT NOT NULL,
   sender_name TEXT,
   sender_email TEXT,

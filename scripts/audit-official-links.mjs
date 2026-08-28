@@ -24,6 +24,12 @@ function readBrowserData(source, variable) {
   return sandbox.window[variable];
 }
 
+function readOfficialPosters(source) {
+  const match = source.match(/const officialPosters = (\{[\s\S]*?\n\});\nconst officialEventPages/);
+  if (!match) return {};
+  return readBrowserData(`${match[1]}; window.OFFICIAL_POSTERS = officialPosters;`, "OFFICIAL_POSTERS") || {};
+}
+
 function usableUrl(value) {
   try {
     const url = new URL(value);
@@ -55,7 +61,14 @@ async function probe(url) {
         }
       });
     }
-    return { status: response.status, finalUrl: response.url, ok: response.ok };
+    return {
+      status: response.status,
+      finalUrl: response.url,
+      ok: response.ok,
+      etag: response.headers.get("etag") || "",
+      lastModified: response.headers.get("last-modified") || "",
+      contentLength: response.headers.get("content-length") || ""
+    };
   } catch (error) {
     return { status: null, finalUrl: null, ok: false, error: error.name === "AbortError" ? "timeout" : error.message };
   } finally {
@@ -65,12 +78,17 @@ async function probe(url) {
 
 const eventsSource = await readFile(path.join(root, "events.js"), "utf8");
 const events = readBrowserData(eventsSource, "EVENTS") || [];
+const appSource = await readFile(path.join(root, "app.js"), "utf8");
+const posters = readOfficialPosters(appSource);
 const targets = [];
 for (const event of events) {
   for (const [kind, value] of [["Página oficial", event.sourceUrl], ["Bilheteira", event.ticketUrl]]) {
     const url = usableUrl(value);
     if (url) targets.push({ id: event.id, title: event.title, kind, url });
   }
+  const poster = posters[event.id];
+  const posterUrl = usableUrl(Array.isArray(poster) ? poster[0] : "");
+  if (posterUrl) targets.push({ id: event.id, title: event.title, kind: "Cartaz", url: posterUrl });
 }
 
 // Every two-hour run checks every known direct event page and ticket page.

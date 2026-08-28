@@ -427,3 +427,18 @@ html,body { overflow-x:clip; }
   background:rgba(224,235,205,.62);
   font:500 10px/1.45 "DM Sans",Arial,sans-serif;
 }
+
+/* Comfortable reading is a product feature: controls and event information
+   remain legible at arm's length on a phone as well as on a large screen. */
+body { font-size:17px; line-height:1.5; }
+.site-header>p,.submit-link { font-size:15px; }.brand { font-size:21px; }
+.kicker,.featured-copy p,.event-list-heading,.detail-label { font-size:12px; }
+.intro>p:not(.kicker) { font-size:19px; line-height:1.55; }
+.featured-description,.result-count { font-size:15px; line-height:1.45; }
+.featured-copy h3 { font-size:18px; line-height:1.15; }.featured-copy time,.featured-copy a { font-size:14px; line-height:1.4; }
+.browse-heading h2 { font-size:34px; }.agenda-search-input input { font-size:17px; }.filter-toggle { font-size:15px; }.filter-grid label>span,.location-bar label>span,.multi-filter>span { font-size:12px; }.location-bar label select,.multi-filter strong { font-size:15px; }
+.quick-picks>span,.quick-picks button,.clear-button { font-size:14px; }
+.event-card-link { display:grid; grid-template-columns:66px minmax(190px,1.4fr) minmax(145px,.8fr) 120px 25px; gap:18px; align-items:center; min-height:88px; padding:11px 8px 11px 0; color:inherit; text-decoration:none; transition:padding .18s ease,background .18s ease,transform .18s ease; }.event-card-link:hover,.event-card-link:focus-visible { padding-left:10px; background:rgba(223,235,201,.45); outline:0; }.date-box b { font-size:22px; }.date-box span { font-size:12px; }.event-title { font-size:21px; }.event-venue { font-size:16px; line-height:1.4; }.format { font-size:12px; }.status { padding:7px 9px; font-size:11px; }.chevron { font-size:20px; }
+::view-transition-old(root) { animation:desvio-page-out .18s ease both; } ::view-transition-new(root) { animation:desvio-page-in .28s ease both; } @keyframes desvio-page-out { to { opacity:0; transform:scale(.985); } } @keyframes desvio-page-in { from { opacity:0; transform:scale(1.018); } }
+@media (max-width:900px) { .event-card-link { grid-template-columns:58px 1fr 100px 24px; gap:12px; }.event-card-link .format { display:none; } }
+@media (max-width:580px) { body { font-size:16px; }.brand { font-size:19px; }.submit-link { font-size:14px; }.intro>p:not(.kicker) { font-size:17px; }.featured-copy h3 { font-size:17px; }.featured-copy time,.featured-copy a { font-size:14px; }.browse-heading h2 { font-size:30px; }.event-card-link { grid-template-columns:52px minmax(0,1fr) 23px; min-height:84px; gap:10px; padding:11px 2px; }.event-card-link .format,.event-card-link .status { display:none; }.date-box b { font-size:19px; }.date-box span { font-size:11px; }.event-title { font-size:18px; white-space:normal; line-height:1.15; }.event-venue { overflow:visible; white-space:normal; font-size:15px; }.chevron { font-size:19px; } }

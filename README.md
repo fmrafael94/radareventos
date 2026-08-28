@@ -18,13 +18,12 @@ Include public concerts, festivals, DJ sets, bar and club gigs, free local shows
 
 `sources.js` is the source watchlist. Discovery sites help find events, but are not sufficient confirmation by themselves.
 
-## Publish free with Cloudflare Pages
+## Publicar com Cloudflare Workers
 
 1. Create a free Cloudflare account and a free GitHub account.
 2. Create a new GitHub repository and upload these files.
-3. In Cloudflare, open **Workers & Pages**, choose **Create application** → **Pages** → **Connect to Git**.
-4. Select the repository. There is no build command and the output folder is `/`.
-5. Click **Save and Deploy**. Cloudflare gives you a free `*.pages.dev` address.
+3. In Cloudflare, open **Workers & Pages**, choose the Worker `radareventos` and connect the GitHub repository in **Settings → Builds**.
+4. O `wrangler.jsonc` define o Worker, os ficheiros estáticos, D1 e R2. Cada alteração no `main` é publicada automaticamente.
 
 The custom domain can be connected later from the same Cloudflare project.
 
@@ -44,8 +43,8 @@ The same direct-page rule applies to ticket links: an agenda or homepage is a so
 
 As duas GitHub Actions produzem uma fila de trabalho privada, sem publicar ou alterar eventos sozinhas:
 
-- de 2 em 2 horas, `Verificação de links oficiais` confirma se as páginas oficiais e bilheteiras diretas respondem;
-- diariamente, `Ronda diária de fontes` coloca fontes a explorar na fila.
+- de 2 em 2 horas, `Verificação de links oficiais` verifica páginas oficiais, bilheteiras e cartazes; alterações técnicas ou links indisponíveis entram na fila;
+- diariamente, `Ronda diária de fontes` percorre todas as fontes e só cria um sinal quando uma página muda ou deixa de responder.
 
 Para fazer os resultados aparecerem em `admin.html`:
 
@@ -56,3 +55,9 @@ Para fazer os resultados aparecerem em `admin.html`:
 3. Executa cada workflow uma vez manualmente. Os sinais entram em **Revisão automática** no admin.
 
 Um resultado `403` ou `429` pode significar uma proteção anti-bot da plataforma, e não uma página avariada. A fila serve para decidir manualmente: *em análise*, *resolvido* ou *ignorado*.
+
+## Segurança de imagens submetidas
+
+Os ficheiros de imagem enviados com sugestões passam por validação do ficheiro e verificação automática no Workers AI. Nudez, conteúdo sexual/pornográfico, violência gráfica e imagens de ódio claramente identificadas são rejeitados e não ficam guardados no R2. Casos ambíguos são guardados em área privada de quarentena e assinalados no admin para revisão humana.
+
+Antes de ativar esta funcionalidade, executa a migração `database/migrations/0004_feedback_image_moderation.sql` na D1, acrescenta a binding `AI` (já declarada no `wrangler.jsonc`) e aceita uma vez a licença do modelo Meta Llama 3.2 Vision no Cloudflare.

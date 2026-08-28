@@ -20,6 +20,9 @@
       "bucket_name": "event-radar-posters"
     }
   ],
+  "ai": {
+    "binding": "AI"
+  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
