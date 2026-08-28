@@ -3,11 +3,13 @@
 .git/
 .github/
 .agents/
+.codex/
 database/
 functions/
 scripts/
 src/
 reports/
+sources/
 AGENTS.md
 CLOUDFLARE_SETUP.md
 README.md
