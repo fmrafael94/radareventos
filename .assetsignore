@@ -1,12 +1,16 @@
+# Infrastructure and project-only files must never be served as public assets.
+.wrangler/
 .git/
 .github/
 .agents/
-.codex/
-functions/
-src/
 database/
-sources/
-README.md
+functions/
+scripts/
+src/
+reports/
+AGENTS.md
 CLOUDFLARE_SETUP.md
+README.md
 wrangler.jsonc
+.gitignore
 .assetsignore
