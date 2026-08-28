@@ -1,7 +1,10 @@
+import { requireAdmin } from "../../admin-auth.js";
+
 const invalid = () => new Response("Não encontrado.", { status: 404, headers: { "Cache-Control": "no-store" } });
 
 export async function onRequestGet(context) {
-  if (!context.request.headers.get("Cf-Access-Jwt-Assertion")) return new Response("Acesso privado necessário.", { status: 403 });
+  const session = await requireAdmin(context);
+  if (session.response) return session.response;
   if (!context.env.EVENT_POSTERS) return new Response("Armazenamento ainda não ligado.", { status: 503 });
   const key = new URL(context.request.url).searchParams.get("key") || "";
   if (!key.startsWith("feedback-posters/") || key.length > 240) return invalid();

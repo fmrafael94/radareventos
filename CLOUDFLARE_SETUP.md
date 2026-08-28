@@ -60,10 +60,26 @@ O projeto inclui `admin.html`, uma área que mostra sugestões, correções, lin
 
 1. Depois do primeiro deploy, abre **Cloudflare Zero Trust** → **Access** → **Applications** → **Add an application**.
 2. Cria uma aplicação para `https://<a-tua-morada-pages>/admin.html` e outra para `https://<a-tua-morada-pages>/api/admin/*`.
-3. Em ambas, cria uma política **Allow** apenas para o teu email, usando o método de login de código por email.
+3. Cria uma aplicação que protege `https://<a-tua-morada-pages>/admin.html` e `https://<a-tua-morada-pages>/api/admin/*`, usando o método de login de código por email. A aplicação deverá encaminhar todos os pedidos protegidos para o Worker.
 4. Não partilhes a morada `admin.html` nem a transformes num link público do site.
 
 As funções do painel também exigem o comprovativo do Cloudflare Access; sem essa proteção, recusam listar ou alterar pedidos.
+
+### Login e utilizadores do painel
+
+O Worker valida a assinatura do token do Cloudflare Access e só autoriza os e-mails ativos na tabela `admin_users`. Define estes três valores antes do deploy (não os guardes no repositório):
+
+```sh
+npx wrangler secret put ADMIN_OWNER_EMAIL
+npx wrangler secret put TEAM_DOMAIN
+npx wrangler secret put POLICY_AUD
+```
+
+- `ADMIN_OWNER_EMAIL` é o teu e-mail e cria o único proprietário inicial;
+- `TEAM_DOMAIN` é `https://<equipa>.cloudflareaccess.com`;
+- `POLICY_AUD` é a etiqueta AUD da aplicação Access. Como o painel protege duas rotas (`/admin.html` e `/api/admin/*`), coloca as duas etiquetas separadas por vírgula.
+
+Para o painel poder gerir mais e-mails sem voltar ao Cloudflare, configura a política Access para permitir o método de login escolhido e deixa o Worker aplicar a lista estrita de `admin_users`. A validação de assinatura e de AUD continua a impedir que um token de outra aplicação seja usado aqui. O proprietário pode então autorizar, suspender e reativar e-mails no topo do painel.
 
 ## 7. Rever contribuições
 

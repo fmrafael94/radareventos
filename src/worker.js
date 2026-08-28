@@ -4,6 +4,8 @@ import { onRequestPost as postFeedback } from "../functions/api/feedback.js";
 import { onRequestGet as getAdminFeedback, onRequestPatch as patchAdminFeedback } from "../functions/api/admin/feedback.js";
 import { onRequestGet as getAutomationReviews, onRequestPatch as patchAutomationReview } from "../functions/api/admin/automation-reviews.js";
 import { onRequestGet as getAdminPoster } from "../functions/api/admin/poster.js";
+import { onRequestGet as getAdminUsers, onRequestPost as postAdminUser, onRequestPatch as patchAdminUser } from "../functions/api/admin/users.js";
+import { requireAdmin } from "../functions/admin-auth.js";
 import { onRequestPost as postAuditReport } from "../functions/api/internal/audit-report.js";
 
 const contextFor = (request, env) => ({ request, env });
@@ -65,6 +67,13 @@ export default {
     if (pathname === "/api/admin/automation-reviews" && request.method === "GET") return getAutomationReviews(context);
     if (pathname === "/api/admin/automation-reviews" && request.method === "PATCH") return patchAutomationReview(context);
     if (pathname === "/api/admin/poster" && request.method === "GET") return getAdminPoster(context);
+    if (pathname === "/api/admin/users" && request.method === "GET") return getAdminUsers(context);
+    if (pathname === "/api/admin/users" && request.method === "POST") return postAdminUser(context);
+    if (pathname === "/api/admin/users" && request.method === "PATCH") return patchAdminUser(context);
+    if (pathname === "/admin.html" && request.method === "GET") {
+      const session = await requireAdmin(context);
+      if (session.response) return new Response("Acesso privado necessário.", { status: session.response.status, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } });
+    }
     if (pathname === "/api/internal/audit-report" && request.method === "POST") return postAuditReport(context);
 
     return env.ASSETS.fetch(request);

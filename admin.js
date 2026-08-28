@@ -4,6 +4,9 @@ const viewFilters = document.querySelector("#review-views");
 const communityFilters = document.querySelector("#status-filters");
 const automationFilters = document.querySelector("#automation-status-filters");
 const filterContext = document.querySelector("#filter-context");
+const accessManagement = document.querySelector("#access-management");
+const adminUsers = document.querySelector("#admin-users");
+const addAdminUser = document.querySelector("#add-admin-user");
 let activeView = "community";
 let activeCommunityStatus = "new";
 let activeAutomationStatus = "new";
@@ -11,6 +14,28 @@ let activeAutomationStatus = "new";
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 const dateTime = value => value ? new Intl.DateTimeFormat("pt-PT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(`${value.replace(" ", "T")}Z`)) : "—";
 const displayUrl = value => value ? `<a href="${escapeHtml(value)}" target="_blank" rel="noopener">Abrir fonte ↗</a>` : "<span>Sem link enviado</span>";
+
+function userRow(user) {
+  const owner = user.role === "owner";
+  const active = user.status === "active";
+  return `<div class="admin-user" data-email="${escapeHtml(user.email)}">
+    <div><b>${escapeHtml(user.email)}</b><small>${owner ? "Proprietário" : active ? "Autorizado" : "Acesso suspenso"}</small></div>
+    ${owner ? "" : `<button type="button" class="secondary" data-user-status="${active ? "disabled" : "active"}">${active ? "Suspender" : "Reativar"}</button>`}
+  </div>`;
+}
+
+async function loadAdminUsers() {
+  try {
+    const response = await fetch("/api/admin/users", { headers: { Accept: "application/json" }, credentials: "same-origin" });
+    if (response.status === 403) return;
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !Array.isArray(result.items)) return;
+    accessManagement.hidden = false;
+    adminUsers.innerHTML = result.items.map(userRow).join("");
+  } catch {
+    // A gestão de utilizadores é opcional para editores e nunca impede a revisão de eventos.
+  }
+}
 
 function reportCard(item) {
   const title = item.event_name || "Evento sem nome";
@@ -70,7 +95,7 @@ async function loadReports() {
   adminStatus.textContent = "A carregar pedidos…";
   reports.innerHTML = "";
   try {
-    const response = await fetch(`/api/admin/feedback?status=${encodeURIComponent(activeCommunityStatus)}`, { headers: { Accept: "application/json" } });
+    const response = await fetch(`/api/admin/feedback?status=${encodeURIComponent(activeCommunityStatus)}`, { headers: { Accept: "application/json" }, credentials: "same-origin" });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar os pedidos.");
     if (!Array.isArray(result.items)) {
@@ -87,7 +112,7 @@ async function loadAutomationReviews() {
   adminStatus.textContent = "A carregar revisão automática…";
   reports.innerHTML = "";
   try {
-    const response = await fetch(`/api/admin/automation-reviews?status=${encodeURIComponent(activeAutomationStatus)}`, { headers: { Accept: "application/json" } });
+    const response = await fetch(`/api/admin/automation-reviews?status=${encodeURIComponent(activeAutomationStatus)}`, { headers: { Accept: "application/json" }, credentials: "same-origin" });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar a revisão automática.");
     if (!Array.isArray(result.items)) throw new Error("A revisão automática ainda não está configurada.");
@@ -145,7 +170,7 @@ reports.addEventListener("click", async event => {
     try {
       const response = await fetch("/api/admin/automation-reviews", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json" }, credentials: "same-origin",
         body: JSON.stringify({
           id: card.dataset.id,
           status: automationButton.dataset.automationStatus,
@@ -173,7 +198,7 @@ reports.addEventListener("click", async event => {
   try {
     const response = await fetch("/api/admin/feedback", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json" }, credentials: "same-origin",
       body: JSON.stringify({
         id: card.dataset.id,
         status: button.dataset.nextStatus,
@@ -195,5 +220,44 @@ reports.addEventListener("click", async event => {
 });
 
 document.querySelector("#refresh").addEventListener("click", loadActiveView);
+addAdminUser.addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = addAdminUser.querySelector("button");
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/admin/users", {
+      method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ email: new FormData(addAdminUser).get("email") })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível autorizar este e-mail.");
+    addAdminUser.reset();
+    adminStatus.textContent = "E-mail autorizado.";
+    loadAdminUsers();
+  } catch (error) {
+    adminStatus.textContent = error.message || "Não foi possível autorizar este e-mail.";
+  } finally {
+    button.disabled = false;
+  }
+});
+adminUsers.addEventListener("click", async event => {
+  const button = event.target.closest("[data-user-status]");
+  if (!button) return;
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/admin/users", {
+      method: "PATCH", credentials: "same-origin", headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ email: button.closest(".admin-user").dataset.email, status: button.dataset.userStatus })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível alterar o acesso.");
+    adminStatus.textContent = button.dataset.userStatus === "active" ? "Acesso reativado." : "Acesso suspenso.";
+    loadAdminUsers();
+  } catch (error) {
+    adminStatus.textContent = error.message || "Não foi possível alterar o acesso.";
+    button.disabled = false;
+  }
+});
 updateReviewControls();
+loadAdminUsers();
 loadActiveView();
