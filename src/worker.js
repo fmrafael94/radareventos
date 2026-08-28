@@ -15,7 +15,7 @@ async function assetText(request, env, path) {
   const url = new URL(request.url);
   url.pathname = path;
   url.search = "";
-  const response = await env.ASSETS.fetch(new Request(url, request));
+  const response = await env.ASSETS.fetch(new Request(url.toString()));
   if (!response.ok) throw new Error("Asset não encontrado");
   return response.text();
 }
