@@ -1,5 +1,6 @@
 import { ensureAutomationReviewStore } from "../../automation-review-store.js";
 import { ensureEventStore } from "../../event-store.js";
+import { requireAdmin } from "../../admin-auth.js";
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 const statuses = new Set(["new", "reviewing", "resolved", "ignored"]);
@@ -13,16 +14,9 @@ const validUrl = value => {
   }
 };
 
-function accessRequired(context) {
-  if (!context.request.headers.get("Cf-Access-Jwt-Assertion")) {
-    return json({ message: "Esta área só pode ser usada através do acesso privado configurado no Cloudflare." }, 403);
-  }
-  return null;
-}
-
 export async function onRequestGet(context) {
-  const denied = accessRequired(context);
-  if (denied) return denied;
+  const session = await requireAdmin(context);
+  if (session.response) return session.response;
   if (!context.env.EVENT_RADAR_DB) return json({ message: "Base de dados ainda não ligada." }, 503);
   await ensureAutomationReviewStore(context.env.EVENT_RADAR_DB);
   const url = new URL(context.request.url);
@@ -38,8 +32,8 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPatch(context) {
-  const denied = accessRequired(context);
-  if (denied) return denied;
+  const session = await requireAdmin(context);
+  if (session.response) return session.response;
   if (!context.env.EVENT_RADAR_DB) return json({ message: "Base de dados ainda não ligada." }, 503);
   let payload;
   try { payload = await context.request.json(); } catch { return json({ message: "Pedido inválido." }, 400); }

@@ -21,6 +21,18 @@
         <h1>Pedidos para rever.</h1>
         <p>Centraliza sugestões de utilizadores e sinais encontrados pelas rondas automáticas. Nada entra na agenda sem confirmação humana e uma fonte oficial.</p>
       </section>
+      <section id="access-management" class="access-management" hidden aria-labelledby="access-title">
+        <div>
+          <p class="eyebrow">Acesso ao painel</p>
+          <h2 id="access-title">Quem pode entrar</h2>
+          <p>Os e-mails autorizados recebem o login seguro do Cloudflare. Podes revogar o acesso a qualquer momento.</p>
+        </div>
+        <form id="add-admin-user" class="add-admin-user">
+          <label for="admin-email">Autorizar e-mail</label>
+          <div><input id="admin-email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.pt" required /><button type="submit">Adicionar</button></div>
+        </form>
+        <div id="admin-users" class="admin-users" aria-live="polite"></div>
+      </section>
       <section class="review-controls" aria-label="Filtros da moderação">
         <div class="review-source">
           <span class="control-label">Origem</span>
