@@ -11,14 +11,14 @@ permissions:
 jobs:
   watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Fazer ronda das fontes conhecidas
-        run: node scripts/watch-sources.mjs --limit=30
+        run: node scripts/watch-sources.mjs
       - name: Enviar fontes a explorar para o admin
         env:
           AUDIT_INGEST_URL: ${{ secrets.DESVIO_AUDIT_INGEST_URL }}

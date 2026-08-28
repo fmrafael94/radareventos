@@ -1,3 +1,5 @@
+import { assessUploadedImage } from "../image-moderation.js";
+
 const json = (body, status = 200) => Response.json(body, {
   status,
   headers: { "Cache-Control": "no-store" }
@@ -96,6 +98,8 @@ export async function onRequestPost(context) {
 
   let posterObjectKey = "";
   let posterFileName = "";
+  let imageModerationStatus = hasPosterFile ? "review" : "not_applicable";
+  let imageModerationReason = hasPosterFile ? "Imagem pendente de verificação." : "";
   if (posterFile && typeof posterFile !== "string" && posterFile.size > 0) {
     const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
     if (!allowedTypes.has(posterFile.type) || posterFile.size > 2 * 1024 * 1024) {
@@ -104,12 +108,16 @@ export async function onRequestPost(context) {
     if (!context.env.EVENT_POSTERS) {
       return json({ message: "O envio de imagens será ativado quando a publicação for concluída. Usa, por agora, o link do cartaz." }, 503);
     }
-    const extension = posterFile.type === "image/png" ? "png" : posterFile.type === "image/webp" ? "webp" : "jpg";
-    posterObjectKey = `feedback-posters/${crypto.randomUUID()}.${extension}`;
-    posterFileName = text(posterFile.name, 180);
-    await context.env.EVENT_POSTERS.put(posterObjectKey, posterFile.stream(), {
-      httpMetadata: { contentType: posterFile.type }
-    });
+    const bytes = await posterFile.arrayBuffer();
+    const assessment = await assessUploadedImage(context.env.AI, bytes, posterFile.type);
+    imageModerationStatus = assessment.status;
+    imageModerationReason = assessment.reason;
+    if (assessment.status !== "rejected") {
+      const extension = posterFile.type === "image/png" ? "png" : posterFile.type === "image/webp" ? "webp" : "jpg";
+      posterObjectKey = `feedback-posters/${assessment.status === "review" ? "quarantine/" : ""}${crypto.randomUUID()}.${extension}`;
+      posterFileName = text(posterFile.name, 180);
+      await context.env.EVENT_POSTERS.put(posterObjectKey, bytes, { httpMetadata: { contentType: posterFile.type } });
+    }
   }
 
   const message = kind === "promoter"
@@ -125,9 +133,9 @@ export async function onRequestPost(context) {
   await context.env.EVENT_RADAR_DB.prepare(`
     INSERT INTO feedback (
       id, kind, event_id, event_name, event_date, city, official_url,
-      poster_url, poster_object_key, poster_file_name,
+      poster_url, poster_object_key, poster_file_name, image_moderation_status, image_moderation_reason,
       message, sender_name, sender_email, status, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
   `).bind(
     id,
     kind === "promoter" ? "suggestion" : kind,
@@ -139,6 +147,8 @@ export async function onRequestPost(context) {
     posterUrl || null,
     posterObjectKey || null,
     posterFileName || null,
+    imageModerationStatus,
+    imageModerationReason || null,
     message,
     senderName || null,
     email || null

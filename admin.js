@@ -15,6 +15,9 @@ const displayUrl = value => value ? `<a href="${escapeHtml(value)}" target="_bla
 function reportCard(item) {
   const title = item.event_name || "Evento sem nome";
   const promoterPage = item.event_id === "promoter-page";
+  const moderation = item.image_moderation_status && item.image_moderation_status !== "not_applicable"
+    ? `<div><dt>Verificação da imagem</dt><dd>${escapeHtml(item.image_moderation_status === "approved" ? "Aprovada automaticamente" : item.image_moderation_status === "review" ? "Retida para revisão" : "Rejeitada automaticamente")}${item.image_moderation_reason ? ` · ${escapeHtml(item.image_moderation_reason)}` : ""}</dd></div>`
+    : "";
   const poster = item.poster_object_key
     ? `<a class="submitted-poster" href="/api/admin/poster?key=${encodeURIComponent(item.poster_object_key)}" target="_blank" rel="noopener"><img src="/api/admin/poster?key=${encodeURIComponent(item.poster_object_key)}" alt="Cartaz enviado para ${escapeHtml(title)}" /></a>`
     : item.poster_url
@@ -28,6 +31,7 @@ function reportCard(item) {
       <div><dt>Fonte oficial</dt><dd>${displayUrl(item.official_url)}</dd></div>
       <div><dt>Contacto</dt><dd>${escapeHtml(item.sender_name || "Anónimo")}${item.sender_email ? ` · <a href="mailto:${escapeHtml(item.sender_email)}">${escapeHtml(item.sender_email)}</a>` : ""}</dd></div>
       ${item.poster_file_name ? `<div><dt>Ficheiro enviado</dt><dd>${escapeHtml(item.poster_file_name)}</dd></div>` : ""}
+      ${moderation}
     </dl>
     ${item.kind === "suggestion" && !promoterPage ? `<fieldset class="event-review-fields"><legend>Dados para publicação</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${escapeHtml(item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${escapeHtml(item.event_date || "")}" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${escapeHtml(item.city || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${escapeHtml(item.official_url || "")}" /></label></fieldset>` : ""}
     <label class="staff-note"><span>Nota privada</span><textarea maxlength="1500" placeholder="O que verificaste ou o que falta confirmar?">${escapeHtml(item.staff_note || "")}</textarea></label>

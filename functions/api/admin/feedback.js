@@ -27,7 +27,7 @@ export async function onRequestGet(context) {
   const status = statuses.has(url.searchParams.get("status")) ? url.searchParams.get("status") : "new";
   const { results } = await context.env.EVENT_RADAR_DB.prepare(`
     SELECT id, kind, event_id, event_name, event_date, city, official_url, poster_url,
-      poster_object_key, poster_file_name, message, sender_name, sender_email,
+      poster_object_key, poster_file_name, image_moderation_status, image_moderation_reason, message, sender_name, sender_email,
       status, staff_note, created_at, reviewed_at
     FROM feedback WHERE status = ? ORDER BY created_at DESC LIMIT 100
   `).bind(status).all();

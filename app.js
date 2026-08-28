@@ -769,6 +769,7 @@ const matchesHighlight = event => !state.highlight ||
 const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl);
 const posterStyle = image => `style="--poster-image:url(&quot;${encodeURI(image)}&quot;)"`;
 const feedbackAction = event => `<button class="report-link feedback-open" type="button" data-feedback-kind="correction" data-feedback-event-id="${event.id}" data-feedback-event-title="${encodeURIComponent(event.title)}">Informação errada?</button>`;
+const eventUrl = event => `/evento/${encodeURIComponent(event.id)}`;
 
 function renderFeatured() {
   const today = shiftedIso(0);
@@ -781,9 +782,8 @@ function renderFeatured() {
   featuredRail.innerHTML = featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     return `<article class="featured-card" data-event-id="${event.id}">
-      <button class="featured-open" type="button" data-open-featured-event="${event.id}" aria-label="Abrir detalhes de ${event.title}"></button>
       <span class="featured-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"></span>
-      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${event.sourceUrl}" target="_blank" rel="noopener">Página oficial ↗</a></div>
+      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${eventUrl(event)}">Abrir evento ↗</a></div>
     </article>`;
   }).join("");
   featuredRail.setAttribute("aria-label", "Cinco próximos eventos com entrada disponível");
@@ -806,40 +806,17 @@ function startFeaturedAutoscroll() {
 function eventCard(event) {
   const [day, month] = dateParts(event.date);
   const endDay = event.endDate ? eventDate(event.endDate).getDate() : null;
-  const fullDate = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
   const availability = availabilityLabel(event);
   const statusClass = availability === "Esgotado" ? "sold" : availability === "Cancelado" ? "cancelled" : availability === "Bilhetes a confirmar" ? "pending" : "";
-  // Keep an ongoing festival in the agenda, but never offer a past day in its
-  // programme. The parent still overlaps today, while the timetable starts at
-  // the next useful date for the visitor.
-  const today = shiftedIso(0);
-  const children = festivalChildren(event)
-    .filter(child => child.date >= today)
-    .sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
-  const groupedDays = [...new Set(children.map(child => child.date))];
-  const schedule = children.length ? `<div class="festival-program"><span class="detail-label">${event.endDate ? "Programa por dia / sessões" : "Alinhamento e horário"}</span>${groupedDays.length > 1 ? `<div class="festival-day-tabs" role="tablist">${groupedDays.map((date, index) => `<button type="button" role="tab" data-festival-day="${event.id}-${date}" aria-selected="${index === 0}">${prettyDate(date)}</button>`).join("")}</div>` : ""}${groupedDays.map((date, index) => `<section class="festival-day" data-festival-day-panel="${event.id}-${date}"${index ? " hidden" : ""}><h4>${prettyDate(date)}</h4>${children.filter(child => child.date === date).map(child => `<div class="festival-slot">${hasOfficialPoster(child) ? `<button class="festival-slot-art poster-trigger" type="button" ${posterStyle(child.image)} aria-label="Ampliar cartaz oficial de ${child.title}"><img src="${child.image}" alt="Cartaz oficial de ${child.title}" loading="lazy"></button>` : ""}<time>${child.time || "Horário a confirmar"}</time><div><strong>${child.title.replace(/^.*?— /, "")}</strong><span>${child.venue}</span></div><em>${ticketStatus(child)}</em>${programmeAction(child)}</div>`).join("")}</section>`).join("")}</div>` : `<div class="single-program"><span class="detail-label">Alinhamento / horário</span><div class="festival-slot"><time>${event.time || "Horário a confirmar"}</time><div><strong>${event.lineup || event.title}</strong><span>${event.venue}</span></div><em>${ticketStatus(event)}</em>${programmeAction(event)}</div></div>`;
-  const art = hasOfficialPoster(event) ? `<button class="event-art poster-trigger" type="button" ${posterStyle(event.image)} aria-label="Ampliar cartaz oficial de ${event.title}"><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"><span class="event-art-caption">Ampliar cartaz</span></button>` : `<p class="event-art-missing">Não existe cartaz oficial ainda.</p>`;
-  // A direct ticket link is useful even before stock is checked, but a price
-  // must never look like a current availability confirmation. Use a neutral
-  // action until the ticket page has been reviewed.
-  const ticket = event.availability === "Esgotado" ? `<span class="ticket-link ticket-pending">Esgotado</span>` : freeEntryOnly(event) ? `<span class="ticket-link ticket-free">Entrada livre</span>` : genericTicketUrl(event.ticketUrl) ? `<span class="ticket-link ticket-pending">Bilheteira oficial ainda não localizada</span>` : availability === "Bilhetes a confirmar" ? `<a class="ticket-link ticket-check" href="${event.ticketUrl}" target="_blank" rel="noopener">Consultar bilheteira ↗</a>` : `<a class="ticket-link" href="${event.ticketUrl}" target="_blank" rel="noopener">${event.tickets} ↗</a>`;
-  const sourceLabel = "Fonte";
-  return `<details class="event-card${groupedDays.length > 1 ? " has-multiple-days" : ""}" data-event-id="${event.id}">
-    <summary>
+  return `<article class="event-card" data-event-id="${event.id}">
+    <a class="event-card-link" href="${eventUrl(event)}" aria-label="Abrir ${event.title}">
       <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
       <span class="event-main"><span class="event-title">${event.title}</span><span class="event-venue">${event.venue} · ${event.city}</span></span>
       <span class="format">${eventType(event)}</span>
       <span class="status ${statusClass}">${availability}</span>
-      <span class="chevron">+</span>
-    </summary>
-    <div class="event-details has-program">
-      ${art}
-      <div><span class="detail-label">Quando e onde</span><p>${fullDate} · ${event.time}<br>${event.venue}, ${event.city} · ${event.district}</p></div>
-      <div><span class="detail-label">Entrada e lotação</span><p>Entrada: ${availability === "Bilhetes a confirmar" ? "Consultar a bilheteira oficial" : event.tickets}<br>${event.age}<br>Lotação: ${event.capacity}</p></div>
-      <div>${ticket}<p class="verified">Verificado: ${event.verifiedAt}<br><a href="${event.sourceUrl}" target="_blank" rel="noopener">${sourceLabel}: ${event.source}</a><br>${feedbackAction(event)}</p></div>
-      ${schedule}
-    </div>
-  </details>`;
+      <span class="chevron">↗</span>
+    </a>
+  </article>`;
 }
 
 function filteredEvents() {
@@ -894,22 +871,7 @@ function resetAgendaSelection() {
   [dateSelect].forEach(select => select.dispatchEvent(new Event("change")));
 }
 function openFeaturedEvent(id) {
-  let matches = filteredEvents();
-  let index = matches.findIndex(event => event.id === id);
-  // A featured event should always be reachable, even if the visitor left a
-  // restrictive agenda selection on before returning to the top of the page.
-  if (index === -1) {
-    resetAgendaSelection();
-    matches = filteredEvents();
-    index = matches.findIndex(event => event.id === id);
-  }
-  if (index === -1) return;
-  state.page = Math.floor(index / perPage) + 1;
-  render();
-  const target = list.querySelector(`[data-event-id="${id}"]`);
-  if (!target) return;
-  target.open = true;
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  location.assign(`/evento/${encodeURIComponent(id)}`);
 }
 function renderSources() {
   document.querySelector("#source-groups").innerHTML = SOURCE_GROUPS.map(group => `<article class="source-group"><h3>${group.title}</h3>${group.sources.map(([name, type, url]) => url ? `<a href="${url}" target="_blank" rel="noopener">${name}<span>${type}</span></a>` : `<p class="source-pending"><b>${name}</b><span>${type}</span></p>`).join("")}</article>`).join("");
@@ -921,15 +883,6 @@ featuredRail.addEventListener("click", event => {
   const card = event.target.closest(".featured-card");
   if (card) openFeaturedEvent(card.dataset.eventId);
 });
-// Keep the agenda calm: opening one event closes the previous detail card.
-// This also applies when a featured card sends the visitor directly to it.
-list.addEventListener("toggle", event => {
-  const opened = event.target;
-  if (!(opened instanceof HTMLDetailsElement) || !opened.open) return;
-  list.querySelectorAll(".event-card[open]").forEach(card => {
-    if (card !== opened) card.open = false;
-  });
-}, true);
 filterToggle.addEventListener("click", () => {
   filterPanel.hidden = !filterPanel.hidden;
   filterToggle.setAttribute("aria-expanded", String(!filterPanel.hidden));
