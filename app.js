@@ -797,7 +797,7 @@ function renderFeatured() {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     return `<article class="featured-card" data-event-id="${event.id}">
       <span class="featured-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"></span>
-      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${eventUrl(event)}" target="_blank" rel="noopener">Abrir evento ↗</a></div>
+      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${eventUrl(event)}" target="_blank" rel="noopener">Abrir evento <svg class="link-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></a></div>
     </article>`;
   }).join("");
   featuredRail.setAttribute("aria-label", "Cinco próximos eventos com entrada disponível");
