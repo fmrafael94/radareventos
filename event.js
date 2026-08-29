@@ -33,6 +33,13 @@ const festivalProgramme = event => {
     .filter(item => item.id !== event.id && item.title.startsWith(`${seriesName} —`) && item.date >= event.date && item.date <= event.endDate)
     .sort((a, b) => a.date.localeCompare(b.date) || String(a.time || "").localeCompare(String(b.time || "")));
 };
+const programmeParent = candidate => (window.EVENTS || []).find(parent => {
+  if (parent.id === candidate.id || !parent.endDate) return false;
+  return candidate.title.startsWith(`${eventSeriesName(parent)} —`)
+    && candidate.date >= parent.date
+    && candidate.date <= parent.endDate;
+});
+const isMainAgendaEvent = candidate => !candidate.seriesId && !programmeParent(candidate);
 const shortDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(eventDate(iso)).replace(".", "");
 const compactEventDate = event => {
   const start = eventDate(event.date);
@@ -50,7 +57,7 @@ const programmeTitle = (event, title) => String(title || "")
 const icsText = value => String(value || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 const icsDate = iso => String(iso || "").replaceAll("-", "");
 const similarEvents = event => (window.EVENTS || [])
-  .filter(item => item.id !== event.id && !item.seriesId && !item.title.startsWith(`${eventSeriesName(event)} —`))
+  .filter(item => item.id !== event.id && isMainAgendaEvent(item))
   .map(item => ({
     item,
     score: (item.city === event.city ? 8 : 0)

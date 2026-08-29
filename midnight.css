@@ -521,6 +521,20 @@ footer nav a { font-size:14px; line-height:1.45; }
 .agenda-shortcuts button { min-height:46px; padding:0 18px; font:600 14px "DM Mono",monospace; letter-spacing:.015em; }
 @media (max-width:580px) { .agenda-shortcuts button { min-height:44px; padding:0 16px; font-size:14px; } }
 
+/* Desktop keeps every featured card on the same grid. The artwork fills a
+   predictable frame; mobile retains the uncropped, natural poster treatment. */
+@media (min-width:761px) {
+  .featured-rail { align-items:stretch; }
+  .featured-card { display:flex; flex-direction:column; }
+  .featured-poster { aspect-ratio:16 / 10; }
+  .featured-poster img { width:100%!important; height:100%!important; object-fit:cover!important; object-position:center; }
+  .featured-copy { flex:1; }
+  .featured-copy a { margin-top:auto; }
+}
+
+/* The three legal links are a single, aligned row on phones. */
+@media (max-width:580px) { footer nav { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
 /* On desktop the footer is a calm, centred navigation bar rather than four
    competing text blocks. The promoter invitation remains visually secondary. */
 @media (min-width:581px) {
