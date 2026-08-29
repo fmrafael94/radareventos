@@ -1,5 +1,6 @@
 import { canonicalEventFromReview, ensureEventStore } from "../../event-store.js";
 import { requireAdmin } from "../../admin-auth.js";
+import { sendFeedbackDecisionEmail } from "../../feedback-notification.js";
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 const statuses = new Set(["new", "reviewing", "published", "rejected", "closed"]);
@@ -39,7 +40,7 @@ export async function onRequestPatch(context) {
   if (!id || !statuses.has(status)) return json({ message: "Pedido inválido." }, 400);
 
   const feedback = await context.env.EVENT_RADAR_DB.prepare(`
-    SELECT id, kind, event_id, event_name, event_date, city, official_url
+    SELECT id, kind, event_id, event_name, event_date, city, official_url, sender_name, sender_email, status
     FROM feedback WHERE id = ?
   `).bind(id).first();
   if (!feedback) return json({ message: "Pedido não encontrado." }, 404);
@@ -86,5 +87,9 @@ export async function onRequestPatch(context) {
     id
   ).run();
   if (!result.meta.changes) return json({ message: "Pedido não encontrado." }, 404);
-  return json({ ok: true });
+  const shouldNotify = feedback.status !== status && ["published", "rejected"].includes(status) && feedback.sender_email;
+  const notification = shouldNotify
+    ? await sendFeedbackDecisionEmail(context.env, { ...feedback, event_name: reviewValues.eventName || feedback.event_name }, status)
+    : "not_needed";
+  return json({ ok: true, notification });
 }

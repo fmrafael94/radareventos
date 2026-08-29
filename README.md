@@ -62,6 +62,6 @@ Os ficheiros de imagem enviados com sugestões passam por validação do ficheir
 
 Antes de ativar esta funcionalidade, executa a migração `database/migrations/0004_feedback_image_moderation.sql` na D1, acrescenta a binding `AI` (já declarada no `wrangler.jsonc`) e aceita uma vez a licença do modelo Meta Llama 3.2 Vision no Cloudflare.
 
-## Acompanhar pedidos
+## Notificações de pedidos
 
-Se a base já existia antes do acompanhamento de pedidos, executa também, uma única vez, `database/migrations/0006_feedback_tracking.sql`. O formulário entrega uma referência de 12 caracteres; a pessoa pode consultá-la em `/acompanhar.html` com o mesmo e-mail usado no envio. A consulta devolve apenas o estado do pedido.
+Quando uma sugestão é publicada ou recusada no painel, o Desvio envia uma notificação para o e-mail indicado no formulário. Consulta `CLOUDFLARE_SETUP.md` para ligar o fornecedor de envio.

@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS feedback (
   message TEXT NOT NULL,
   sender_name TEXT,
   sender_email TEXT,
-  tracking_code TEXT UNIQUE,
   status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'published', 'rejected', 'closed')),
   staff_note TEXT,
   created_at TEXT NOT NULL,

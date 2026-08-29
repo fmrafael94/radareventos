@@ -31,11 +31,11 @@ Não é preciso adicionar Google Analytics nem editar o código. Verás visitas,
 
 Se já tinhas criado a base antes de esta opção de cartaz existir, executa também, uma única vez, o conteúdo de `database/migrations/0002_feedback_posters.sql`.
 
-Para ativar o acompanhamento público de pedidos e a proteção contra tentativas repetidas, executa também uma vez a migração `database/migrations/0006_feedback_tracking.sql`. A página `/acompanhar.html` só mostra o estado a quem tiver simultaneamente a referência de 12 caracteres e o e-mail usado no envio.
+Para ativar a proteção contra tentativas repetidas, executa também uma vez a migração `database/migrations/0006_feedback_tracking.sql`.
 
 ### Limite de pedidos no Worker
 
-O Worker aplica um limite real antes de validar o Turnstile ou consultar pedidos: quatro envios de formulário em 15 minutos e 12 consultas de acompanhamento em 15 minutos, por origem com hash SHA-256. O IP em claro nunca é gravado na D1; os contadores expiram automaticamente. Mantém o Turnstile ativo — é a segunda camada contra abuso.
+O Worker aplica um limite real antes de validar o Turnstile: quatro envios de formulário em 15 minutos por origem com hash SHA-256. O IP em claro nunca é gravado na D1; os contadores expiram automaticamente. Mantém o Turnstile ativo — é a segunda camada contra abuso.
 
 ## 4. Guardar cartazes enviados para revisão
 
@@ -97,7 +97,24 @@ SELECT * FROM feedback WHERE status = 'new' ORDER BY created_at DESC;
 
 Depois de rever, atualiza o estado para `reviewing`, `published`, `rejected` ou `closed`. Publicar uma sugestão continua a significar atualizar `events.js` com fonte oficial e data de verificação.
 
-## 8. Email e domínio (fazemos depois)
+## 8. Notificações por e-mail
+
+O formulário deixa de expor uma página de acompanhamento. Quando o pedido é aceite ou recusado no admin, o Worker envia uma mensagem para o e-mail submetido.
+
+1. Cria uma conta no [Resend](https://resend.com) e verifica o domínio de envio. Enquanto o `odesvio.pt` não estiver disponível, podes usar um domínio que controles; o endereço remetente tem de pertencer a um domínio verificado.
+2. Cria uma API key no Resend e, no Worker, guarda estes dois valores como secrets:
+
+```sh
+npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put OUTBOUND_EMAIL_FROM
+```
+
+3. Para `OUTBOUND_EMAIL_FROM`, usa por exemplo `Desvio <ola@teudominio.pt>`.
+4. Faz deploy. Ao publicar ou recusar um pedido, o admin confirma se o e-mail foi enviado.
+
+O segredo nunca entra no GitHub. Sem estes dois valores, o pedido continua a ser atualizado normalmente, mas o admin avisa que o e-mail ainda não está configurado.
+
+## 9. Email e domínio (fazemos depois)
 
 Quando comprares o domínio, criaremos pelo menos:
 
@@ -106,6 +123,6 @@ Quando comprares o domínio, criaremos pelo menos:
 
 Esses endereços podem encaminhar para a tua caixa de email atual. Antes de ativar os formulários para o público, atualiza `privacidade.html` com o nome legal do responsável e esse contacto de privacidade.
 
-## 9. Ligar o domínio
+## 10. Ligar o domínio
 
 No projeto Pages: **Custom domains** → **Set up a domain**. Se o domínio principal estiver no Cloudflare, aceita a configuração de DNS sugerida. Depois confirma que tanto `www` como a versão sem `www` encaminham para uma única versão escolhida.

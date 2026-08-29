@@ -489,3 +489,24 @@ footer nav a { font-size:14px; line-height:1.45; }
 .featured-poster.poster-unavailable img { opacity:0; }
 .featured-rail[aria-busy="true"],.calendar-grid[aria-busy="true"] { min-height:118px; opacity:.58; background:linear-gradient(100deg,rgba(226,231,219,.48) 20%,rgba(255,255,255,.72) 38%,rgba(226,231,219,.48) 58%) 0 0/220% 100%; animation:desvio-shimmer 1.2s ease-in-out infinite; } @keyframes desvio-shimmer { to { background-position:-220% 0; } }
 @media (prefers-reduced-motion:reduce) { .featured-rail[aria-busy="true"],.calendar-grid[aria-busy="true"] { animation:none; } }
+
+/* Location is a visual recommendation, not another dense filter result. */
+.nearby-events { margin:42px 0 46px; padding:24px; border:1px solid #d6ddd0; border-radius:17px; background:linear-gradient(140deg,rgba(222,237,207,.58),rgba(255,253,248,.84) 48%,rgba(224,235,228,.62)); box-shadow:0 16px 36px rgba(45,70,52,.08); }.nearby-heading { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:17px; }.nearby-heading .kicker { margin-bottom:5px; color:#557546; }.nearby-heading h2 { margin:0; color:#1c3225; font:700 30px/.98 "Space Grotesk",sans-serif; letter-spacing:-.065em; }.nearby-heading>p { margin:0 0 2px; color:#557060; font:600 12px "DM Mono",monospace; }.nearby-rail { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }.nearby-card a { display:block; min-width:0; color:#1c2a21; text-decoration:none; }.nearby-poster { position:relative; display:grid; width:100%; aspect-ratio:3/4; place-items:center; overflow:hidden; border-radius:11px; background:var(--poster-image) center/cover no-repeat; box-shadow:0 8px 19px rgba(34,56,40,.14); isolation:isolate; }.nearby-poster::before { content:""; position:absolute; z-index:-1; inset:-18px; background:var(--poster-image) center/cover no-repeat; filter:blur(15px) saturate(.8); transform:scale(1.14); }.nearby-poster img { display:block; width:auto; height:auto; max-width:88%; max-height:88%; filter:drop-shadow(0 6px 11px rgba(15,29,19,.25)); object-fit:contain; }.nearby-card time { display:block; margin-top:9px; color:#537247; font:600 11px "DM Mono",monospace; }.nearby-card h3 { display:-webkit-box; margin:3px 0 0; overflow:hidden; color:#1d2b22; font:700 17px/1.1 "DM Sans",Arial,sans-serif; letter-spacing:-.04em; -webkit-box-orient:vertical; -webkit-line-clamp:2; }.nearby-card a:hover h3,.nearby-card a:focus-visible h3 { color:#315e3d; text-decoration:underline; text-underline-offset:3px; }.nearby-card a:focus-visible { outline:3px solid #7e9e66; outline-offset:4px; }
+@media (max-width:760px) { .nearby-events { margin:32px 0 36px; padding:18px 14px 19px; border-radius:15px; }.nearby-heading { align-items:start; margin:0 3px 13px; }.nearby-heading h2 { font-size:27px; }.nearby-heading>p { padding-top:4px; font-size:10px; }.nearby-rail { display:flex; gap:11px; margin-right:-14px; padding:0 14px 3px 3px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }.nearby-rail::-webkit-scrollbar { display:none; }.nearby-card { flex:0 0 min(42vw,166px); scroll-snap-align:start; }.nearby-card h3 { font-size:16px; }.nearby-card time { font-size:10px; } }
+@media (max-width:580px) { footer { justify-items:center; text-align:center; } footer>span,footer p { max-width:29ch; text-align:center; } footer nav a { text-align:center; } }
+
+/* Five suggestions remain one horizontal story on large screens: three cards
+   are visible and the rail advances without moving the document itself. */
+@media (min-width:761px) {
+  .featured-rail { display:flex; gap:16px; overflow:hidden; scroll-behavior:smooth; scroll-snap-type:x mandatory; }
+  .featured-card { flex:0 0:calc((100% - 32px) / 3); min-width:0; scroll-snap-align:start; }
+}
+
+/* On desktop the footer is a calm, centred navigation bar rather than four
+   competing text blocks. The promoter invitation remains visually secondary. */
+@media (min-width:581px) {
+  footer { grid-template-columns:minmax(250px,1fr) auto minmax(300px,1fr); gap:28px; max-width:1120px; padding:32px 28px 38px; }
+  footer>span { justify-self:start; white-space:nowrap; }
+  footer nav { gap:20px; }
+  footer p { justify-self:end; max-width:330px; text-align:right; }
+}
