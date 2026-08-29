@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="midnight.css" />
   </head>
   <body>
+    <a class="skip-link" href="#agenda">Saltar para a agenda</a>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início">Desvio</a>
       <p>Música em Portugal</p>
@@ -46,6 +47,13 @@
 
       <section id="agenda" class="browse-panel" aria-labelledby="browse-title">
         <div class="browse-heading"><div><h2 id="browse-title">Encontra algo teu.</h2></div></div>
+        <nav class="agenda-shortcuts" aria-label="Atalhos rápidos da agenda">
+          <button type="button" data-quick-pick="today">Hoje</button>
+          <button type="button" data-quick-pick="weekend">Este fim de semana</button>
+          <button type="button" data-quick-pick="week">Próximos 7 dias</button>
+          <button type="button" data-quick-pick="free">Entrada livre</button>
+          <button type="button" data-nearby-shortcut>Perto de mim</button>
+        </nav>
         <div class="agenda-search">
           <label class="agenda-search-input"><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" aria-label="Procurar artista, sala ou cidade" /></label>
           <button id="filter-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="filter-panel"><span>Filtros</span><i aria-hidden="true">+</i></button>
@@ -95,7 +103,7 @@
       <section class="agenda" aria-label="Eventos encontrados">
         <div class="agenda-view-switch" role="group" aria-label="Modo de visualização"><button type="button" data-agenda-view="list" aria-pressed="true">Lista</button><button type="button" data-agenda-view="calendar" aria-pressed="false">Calendário</button></div>
         <div class="event-list-heading" aria-hidden="true"><span>Data</span><span>Evento</span><span>Formato</span><span>Bilhetes</span><span>Detalhes</span></div>
-        <div id="event-list" class="event-list"></div>
+        <div id="event-list" class="event-list" aria-live="polite"></div>
         <section id="calendar-view" class="calendar-view" aria-label="Calendário de eventos" hidden><header class="calendar-heading"><button id="calendar-previous" type="button" aria-label="Mês anterior">←</button><h3 id="calendar-label"></h3><button id="calendar-next" type="button" aria-label="Mês seguinte">→</button></header><div id="calendar-grid" class="calendar-grid"></div></section>
         <p id="empty-state" class="empty-state" hidden>Não encontrámos eventos com esta seleção.</p>
         <nav id="pagination" class="pagination" aria-label="Paginação de eventos" hidden>
@@ -119,7 +127,7 @@
 
     <footer>
       <span>Desvio — Menos procura. Mais música.</span>
-      <nav aria-label="Informação legal"><a href="termos.html" target="_blank" rel="noopener">Termos</a><a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a><a href="cookies.html" target="_blank" rel="noopener">Cookies</a></nav>
+      <nav aria-label="Informação legal"><a href="termos.html" target="_blank" rel="noopener">Termos</a><a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a><a href="cookies.html" target="_blank" rel="noopener">Cookies</a><a href="acompanhar.html" target="_blank" rel="noopener">Acompanhar pedido</a></nav>
       <p>És promotor ou geres uma sala? <button class="report-link feedback-open" type="button" data-feedback-kind="promoter">Junta a tua agenda ao Desvio.</button></p>
     </footer>
     <dialog id="poster-lightbox" class="poster-lightbox" aria-label="Cartaz ampliado">
@@ -167,6 +175,7 @@
           </div>
         </fieldset>
         <label><span id="feedback-message-label">O que devemos adicionar?</span><textarea name="message" rows="4" maxlength="2500" placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante." required></textarea></label>
+        <label class="feedback-trap" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off" /></label>
         <label class="feedback-consent"><input name="privacyAcknowledged" type="checkbox" required /><span>Li a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e compreendo que estes dados serão usados apenas para analisar este pedido.</span></label>
         <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>
         <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>

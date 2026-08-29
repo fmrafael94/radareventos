@@ -1,4 +1,5 @@
 import { assessUploadedImage } from "../image-moderation.js";
+import { withinRequestLimit } from "../request-rate-limit.js";
 
 const json = (body, status = 200) => Response.json(body, {
   status,
@@ -44,6 +45,17 @@ export async function onRequestPost(context) {
 
   const value = name => payload.get(name);
   const field = (name, limit) => text(value(name), limit);
+  if (field("website", 80)) return json({ message: "Pedido inválido." }, 400);
+  try {
+    const allowed = await withinRequestLimit(context.env.EVENT_RADAR_DB, context.request, {
+      scope: "feedback",
+      limit: 4,
+      windowMs: 15 * 60 * 1000
+    });
+    if (!allowed) return json({ message: "Recebemos muitos pedidos deste dispositivo. Tenta novamente dentro de alguns minutos." }, 429);
+  } catch {
+    return json({ message: "A proteção contra abuso está temporariamente indisponível. Tenta novamente." }, 503);
+  }
 
   const requestedKind = field("kind", 20);
   const kind = requestedKind === "correction" ? "correction" : requestedKind === "promoter" ? "promoter" : "suggestion";
@@ -130,12 +142,13 @@ export async function onRequestPost(context) {
         ? "Link oficial enviado para revisão."
         : "Sugestão enviada para revisão.");
   const id = crypto.randomUUID();
+  const trackingCode = crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
   await context.env.EVENT_RADAR_DB.prepare(`
     INSERT INTO feedback (
       id, kind, event_id, event_name, event_date, city, official_url,
       poster_url, poster_object_key, poster_file_name, image_moderation_status, image_moderation_reason,
-      message, sender_name, sender_email, status, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
+      message, sender_name, sender_email, tracking_code, status, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
   `).bind(
     id,
     kind === "promoter" ? "suggestion" : kind,
@@ -151,8 +164,9 @@ export async function onRequestPost(context) {
     imageModerationReason || null,
     message,
     senderName || null,
-    email || null
+    email || null,
+    trackingCode
   ).run();
 
-  return json({ ok: true, id });
+  return json({ ok: true, id, reference: trackingCode });
 }

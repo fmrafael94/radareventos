@@ -787,20 +787,26 @@ const eventUrl = event => `/evento/${encodeURIComponent(event.id)}`;
 
 function renderFeatured() {
   const today = shiftedIso(0);
+  featuredRail.setAttribute("aria-busy", "true");
   window.clearInterval(featuredAutoscroll);
   const featured = EVENTS
     .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today)
     .filter(event => !["Bilhetes a confirmar", "Esgotado", "Cancelado"].includes(availabilityLabel(event)))
     .sort((a, b) => Math.max(eventDate(a.date).getTime(), eventDate(today).getTime()) - Math.max(eventDate(b.date).getTime(), eventDate(today).getTime()))
     .slice(0, 5);
-  featuredRail.innerHTML = featured.map(event => {
+  featuredRail.innerHTML = featured.length ? featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     return `<article class="featured-card" data-event-id="${event.id}">
-      <span class="featured-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"></span>
+      <span class="featured-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy" decoding="async"></span>
       <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${eventUrl(event)}" target="_blank" rel="noopener">Abrir evento <svg class="link-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></a></div>
     </article>`;
-  }).join("");
+  }).join("") : '<p class="featured-empty">Ainda estamos a confirmar os próximos eventos.</p>';
+  featuredRail.querySelectorAll("img").forEach(image => image.addEventListener("error", () => {
+    image.closest(".featured-poster")?.classList.add("poster-unavailable");
+    image.alt = "Cartaz oficial temporariamente indisponível";
+  }, { once: true }));
   featuredRail.setAttribute("aria-label", "Cinco próximos eventos com entrada disponível");
+  featuredRail.setAttribute("aria-busy", "false");
   startFeaturedAutoscroll();
 }
 
@@ -852,6 +858,7 @@ function filteredEvents() {
 }
 
 function renderCalendar(matches) {
+  calendarGrid.setAttribute("aria-busy", "true");
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
   const firstDay = new Date(year, month, 1);
@@ -859,10 +866,13 @@ function renderCalendar(matches) {
   const mondayOffset = (firstDay.getDay() + 6) % 7;
   const eventByDay = new Map();
   matches.forEach(event => {
-    const date = eventDate(event.date);
-    if (date.getFullYear() !== year || date.getMonth() !== month) return;
-    const day = date.getDate();
-    eventByDay.set(day, [...(eventByDay.get(day) || []), event]);
+    const first = eventDate(event.date);
+    const last = eventDate(event.endDate || event.date);
+    for (const date = new Date(first); date <= last; date.setDate(date.getDate() + 1)) {
+      if (date.getFullYear() !== year || date.getMonth() !== month) continue;
+      const day = date.getDate();
+      eventByDay.set(day, [...(eventByDay.get(day) || []), event]);
+    }
   });
   calendarLabel.textContent = monthLabel(calendarCursor);
   const weekdayLabels = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
@@ -873,6 +883,7 @@ function renderCalendar(matches) {
     return `<article class="calendar-day"><time datetime="${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}">${day}</time>${events.slice(0, 3).map(event => `<a href="${eventUrl(event)}" target="_blank" rel="noopener">${event.title}</a>`).join("")}${events.length > 3 ? `<small>+${events.length - 3} eventos</small>` : ""}</article>`;
   });
   calendarGrid.innerHTML = weekdayLabels.map(day => `<span class="calendar-weekday">${day}</span>`).join("") + blanks.join("") + days.join("");
+  calendarGrid.setAttribute("aria-busy", "false");
 }
 
 function render() {
@@ -883,9 +894,11 @@ function render() {
   const visible = matches.slice(first, first + perPage);
   const calendarMode = state.view === "calendar";
   list.hidden = calendarMode;
+  list.setAttribute("aria-busy", "true");
   calendarView.hidden = !calendarMode;
   document.querySelector(".event-list-heading").hidden = calendarMode;
   list.innerHTML = visible.map(eventCard).join("");
+  list.setAttribute("aria-busy", "false");
   if (calendarMode) renderCalendar(matches);
   if (resultCount) resultCount.textContent = `${matches.length} ${matches.length === 1 ? "evento" : "eventos"}`;
   emptyState.hidden = matches.length !== 0;
@@ -949,15 +962,16 @@ document.querySelector("#clear-filters").addEventListener("click", () => {
 });
 document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEventListener("click", () => {
   const pick = button.dataset.quickPick;
-  const next = state.highlight === pick || (pick === "week" && state.date === "week") ? "" : pick;
-  state.highlight = pick === "week" ? "" : next;
-  state.date = pick === "week" && next ? "week" : state.date;
-  if (pick === "week" && !next) state.date = "";
+  const isDatePick = ["today", "weekend", "week"].includes(pick);
+  const next = isDatePick ? (state.date === pick ? "" : pick) : (state.highlight === pick ? "" : pick);
+  state.highlight = isDatePick ? "" : next;
+  state.date = isDatePick ? next : state.date;
   dateSelect.value = state.date;
   state.page = 1;
   document.querySelectorAll("[data-quick-pick]").forEach(item => item.setAttribute("aria-pressed", String(item === button && Boolean(next))));
   dateSelect.dispatchEvent(new Event("change"));
 }));
+document.querySelectorAll("[data-nearby-shortcut]").forEach(button => button.addEventListener("click", () => nearbyButton.click()));
 nearbyButton.addEventListener("click", () => {
   if (!navigator.geolocation) {
     nearbyHint.textContent = "Localização não disponível neste browser.";
@@ -1226,8 +1240,8 @@ feedbackForm.addEventListener("submit", async event => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
-    const reference = result.id ? ` Referência: ${String(result.id).slice(0, 8).toUpperCase()}.` : "";
-    feedbackStatus.textContent = `Recebido.${reference} Vamos rever a informação; usamos o e-mail indicado se precisarmos de confirmar algo.`;
+    const reference = result.reference ? ` <strong>${String(result.reference)}</strong>` : "";
+    feedbackStatus.innerHTML = `Recebido.${reference} Guarda esta referência para <a href="/acompanhar.html" target="_blank" rel="noopener">acompanhar o pedido</a>. Usamos o e-mail indicado se precisarmos de confirmar algo.`;
     discardFeedbackDraft();
     feedbackForm.reset();
     refreshFeedbackDraftNote();

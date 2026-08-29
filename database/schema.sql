@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS feedback (
   message TEXT NOT NULL,
   sender_name TEXT,
   sender_email TEXT,
+  tracking_code TEXT UNIQUE,
   status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'published', 'rejected', 'closed')),
   staff_note TEXT,
   created_at TEXT NOT NULL,
@@ -22,6 +23,16 @@ CREATE TABLE IF NOT EXISTS feedback (
 );
 
 CREATE INDEX IF NOT EXISTS feedback_status_created_at ON feedback(status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS request_rate_limits (
+  scope TEXT NOT NULL,
+  fingerprint TEXT NOT NULL,
+  window_start INTEGER NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (scope, fingerprint, window_start)
+);
+
+CREATE INDEX IF NOT EXISTS request_rate_limits_expiry ON request_rate_limits(window_start);
 
 CREATE TABLE IF NOT EXISTS admin_users (
   email TEXT PRIMARY KEY COLLATE NOCASE,
