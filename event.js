@@ -52,6 +52,8 @@ function render(event, poster) {
   const compactDate = compactEventDate(event);
   const shareUrl = eventUrl(event.id);
   const shareText = `${event.title} — ${date}, ${event.venue}, ${event.city}. Encontrado no Desvio.`;
+  const shareCaption = `${shareText}\n${shareUrl}`;
+  const posterDownloadUrl = `${location.origin}/api/event-poster/${encodeURIComponent(event.id)}`;
   const programme = festivalProgramme(event);
   const programmeDates = [...new Set(programme.map(item => item.date))];
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
@@ -101,9 +103,31 @@ function render(event, poster) {
   }
   page.querySelector("[data-share]").addEventListener("click", async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: `${event.title} — Desvio`, text: shareText, url: shareUrl }); }
-      catch { status.textContent = "Partilha cancelada."; }
-      return;
+      try {
+        // WhatsApp and Instagram receive this as a real image, with the event URL in its caption.
+        const posterResponse = await fetch(posterDownloadUrl);
+        const posterBlob = await posterResponse.blob();
+        if (!posterResponse.ok || !posterBlob.type.startsWith("image/")) throw new Error("poster-unavailable");
+        const extension = posterBlob.type.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+        const posterFile = new File([posterBlob], `${event.id}-desvio.${extension}`, { type: posterBlob.type });
+        const fileShare = { files: [posterFile] };
+        if (!navigator.canShare || navigator.canShare(fileShare)) {
+          await navigator.share({ title: `${event.title} — Desvio`, text: shareCaption, ...fileShare });
+          return;
+        }
+        throw new Error("file-share-unavailable");
+      } catch (error) {
+        // A cancelled native share should remain silent; a browser without file sharing falls back to the rich link.
+        if (error?.name === "AbortError") return;
+        try {
+          await navigator.share({ title: `${event.title} — Desvio`, text: shareText, url: shareUrl });
+          return;
+        } catch (fallbackError) {
+          if (fallbackError?.name === "AbortError") return;
+          status.textContent = "Não foi possível abrir a partilha.";
+          return;
+        }
+      }
     }
     try { await navigator.clipboard.writeText(shareUrl); status.textContent = "Link copiado."; }
     catch { status.textContent = `Copia este link: ${shareUrl}`; }
