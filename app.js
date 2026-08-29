@@ -783,7 +783,7 @@ function renderFeatured() {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     return `<article class="featured-card" data-event-id="${event.id}">
       <span class="featured-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy"></span>
-      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${eventUrl(event)}">Abrir evento ↗</a></div>
+      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${eventUrl(event)}" target="_blank" rel="noopener">Abrir evento ↗</a></div>
     </article>`;
   }).join("");
   featuredRail.setAttribute("aria-label", "Cinco próximos eventos com entrada disponível");
@@ -809,7 +809,7 @@ function eventCard(event) {
   const availability = availabilityLabel(event);
   const statusClass = availability === "Esgotado" ? "sold" : availability === "Cancelado" ? "cancelled" : availability === "Bilhetes a confirmar" ? "pending" : "";
   return `<article class="event-card" data-event-id="${event.id}">
-    <a class="event-card-link" href="${eventUrl(event)}" aria-label="Abrir ${event.title}">
+    <a class="event-card-link" href="${eventUrl(event)}" target="_blank" rel="noopener" aria-label="Abrir ${event.title} numa nova aba">
       <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
       <span class="event-main"><span class="event-title">${event.title}</span><span class="event-venue">${event.venue} · ${event.city}</span></span>
       <span class="format">${eventType(event)}</span>
@@ -871,7 +871,8 @@ function resetAgendaSelection() {
   [dateSelect].forEach(select => select.dispatchEvent(new Event("change")));
 }
 function openFeaturedEvent(id) {
-  location.assign(`/evento/${encodeURIComponent(id)}`);
+  const eventPage = `/evento/${encodeURIComponent(id)}`;
+  window.open(eventPage, "_blank", "noopener,noreferrer") || location.assign(eventPage);
 }
 function renderSources() {
   document.querySelector("#source-groups").innerHTML = SOURCE_GROUPS.map(group => `<article class="source-group"><h3>${group.title}</h3>${group.sources.map(([name, type, url]) => url ? `<a href="${url}" target="_blank" rel="noopener">${name}<span>${type}</span></a>` : `<p class="source-pending"><b>${name}</b><span>${type}</span></p>`).join("")}</article>`).join("");
