@@ -20,7 +20,7 @@ async function posterFor(id) {
 function ticketButton(event) {
   if (event.availability === "Esgotado") return `<span class="event-ticket muted">Esgotado</span>`;
   if (!event.ticketUrl) return `<span class="event-ticket muted">Bilhetes por confirmar</span>`;
-  return `<a class="event-ticket" href="${escapeHtml(event.ticketUrl)}" target="_blank" rel="noopener">${escapeHtml(event.tickets || "Consultar bilheteira")} ↗</a>`;
+  return `<a class="event-ticket" href="${escapeHtml(event.ticketUrl)}" target="_blank" rel="noopener"><span class="event-action-full">${escapeHtml(event.tickets || "Consultar bilheteira")} ↗</span><span class="event-action-short">Bilhetes ↗</span></a>`;
 }
 
 const eventSeriesName = event => String(event.title || "").split(" — ")[0].replace(/\s+\d{4}$/, "").trim();
@@ -43,7 +43,6 @@ function render(event, poster) {
   const programme = festivalProgramme(event);
   const programmeDates = [...new Set(programme.map(item => item.date))];
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
-  const verification = [event.verifiedAt ? `Fonte revista em ${event.verifiedAt}` : "Fonte oficial indicada", event.salesCheckedAt ? `bilheteira revista em ${event.salesCheckedAt}` : "bilheteira a confirmar"].join(" · ");
   page.innerHTML = `<article class="event-view">
     <div class="event-main">
       <div class="event-overview">
@@ -52,9 +51,9 @@ function render(event, poster) {
       </div>
       <div class="event-information">
         ${programmeDates.length ? `<section class="festival-programme"><p class="event-eyebrow">Programação</p><div class="festival-tabs" role="tablist" aria-label="Dias do festival">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" data-programme-date="${itemDate}" aria-selected="${index === 0}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(programmeTitle(event, item.title))}</strong><small>${escapeHtml(item.venue)}</small></div></article>`).join("")}</div>`).join("")}</section>` : ""}
-        <div class="event-actions">${ticketButton(event)}<a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener">Fonte oficial ↗</a></div>
+        <div class="event-actions">${ticketButton(event)}<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ↗</span><span class="event-action-short">Percurso ↗</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ↗</span><span class="event-action-short">Fonte ↗</span></a></div>
       </div>
-      <div class="event-trust"><b>Informação com origem</b><p>${escapeHtml(verification)}. Confirma sempre horários e disponibilidade na fonte oficial.</p><a href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener">Ver percurso até ao local ↗</a></div>
+      <p class="event-disclaimer">Confirma sempre horários e disponibilidade na fonte oficial.</p>
     </div>
     <aside class="event-sidebar">
       <div class="event-poster-panel">

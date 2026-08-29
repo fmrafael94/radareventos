@@ -438,13 +438,36 @@ body { font-size:17px; line-height:1.5; }
 .featured-copy h3 { font-size:18px; line-height:1.15; }.featured-copy time,.featured-copy a { font-size:14px; line-height:1.4; }
 .browse-heading h2 { font-size:34px; }.agenda-search-input input { font-size:17px; }.filter-toggle { font-size:15px; }.filter-grid label>span,.location-bar label>span,.multi-filter>span { font-size:12px; }.location-bar label select,.multi-filter strong { font-size:15px; }
 .quick-picks>span,.quick-picks button,.clear-button { font-size:14px; }
-.event-card-link { display:grid; grid-template-columns:66px minmax(190px,1.4fr) minmax(145px,.8fr) 120px 25px; gap:18px; align-items:center; min-height:88px; padding:11px 8px 11px 0; color:inherit; text-decoration:none; transition:padding .18s ease,background .18s ease,transform .18s ease; }.event-card-link:hover,.event-card-link:focus-visible { padding-left:10px; background:rgba(223,235,201,.45); outline:0; }.date-box b { font-size:22px; }.date-box span { font-size:12px; }.event-title { font-size:21px; }.event-venue { font-size:16px; line-height:1.4; }.format { font-size:12px; }.status { padding:7px 9px; font-size:11px; }.chevron { font-size:20px; }
+.event-card-link { display:grid; grid-template-columns:66px minmax(190px,1.4fr) minmax(145px,.8fr) 120px 25px; gap:18px; align-items:center; min-height:88px; padding:11px 8px 11px 0; color:inherit; text-decoration:none; transition:padding .18s ease,background .18s ease,transform .18s ease; }.event-card-link:hover,.event-card-link:focus-visible { padding-left:10px; background:rgba(223,235,201,.45); outline:0; }.date-box b { font-size:22px; }.date-box span { font-size:12px; }.event-title { font-size:21px; }.event-venue { font-size:16px; line-height:1.4; }.format { font-size:12px; }.status { padding:7px 9px; font-size:11px; }.chevron { display:grid; width:20px; height:20px; place-items:center; }.chevron svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
 ::view-transition-old(root) { animation:desvio-page-out .18s ease both; } ::view-transition-new(root) { animation:desvio-page-in .28s ease both; } @keyframes desvio-page-out { to { opacity:0; transform:scale(.985); } } @keyframes desvio-page-in { from { opacity:0; transform:scale(1.018); } }
 @media (max-width:900px) { .event-card-link { grid-template-columns:58px 1fr 100px 24px; gap:12px; }.event-card-link .format { display:none; } }
-@media (max-width:580px) { body { font-size:16px; }.brand { font-size:19px; }.submit-link { font-size:14px; }.intro>p:not(.kicker) { font-size:17px; }.featured-copy h3 { font-size:17px; }.featured-copy time,.featured-copy a { font-size:14px; }.browse-heading h2 { font-size:30px; }.event-card-link { grid-template-columns:52px minmax(0,1fr); min-height:84px; gap:10px; padding:11px 2px; }.event-card-link .format,.event-card-link .status,.event-card-link .chevron { display:none; }.date-box b { font-size:19px; }.date-box span { font-size:11px; }.event-title { font-size:18px; white-space:normal; line-height:1.15; }.event-venue { overflow:visible; white-space:normal; font-size:15px; } }
+@media (max-width:580px) { body { font-size:16px; }.brand { font-size:19px; }.submit-link { font-size:14px; }.intro>p:not(.kicker) { font-size:17px; }.featured-copy h3 { font-size:17px; }.featured-copy time,.featured-copy a { font-size:14px; }.browse-heading h2 { font-size:30px; }.event-card-link { grid-template-columns:52px minmax(0,1fr) 22px; min-height:84px; gap:10px; padding:11px 2px; }.event-card-link .format,.event-card-link .status { display:none; }.event-card-link .chevron { display:grid; }.date-box b { font-size:19px; }.date-box span { font-size:11px; }.event-title { font-size:18px; white-space:normal; line-height:1.15; }.event-venue { overflow:visible; white-space:normal; font-size:15px; } }
 
 /* The footer is navigation, not fine print. Keep it readable at a glance. */
 footer { padding:30px 28px 38px; font-size:16px; line-height:1.45; }
 footer nav { gap:22px; }
 footer nav a { font-size:14px; line-height:1.45; }
 @media (max-width:580px) { footer { padding:26px 20px 34px; font-size:16px; } footer nav a { font-size:15px; } }
+
+/* Mobile editorial rhythm: featured events read as one clear section and the
+   footer returns to compact navigation instead of a second masthead. */
+@media (max-width:580px) {
+  .featured-events { margin:34px 0 42px; }
+  .featured-heading { display:grid; grid-template-columns:1fr; gap:9px; margin:0 0 17px; }
+  .featured-heading h2 { margin:0; font-size:clamp(30px,9vw,36px); line-height:.98; letter-spacing:-.06em; }
+  .featured-description { max-width:30ch; margin-top:0; font-size:15px; line-height:1.38; }
+  .featured-heading>a { justify-self:start; padding:6px 0 2px; font-size:13px; }
+
+  footer { gap:17px; padding:30px 20px 36px; font-size:15px; line-height:1.4; }
+  footer>span { max-width:26ch; color:#315c40; font-size:16px; line-height:1.3; }
+  footer nav { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; gap:0; border-top:1px solid #d0d5cd; border-bottom:1px solid #d0d5cd; }
+  footer nav a { padding:11px 0; color:#5c6660; font-size:13px; text-align:left; text-underline-offset:3px; }
+  footer p { max-width:29ch; margin:0; color:#66706a; font-size:15px; line-height:1.45; text-align:left; }
+  footer .report-link { font-size:15px; line-height:inherit; }
+
+  .featured-card { display:flex; flex-direction:column; }
+  .featured-copy { flex:1; width:100%; }
+  .featured-copy a { align-self:center; margin-top:auto; }
+}
+
+@media (min-width:581px) { .featured-card { display:flex; flex-direction:column; }.featured-copy { flex:1; width:100%; }.featured-copy a { align-self:center; margin-top:auto; } }

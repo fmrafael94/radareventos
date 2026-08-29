@@ -828,7 +828,7 @@ function eventCard(event) {
       <span class="event-main"><span class="event-title">${event.title}</span><span class="event-venue">${event.venue} · ${event.city}</span></span>
       <span class="format">${eventType(event)}</span>
       <span class="status ${statusClass}">${availability}</span>
-      <span class="chevron">↗</span>
+      <span class="chevron" aria-hidden="true"><svg viewBox="0 0 20 20" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></span>
     </a>
   </article>`;
 }
