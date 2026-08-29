@@ -92,7 +92,6 @@ function render(event, poster) {
   const compactDate = compactEventDate(event);
   const shareUrl = eventUrl(event.id);
   const shareText = `${event.title}\n${compactDate} · ${event.venue}, ${event.city}`;
-  const shareCaption = `${shareText}\n${shareUrl}`;
   const posterDownloadUrl = `${location.origin}/api/event-poster/${encodeURIComponent(event.id)}`;
   const programme = festivalProgramme(event);
   const programmeDates = [...new Set(programme.map(item => item.date))];
@@ -106,7 +105,7 @@ function render(event, poster) {
       </div>
       <div class="event-information">
         ${programmeDates.length ? `<section class="festival-programme"><p class="event-eyebrow">Programação</p><div class="festival-tabs" role="tablist" aria-label="Dias do festival">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" id="programme-tab-${index}" data-programme-date="${itemDate}" aria-controls="programme-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? "0" : "-1"}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" role="tabpanel" id="programme-panel-${index}" aria-labelledby="programme-tab-${index}" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(programmeTitle(event, item.title))}</strong><small>${escapeHtml(item.venue)}</small></div></article>`).join("")}</div>`).join("")}</section>` : ""}
-        <div class="event-actions">${ticketButton(event)}<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ${arrowIcon}</span><span class="event-action-short">Percurso ${arrowIcon}</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ${arrowIcon}</span><span class="event-action-short">Fonte ${arrowIcon}</span></a><button class="event-calendar" type="button" data-calendar><span class="event-action-full">Adicionar ao calendário ${calendarIcon}</span><span class="event-action-short">Calendário ${calendarIcon}</span></button></div>
+        <div class="event-actions">${ticketButton(event)}<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ${arrowIcon}</span><span class="event-action-short">Percurso ${arrowIcon}</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ${arrowIcon}</span><span class="event-action-short">Fonte ${arrowIcon}</span></a><button class="event-calendar" type="button" data-calendar><span class="event-action-full">Adicionar ao Calendário ${calendarIcon}</span><span class="event-action-short">Adicionar ao Calendário ${calendarIcon}</span></button></div>
       </div>
       ${related.length ? `<section class="similar-events" aria-labelledby="similar-title"><p class="event-eyebrow">Pelo caminho</p><h2 id="similar-title">Também pode interessar.</h2><div>${related.map(item => `<a href="${eventUrl(item.id)}" target="_blank" rel="noopener"><time datetime="${escapeHtml(item.date)}">${escapeHtml(compactEventDate(item))}</time><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(`${item.venue} · ${item.city}`)}</span></a>`).join("")}</div></section>` : ""}
       <p class="event-disclaimer">Confirma sempre horários e disponibilidade na fonte oficial.</p>
@@ -127,18 +126,19 @@ function render(event, poster) {
   </article>`;
   page.setAttribute("aria-busy", "false");
   const status = page.querySelector(".share-status");
-  page.querySelector("[data-calendar]").addEventListener("click", async () => {
+  page.querySelector("[data-calendar]").addEventListener("click", () => {
     const file = calendarFile(event, shareUrl);
     try {
-      if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
-        await navigator.share({ files: [file], title: event.title, text: "Adicionar este evento ao calendário." });
-        return;
-      }
       const download = document.createElement("a");
       download.href = URL.createObjectURL(file);
       download.download = file.name;
+      download.style.display = "none";
+      document.body.append(download);
       download.click();
-      window.setTimeout(() => URL.revokeObjectURL(download.href), 1000);
+      window.setTimeout(() => {
+        URL.revokeObjectURL(download.href);
+        download.remove();
+      }, 1000);
     } catch (error) {
       if (error?.name !== "AbortError") status.textContent = "Não foi possível preparar o calendário.";
     }
@@ -186,29 +186,13 @@ function render(event, poster) {
   page.querySelector("[data-share]").addEventListener("click", async () => {
     if (navigator.share) {
       try {
-        // WhatsApp and Instagram receive this as a real image, with the event URL in its caption.
-        const posterResponse = await fetch(posterDownloadUrl);
-        const posterBlob = await posterResponse.blob();
-        if (!posterResponse.ok || !posterBlob.type.startsWith("image/")) throw new Error("poster-unavailable");
-        const extension = posterBlob.type.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
-        const posterFile = new File([posterBlob], `${event.id}-desvio.${extension}`, { type: posterBlob.type });
-        const fileShare = { files: [posterFile] };
-        if (!navigator.canShare || navigator.canShare(fileShare)) {
-          await navigator.share({ title: `${event.title} — Desvio`, text: shareCaption, ...fileShare });
-          return;
-        }
-        throw new Error("file-share-unavailable");
+        // Share one canonical URL. Messaging apps then fetch this page's Open Graph
+        // metadata and the real official poster instead of receiving a loose file.
+        await navigator.share({ title: `${event.title} — Desvio`, text: shareText, url: shareUrl });
+        return;
       } catch (error) {
-        // A cancelled native share should remain silent; a browser without file sharing falls back to the rich link.
+        // A cancelled native share should remain silent; other failures use copy.
         if (error?.name === "AbortError") return;
-        try {
-          await navigator.share({ title: `${event.title} — Desvio`, text: shareText, url: shareUrl });
-          return;
-        } catch (fallbackError) {
-          if (fallbackError?.name === "AbortError") return;
-          status.textContent = "Não foi possível abrir a partilha.";
-          return;
-        }
       }
     }
     try { await navigator.clipboard.writeText(shareUrl); status.textContent = "Link copiado."; }
