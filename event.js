@@ -23,13 +23,25 @@ function ticketButton(event) {
   return `<a class="event-ticket" href="${escapeHtml(event.ticketUrl)}" target="_blank" rel="noopener">${escapeHtml(event.tickets || "Consultar bilheteira")} ↗</a>`;
 }
 
-const relatedEvents = event => (window.EVENTS || [])
-  .filter(item => item.id !== event.id && !item.seriesId && item.date >= event.date)
+const eventSeriesName = event => String(event.title || "").split(" — ")[0].replace(/\s+\d{4}$/, "").trim();
+const relatedEvents = event => {
+  const seriesName = eventSeriesName(event);
+  return (window.EVENTS || [])
+  .filter(item => item.id !== event.id && !item.seriesId && item.date >= event.date && !item.title.startsWith(`${seriesName} —`))
   .map(item => ({ item, score: (item.city === event.city ? 3 : 0) + (item.venue === event.venue ? 2 : 0) + (item.genres || []).filter(genre => (event.genres || []).includes(genre)).length }))
   .filter(({ score }) => score > 0)
   .sort((a, b) => b.score - a.score || a.item.date.localeCompare(b.item.date))
   .slice(0, 3)
   .map(({ item }) => item);
+};
+const festivalProgramme = event => {
+  if (!event.endDate) return [];
+  const seriesName = eventSeriesName(event);
+  return (window.EVENTS || [])
+    .filter(item => item.id !== event.id && item.title.startsWith(`${seriesName} —`) && item.date >= event.date && item.date <= event.endDate)
+    .sort((a, b) => a.date.localeCompare(b.date) || String(a.time || "").localeCompare(String(b.time || "")));
+};
+const shortDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(eventDate(iso)).replace(".", "");
 
 const roundedRect = (context, x, y, width, height, radius) => {
   const r = Math.min(radius, width / 2, height / 2);
@@ -137,14 +149,27 @@ function render(event, poster) {
   const shareUrl = eventUrl(event.id);
   const shareText = `${event.title} — ${date}, ${event.venue}, ${event.city}. Encontrado no Desvio.`;
   const related = relatedEvents(event);
+  const programme = festivalProgramme(event);
+  const programmeDates = [...new Set(programme.map(item => item.date))];
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
   const verification = [event.verifiedAt ? `Fonte revista em ${event.verifiedAt}` : "Fonte oficial indicada", event.salesCheckedAt ? `bilheteira revista em ${event.salesCheckedAt}` : "bilheteira a confirmar"].join(" · ");
   page.innerHTML = `<article class="event-view">
-    <div class="event-view-main">
+    <div class="event-overview">
       <p class="event-eyebrow">${escapeHtml(event.type || "Concerto")} · ${escapeHtml(event.city)}</p>
       <h1>${escapeHtml(event.title)}</h1>
       <p class="event-lede">${escapeHtml(date)} · ${escapeHtml(event.time || "Horário a confirmar")}<br>${escapeHtml(event.venue)}, ${escapeHtml(event.city)}</p>
       <div class="event-actions">${ticketButton(event)}<a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener">Fonte oficial ↗</a></div>
+    </div>
+    <aside class="share-panel">
+      <div class="share-card" ${poster ? `style="--poster:url('${encodeURI(poster)}')"` : ""}>
+        ${poster ? `<img src="${escapeHtml(poster)}" alt="Cartaz oficial de ${escapeHtml(event.title)}" />` : `<div class="share-card-empty">Desvio</div>`}
+      </div>
+      <div class="share-copy"><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>Guarda uma Story pronta ou envia o link do evento.</p></div>
+      <div class="share-actions"><button type="button" data-share-image>Partilhar imagem</button><button type="button" class="secondary" data-copy>Copiar link</button></div>
+      <details class="share-more"><summary>Mais opções de partilha</summary><div class="share-actions"><button type="button" class="secondary" data-save-image>Guardar imagem</button><button type="button" class="secondary" data-share>Partilhar link</button><a class="secondary" href="mailto:?subject=${encodeURIComponent(`${event.title} — Desvio`)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}">Enviar por email</a></div></details>
+      <p class="share-status" aria-live="polite"></p>
+    </aside>
+    <div class="event-information">
       <dl class="event-facts">
         <div><dt>Géneros</dt><dd>${escapeHtml((event.genres || []).join(" · ") || "Por confirmar")}</dd></div>
         <div><dt>Estado da entrada</dt><dd>${escapeHtml(event.availability || "Por confirmar")}</dd></div>
@@ -154,20 +179,17 @@ function render(event, poster) {
         <div><dt>Verificado</dt><dd>${escapeHtml(event.verifiedAt || "Por confirmar")}</dd></div>
         ${event.lineup ? `<div class="event-fact-wide"><dt>Cartaz</dt><dd>${escapeHtml(event.lineup)}</dd></div>` : ""}
       </dl>
+      ${programmeDates.length ? `<section class="festival-programme"><p class="event-eyebrow">Programação</p><div class="festival-tabs" role="tablist" aria-label="Dias do festival">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" data-programme-date="${itemDate}" aria-selected="${index === 0}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(item.title.replace(`${eventSeriesName(event)} — `, ""))}</strong><small>${escapeHtml(item.venue)}</small></div></article>`).join("")}</div>`).join("")}</section>` : ""}
       <div class="event-trust"><b>Informação com origem</b><p>${escapeHtml(verification)}. Confirma sempre horários e disponibilidade na fonte oficial.</p><a href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener">Ver percurso até ao local ↗</a></div>
       ${related.length ? `<section class="related-events"><p class="event-eyebrow">Também pode interessar</p><div>${related.map(item => `<a href="${eventUrl(item.id)}" target="_blank" rel="noopener"><time>${escapeHtml(prettyDate(item.date))}</time><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</small></a>`).join("")}</div></section>` : ""}
     </div>
-    <aside class="share-panel">
-      <div class="share-card" ${poster ? `style="--poster:url('${encodeURI(poster)}')"` : ""}>
-        ${poster ? `<img src="${escapeHtml(poster)}" alt="Cartaz oficial de ${escapeHtml(event.title)}" />` : `<div class="share-card-empty">Desvio</div>`}
-        <div class="share-card-overlay"><span>Desvio</span><time>${escapeHtml(date)}</time><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.venue)} · ${escapeHtml(event.city)}</small></div>
-      </div>
-      <div class="share-copy"><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>Partilha uma imagem pronta para Stories ou envia o link com todos os detalhes.</p></div>
-      <div class="share-actions"><button type="button" data-share-image>Partilhar imagem</button><button type="button" class="secondary" data-save-image>Guardar imagem</button><button type="button" class="secondary" data-share>Partilhar link</button><button type="button" class="secondary" data-copy>Copiar link</button><a class="secondary" href="mailto:?subject=${encodeURIComponent(`${event.title} — Desvio`)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}">Enviar por email</a></div>
-      <p class="share-status" aria-live="polite"></p>
-    </aside>
   </article>`;
   const status = page.querySelector(".share-status");
+  page.querySelectorAll("[data-programme-date]").forEach(button => button.addEventListener("click", () => {
+    const selected = button.dataset.programmeDate;
+    page.querySelectorAll("[data-programme-date]").forEach(tab => tab.setAttribute("aria-selected", String(tab === button)));
+    page.querySelectorAll("[data-programme-panel]").forEach(panel => { panel.hidden = panel.dataset.programmePanel !== selected; });
+  }));
   const createImage = async () => {
     status.textContent = "A preparar imagem…";
     try { return await createShareImage(event); }
