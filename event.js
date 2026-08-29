@@ -23,10 +23,122 @@ function ticketButton(event) {
   return `<a class="event-ticket" href="${escapeHtml(event.ticketUrl)}" target="_blank" rel="noopener">${escapeHtml(event.tickets || "Consultar bilheteira")} ↗</a>`;
 }
 
+const relatedEvents = event => (window.EVENTS || [])
+  .filter(item => item.id !== event.id && !item.seriesId && item.date >= event.date)
+  .map(item => ({ item, score: (item.city === event.city ? 3 : 0) + (item.venue === event.venue ? 2 : 0) + (item.genres || []).filter(genre => (event.genres || []).includes(genre)).length }))
+  .filter(({ score }) => score > 0)
+  .sort((a, b) => b.score - a.score || a.item.date.localeCompare(b.item.date))
+  .slice(0, 3)
+  .map(({ item }) => item);
+
+const roundedRect = (context, x, y, width, height, radius) => {
+  const r = Math.min(radius, width / 2, height / 2);
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + width, y, x + width, y + height, r);
+  context.arcTo(x + width, y + height, x, y + height, r);
+  context.arcTo(x, y + height, x, y, r);
+  context.arcTo(x, y, x + width, y, r);
+  context.closePath();
+};
+
+const drawWrapped = (context, text, x, y, width, lineHeight, maxLines = 3) => {
+  const words = String(text || "").split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (context.measureText(next).width > width && line) {
+      lines.push(line);
+      line = word;
+      if (lines.length === maxLines - 1) break;
+    } else line = next;
+  }
+  if (line && lines.length < maxLines) lines.push(line);
+  lines.forEach((value, index) => context.fillText(value, x, y + index * lineHeight));
+  return y + Math.max(1, lines.length) * lineHeight;
+};
+
+const imageFromBlob = blob => new Promise((resolve, reject) => {
+  const source = new Image();
+  const objectUrl = URL.createObjectURL(blob);
+  source.onload = () => { URL.revokeObjectURL(objectUrl); resolve(source); };
+  source.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("O cartaz não pôde ser carregado.")); };
+  source.src = objectUrl;
+});
+
+async function createShareImage(event) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1920;
+  const context = canvas.getContext("2d");
+  const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
+  context.fillStyle = "#10271a";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "rgba(245, 246, 238, .58)";
+  context.lineWidth = 2;
+  roundedRect(context, 32, 32, 1016, 1856, 54);
+  context.stroke();
+  roundedRect(context, 72, 88, 936, 1080, 22);
+  context.fillStyle = "#0a1710";
+  context.fill();
+  try {
+    const response = await fetch(`/api/event-poster/${encodeURIComponent(event.id)}`);
+    if (!response.ok) throw new Error("Sem cartaz");
+    const poster = await imageFromBlob(await response.blob());
+    const scale = Math.min(936 / poster.naturalWidth, 1080 / poster.naturalHeight);
+    const width = poster.naturalWidth * scale;
+    const height = poster.naturalHeight * scale;
+    context.save();
+    roundedRect(context, 72, 88, 936, 1080, 22);
+    context.clip();
+    context.drawImage(poster, 72 + (936 - width) / 2, 88 + (1080 - height) / 2, width, height);
+    context.restore();
+  } catch {
+    context.fillStyle = "#dce8c0";
+    context.font = "700 110px 'Space Grotesk', Arial, sans-serif";
+    context.fillText("Desvio", 138, 625);
+  }
+  context.fillStyle = "#f7f5ed";
+  roundedRect(context, 32, 1218, 1016, 670, 54);
+  context.fill();
+  context.fillStyle = "#173420";
+  context.font = "700 45px 'DM Sans', Arial, sans-serif";
+  context.fillText("Desvio", 94, 1304);
+  context.font = "700 78px 'Space Grotesk', Arial, sans-serif";
+  const titleBottom = drawWrapped(context, event.title, 94, 1418, 890, 88, 2);
+  context.fillStyle = "#254a31";
+  context.font = "600 39px 'DM Sans', Arial, sans-serif";
+  context.fillText(date, 94, titleBottom + 38);
+  context.font = "500 37px 'DM Sans', Arial, sans-serif";
+  const placeBottom = drawWrapped(context, `${event.venue} · ${event.city}`, 94, titleBottom + 103, 875, 48, 2);
+  context.fillStyle = "#173f27";
+  roundedRect(context, 94, Math.max(1700, placeBottom + 46), 330, 106, 53);
+  context.fill();
+  context.fillStyle = "#f7f5ed";
+  context.font = "700 38px 'DM Sans', Arial, sans-serif";
+  context.fillText("Ver evento  →", 137, Math.max(1768, placeBottom + 114));
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+  if (!blob) throw new Error("Não foi possível criar a imagem.");
+  return new File([blob], `desvio-${event.id}.png`, { type: "image/png" });
+}
+
+const downloadFile = file => {
+  const link = document.createElement("a");
+  const objectUrl = URL.createObjectURL(file);
+  link.href = objectUrl;
+  link.download = file.name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+};
+
 function render(event, poster) {
   const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
   const shareUrl = eventUrl(event.id);
   const shareText = `${event.title} — ${date}, ${event.venue}, ${event.city}. Encontrado no Desvio.`;
+  const related = relatedEvents(event);
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
+  const verification = [event.verifiedAt ? `Fonte revista em ${event.verifiedAt}` : "Fonte oficial indicada", event.salesCheckedAt ? `bilheteira revista em ${event.salesCheckedAt}` : "bilheteira a confirmar"].join(" · ");
   page.innerHTML = `<article class="event-view">
     <div class="event-view-main">
       <p class="event-eyebrow">${escapeHtml(event.type || "Concerto")} · ${escapeHtml(event.city)}</p>
@@ -35,23 +147,51 @@ function render(event, poster) {
       <div class="event-actions">${ticketButton(event)}<a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener">Fonte oficial ↗</a></div>
       <dl class="event-facts">
         <div><dt>Géneros</dt><dd>${escapeHtml((event.genres || []).join(" · ") || "Por confirmar")}</dd></div>
-        <div><dt>Entrada</dt><dd>${escapeHtml(event.availability || "Por confirmar")}</dd></div>
+        <div><dt>Estado da entrada</dt><dd>${escapeHtml(event.availability || "Por confirmar")}</dd></div>
+        <div><dt>Bilheteira</dt><dd>${escapeHtml(event.tickets || "Por confirmar")}</dd></div>
         <div><dt>Idade</dt><dd>${escapeHtml(event.age || "Consultar organização")}</dd></div>
+        <div><dt>Lotação</dt><dd>${escapeHtml(event.capacity || "Não divulgada")}</dd></div>
         <div><dt>Verificado</dt><dd>${escapeHtml(event.verifiedAt || "Por confirmar")}</dd></div>
+        ${event.lineup ? `<div class="event-fact-wide"><dt>Cartaz</dt><dd>${escapeHtml(event.lineup)}</dd></div>` : ""}
       </dl>
-      <p class="event-note">Confirma sempre a informação e a disponibilidade na fonte oficial antes de sair.</p>
+      <div class="event-trust"><b>Informação com origem</b><p>${escapeHtml(verification)}. Confirma sempre horários e disponibilidade na fonte oficial.</p><a href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener">Ver percurso até ao local ↗</a></div>
+      ${related.length ? `<section class="related-events"><p class="event-eyebrow">Também pode interessar</p><div>${related.map(item => `<a href="${eventUrl(item.id)}" target="_blank" rel="noopener"><time>${escapeHtml(prettyDate(item.date))}</time><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</small></a>`).join("")}</div></section>` : ""}
     </div>
     <aside class="share-panel">
       <div class="share-card" ${poster ? `style="--poster:url('${encodeURI(poster)}')"` : ""}>
         ${poster ? `<img src="${escapeHtml(poster)}" alt="Cartaz oficial de ${escapeHtml(event.title)}" />` : `<div class="share-card-empty">Desvio</div>`}
         <div class="share-card-overlay"><span>Desvio</span><time>${escapeHtml(date)}</time><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.venue)} · ${escapeHtml(event.city)}</small></div>
       </div>
-      <div class="share-copy"><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>O link abre esta página com o cartaz, data, local e fonte oficial.</p></div>
-      <div class="share-actions"><button type="button" data-share>Partilhar</button><button type="button" class="secondary" data-copy>Copiar link</button><a class="secondary" href="mailto:?subject=${encodeURIComponent(`${event.title} — Desvio`)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}">Enviar por email</a></div>
+      <div class="share-copy"><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>Partilha uma imagem pronta para Stories ou envia o link com todos os detalhes.</p></div>
+      <div class="share-actions"><button type="button" data-share-image>Partilhar imagem</button><button type="button" class="secondary" data-save-image>Guardar imagem</button><button type="button" class="secondary" data-share>Partilhar link</button><button type="button" class="secondary" data-copy>Copiar link</button><a class="secondary" href="mailto:?subject=${encodeURIComponent(`${event.title} — Desvio`)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}">Enviar por email</a></div>
       <p class="share-status" aria-live="polite"></p>
     </aside>
   </article>`;
   const status = page.querySelector(".share-status");
+  const createImage = async () => {
+    status.textContent = "A preparar imagem…";
+    try { return await createShareImage(event); }
+    catch (error) { status.textContent = error.message || "Não foi possível preparar a imagem."; return null; }
+  };
+  page.querySelector("[data-share-image]").addEventListener("click", async () => {
+    const file = await createImage();
+    if (!file) return;
+    try {
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `${event.title} — Desvio` });
+        status.textContent = "Imagem pronta para publicar.";
+      } else {
+        downloadFile(file);
+        status.textContent = "Imagem guardada. Publica-a no Instagram.";
+      }
+    } catch { status.textContent = "Partilha cancelada."; }
+  });
+  page.querySelector("[data-save-image]").addEventListener("click", async () => {
+    const file = await createImage();
+    if (!file) return;
+    downloadFile(file);
+    status.textContent = "Imagem guardada.";
+  });
   page.querySelector("[data-share]").addEventListener("click", async () => {
     if (!navigator.share) return page.querySelector("[data-copy]").click();
     try { await navigator.share({ title: `${event.title} — Desvio`, text: shareText, url: shareUrl }); } catch { /* The visitor closed the share sheet. */ }
