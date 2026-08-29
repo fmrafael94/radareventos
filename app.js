@@ -1,4 +1,4 @@
-const state = { search: "", date: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 };
+const state = { search: "", date: "", price: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", view: "list", page: 1 };
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
@@ -9,6 +9,7 @@ const previousPage = document.querySelector("#previous-page");
 const nextPage = document.querySelector("#next-page");
 const genreFilter = document.querySelector("#genre-filter");
 const dateSelect = document.querySelector("#date-filter");
+const priceSelect = document.querySelector("#price-filter");
 const areaFilter = document.querySelector("#area-filter");
 const genreMenu = document.querySelector("#genre-menu");
 const areaMenu = document.querySelector("#area-menu");
@@ -26,6 +27,11 @@ const featuredRail = document.querySelector("#featured-rail");
 let featuredAutoscroll;
 const filterToggle = document.querySelector("#filter-toggle");
 const filterPanel = document.querySelector("#filter-panel");
+const calendarView = document.querySelector("#calendar-view");
+const calendarGrid = document.querySelector("#calendar-grid");
+const calendarLabel = document.querySelector("#calendar-label");
+const calendarPrevious = document.querySelector("#calendar-previous");
+const calendarNext = document.querySelector("#calendar-next");
 const feedbackDialog = document.querySelector("#feedback-dialog");
 const feedbackForm = document.querySelector("#feedback-form");
 const feedbackTitle = document.querySelector("#feedback-title");
@@ -59,6 +65,9 @@ const dateParts = iso => {
   return [String(date.getDate()).padStart(2, "0"), new Intl.DateTimeFormat("pt-PT", { month: "short" }).format(date).replace(".", "")];
 };
 const prettyDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
+const monthLabel = date => new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(date);
+const nextAgendaDate = EVENTS.find(event => !event.seriesId && event.date >= new Date().toISOString().slice(0, 10))?.date || EVENTS.find(event => !event.seriesId)?.date;
+let calendarCursor = nextAgendaDate ? eventDate(nextAgendaDate) : new Date();
 const areaCentres = {
   "Algarve":[37.02,-7.93], "Alto Alentejo":[39.29,-7.43], "Alto Minho":[41.69,-8.83], "Ave":[41.44,-8.30], "Aveiro":[40.64,-8.65], "Beira Baixa":[40.28,-7.50], "Cávado":[41.55,-8.43], "Douro":[41.16,-7.79], "Grande Lisboa":[38.72,-9.14], "Grande Porto":[41.16,-8.63], "Lezíria do Tejo":[39.24,-8.69], "Madeira":[32.65,-16.91], "Minho":[41.57,-8.29], "Oeiras":[38.69,-9.31], "Oeste":[39.35,-9.38], "Península de Setúbal":[38.53,-8.89], "Região de Aveiro":[40.64,-8.65], "Região de Coimbra":[40.21,-8.43], "Região de Leiria":[39.74,-8.81], "São Miguel":[37.74,-25.67], "Tâmega e Sousa":[41.21,-8.28], "Vale do Sousa":[41.20,-8.28], "Viseu Dão Lafões":[40.66,-7.91], "Área Metropolitana do Porto":[41.16,-8.63]
 };
@@ -622,7 +631,7 @@ function setupCustomSelect(select) {
   sync();
 }
 
-[dateSelect].forEach(setupCustomSelect);
+[dateSelect, priceSelect].forEach(setupCustomSelect);
 const multiFilterSync = [];
 function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => {}) {
   let availableValues = unique(values);
@@ -760,6 +769,11 @@ const dateFilterRange = value => {
 };
 const overlapsRange = (event, range) => !range || (event.date <= range[1] && (event.endDate || event.date) >= range[0]);
 const isFreeEvent = freeEntryOnly;
+const matchesPrice = event => !state.price ||
+  (state.price === "free" && isFreeEvent(event)) ||
+  (state.price === "available" && !isFreeEvent(event) && !["Esgotado", "Cancelado", "Bilhetes a confirmar"].includes(availabilityLabel(event))) ||
+  (state.price === "pending" && availabilityLabel(event) === "Bilhetes a confirmar") ||
+  (state.price === "sold" && availabilityLabel(event) === "Esgotado");
 const isUnderground = event => event.genres.some(genre => /metal|hardcore|punk|doom|death/i.test(genre)) || /bar|local/i.test(eventType(event));
 const matchesHighlight = event => !state.highlight ||
   (state.highlight === "free" && isFreeEvent(event)) ||
@@ -832,8 +846,33 @@ function filteredEvents() {
       (!state.district.length || group.some(item => state.district.includes(item.district))) &&
       (!state.city.length || group.some(item => state.city.includes(item.city))) &&
       (!state.type.length || group.some(item => state.type.includes(eventType(item)))) &&
+      matchesPrice(event) &&
       matchesHighlight(event);
   }).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function renderCalendar(matches) {
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const mondayOffset = (firstDay.getDay() + 6) % 7;
+  const eventByDay = new Map();
+  matches.forEach(event => {
+    const date = eventDate(event.date);
+    if (date.getFullYear() !== year || date.getMonth() !== month) return;
+    const day = date.getDate();
+    eventByDay.set(day, [...(eventByDay.get(day) || []), event]);
+  });
+  calendarLabel.textContent = monthLabel(calendarCursor);
+  const weekdayLabels = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+  const blanks = Array.from({ length: mondayOffset }, () => '<div class="calendar-day empty" aria-hidden="true"></div>');
+  const days = Array.from({ length: daysInMonth }, (_, index) => {
+    const day = index + 1;
+    const events = eventByDay.get(day) || [];
+    return `<article class="calendar-day"><time datetime="${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}">${day}</time>${events.slice(0, 3).map(event => `<a href="${eventUrl(event)}" target="_blank" rel="noopener">${event.title}</a>`).join("")}${events.length > 3 ? `<small>+${events.length - 3} eventos</small>` : ""}</article>`;
+  });
+  calendarGrid.innerHTML = weekdayLabels.map(day => `<span class="calendar-weekday">${day}</span>`).join("") + blanks.join("") + days.join("");
 }
 
 function render() {
@@ -842,10 +881,15 @@ function render() {
   state.page = Math.min(state.page, pages);
   const first = (state.page - 1) * perPage;
   const visible = matches.slice(first, first + perPage);
+  const calendarMode = state.view === "calendar";
+  list.hidden = calendarMode;
+  calendarView.hidden = !calendarMode;
+  document.querySelector(".event-list-heading").hidden = calendarMode;
   list.innerHTML = visible.map(eventCard).join("");
-  resultCount.textContent = `${matches.length} ${matches.length === 1 ? "evento" : "eventos"}`;
+  if (calendarMode) renderCalendar(matches);
+  if (resultCount) resultCount.textContent = `${matches.length} ${matches.length === 1 ? "evento" : "eventos"}`;
   emptyState.hidden = matches.length !== 0;
-  pagination.hidden = matches.length <= perPage;
+  pagination.hidden = calendarMode || matches.length <= perPage;
   pageLabel.textContent = `Página ${state.page} de ${pages}`;
   previousPage.disabled = state.page === 1;
   nextPage.disabled = state.page === pages;
@@ -853,7 +897,7 @@ function render() {
 }
 
 function syncFilterToggle() {
-  const active = [state.date, state.highlight].filter(Boolean).length + state.genre.length + state.type.length + state.area.length + state.district.length + state.city.length;
+  const active = [state.date, state.price, state.highlight].filter(Boolean).length + state.genre.length + state.type.length + state.area.length + state.district.length + state.city.length;
   const isOpen = !filterPanel.hidden;
   filterToggle.querySelector("span").textContent = isOpen ? "Fechar filtros" : active ? `Filtros · ${active}` : "Filtros";
   filterToggle.querySelector("i").textContent = isOpen ? "×" : "+";
@@ -862,13 +906,14 @@ function syncFilterToggle() {
 
 function updateFilter(key, value) { state[key] = value; state.page = 1; render(); }
 function resetAgendaSelection() {
-  Object.assign(state, { search: "", date: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
+  Object.assign(state, { search: "", date: "", price: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
   document.querySelector("#search").value = "";
   dateSelect.value = "";
+  priceSelect.value = "";
   document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
   refreshLocationOptions();
   multiFilterSync.forEach(sync => sync());
-  [dateSelect].forEach(select => select.dispatchEvent(new Event("change")));
+  [dateSelect, priceSelect].forEach(select => select.dispatchEvent(new Event("change")));
 }
 function openFeaturedEvent(id) {
   const eventPage = `/evento/${encodeURIComponent(id)}`;
@@ -890,6 +935,14 @@ filterToggle.addEventListener("click", () => {
   syncFilterToggle();
 });
 dateSelect.addEventListener("change", event => updateFilter("date", event.target.value));
+priceSelect.addEventListener("change", event => updateFilter("price", event.target.value));
+document.querySelectorAll("[data-agenda-view]").forEach(button => button.addEventListener("click", () => {
+  state.view = button.dataset.agendaView;
+  document.querySelectorAll("[data-agenda-view]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  render();
+}));
+calendarPrevious.addEventListener("click", () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1, 12); render(); });
+calendarNext.addEventListener("click", () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1, 12); render(); });
 document.querySelector("#clear-filters").addEventListener("click", () => {
   resetAgendaSelection();
   render();
@@ -1173,7 +1226,8 @@ feedbackForm.addEventListener("submit", async event => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
-    feedbackStatus.textContent = "Recebido. Obrigado por ajudares a manter a agenda certa.";
+    const reference = result.id ? ` Referência: ${String(result.id).slice(0, 8).toUpperCase()}.` : "";
+    feedbackStatus.textContent = `Recebido.${reference} Vamos rever a informação; usamos o e-mail indicado se precisarmos de confirmar algo.`;
     discardFeedbackDraft();
     feedbackForm.reset();
     refreshFeedbackDraftNote();

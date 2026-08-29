@@ -10,6 +10,7 @@ import { onRequestPost as postAuditReport } from "../functions/api/internal/audi
 
 const contextFor = (request, env) => ({ request, env });
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
+const escapeXml = value => escapeHtml(value).replace(/\"/g, "&quot;");
 
 const eventField = (source, name) => source.match(new RegExp(`${name}:\\s*"((?:\\\\.|[^"\\\\])*)"`))?.[1]?.replace(/\\"/g, '"') || "";
 
@@ -40,15 +41,67 @@ async function eventPage(request, env, id) {
     const canonical = `${url.origin}/evento/${encodeURIComponent(id)}`;
     const description = [date, venue, city].filter(Boolean).join(" · ") || "Agenda pública de música em Portugal.";
     const image = poster || `${url.origin}/share-card.svg`;
+    const eventSchema = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "MusicEvent",
+      name: title,
+      startDate: date,
+      location: { "@type": "Place", name: venue || "Local a confirmar", address: { "@type": "PostalAddress", addressLocality: city || "Portugal", addressCountry: "PT" } },
+      image: [image],
+      url: canonical,
+      organizer: { "@type": "Organization", name: "Desvio" }
+    }).replace(/</g, "\\u003c");
     const template = await assetText(request, env, "/event.html");
     const html = template
       .replaceAll("{{EVENT_TITLE}}", escapeHtml(title))
       .replaceAll("{{EVENT_DESCRIPTION}}", escapeHtml(description))
       .replaceAll("{{EVENT_IMAGE}}", escapeHtml(image))
-      .replaceAll("{{CANONICAL_URL}}", escapeHtml(canonical));
+      .replaceAll("{{CANONICAL_URL}}", escapeHtml(canonical))
+      .replaceAll("{{EVENT_SCHEMA}}", eventSchema);
     return new Response(html, { headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "public, max-age=300" } });
   } catch {
     return new Response("Não foi possível abrir este evento.", { status: 500 });
+  }
+}
+
+async function sitemap(request, env) {
+  try {
+    const source = await assetText(request, env, "/events.js");
+    const origin = new URL(request.url).origin;
+    const ids = [...source.matchAll(/\bid:\s*"([a-z0-9-]{1,180})"/gi)].map(match => match[1]);
+    const urls = [...new Set(ids)].map(id => `<url><loc>${escapeXml(`${origin}/evento/${encodeURIComponent(id)}`)}</loc></url>`).join("");
+    return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(`${origin}/`)}</loc></url>${urls}</urlset>`, {
+      headers: { "Content-Type": "application/xml; charset=UTF-8", "Cache-Control": "public, max-age=3600" }
+    });
+  } catch {
+    return new Response("Sitemap indisponível.", { status: 503 });
+  }
+}
+
+async function eventPoster(request, env, id) {
+  if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Cartaz não encontrado.", { status: 404 });
+  try {
+    const events = await assetText(request, env, "/events.js");
+    const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
+    if (!match) return new Response("Cartaz não encontrado.", { status: 404 });
+    const app = await assetText(request, env, "/app.js");
+    const poster = app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || eventField(match[0], "image");
+    if (!poster) return new Response("Este evento não tem cartaz disponível.", { status: 404 });
+    const posterUrl = new URL(poster);
+    if (!/^https?:$/.test(posterUrl.protocol)) return new Response("Cartaz inválido.", { status: 400 });
+    const response = await fetch(posterUrl.toString());
+    const type = response.headers.get("Content-Type") || "";
+    if (!response.ok || !type.startsWith("image/")) return new Response("Não foi possível obter o cartaz.", { status: 502 });
+    return new Response(response.body, {
+      headers: {
+        "Content-Type": type,
+        "Cache-Control": "public, max-age=86400",
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+  } catch {
+    return new Response("Não foi possível obter o cartaz.", { status: 502 });
   }
 }
 
@@ -57,6 +110,9 @@ export default {
     const { pathname } = new URL(request.url);
     const context = contextFor(request, env);
 
+    if (pathname === "/robots.txt" && request.method === "GET") return new Response(`User-agent: *\nAllow: /\nSitemap: ${new URL(request.url).origin}/sitemap.xml\n`, { headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "public, max-age=3600" } });
+    if (pathname === "/sitemap.xml" && request.method === "GET") return sitemap(request, env);
+    if (pathname.startsWith("/api/event-poster/") && request.method === "GET") return eventPoster(request, env, decodeURIComponent(pathname.slice("/api/event-poster/".length)));
     if (pathname.startsWith("/evento/") && request.method === "GET") return eventPage(request, env, decodeURIComponent(pathname.slice("/evento/".length)));
 
     if (pathname === "/api/config" && request.method === "GET") return getConfig(context);
