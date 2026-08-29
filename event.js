@@ -5,6 +5,7 @@ const prettyDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", mon
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
 const eventUrl = id => `${location.origin}/evento/${encodeURIComponent(id)}`;
 const arrowIcon = `<svg class="event-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg>`;
+const calendarIcon = `<svg class="event-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="3.4" y="4.6" width="13.2" height="11.5" rx="1.4" /><path d="M6.6 2.8v3.7M13.4 2.8v3.7M3.5 8.4h13" /></svg>`;
 
 async function posterFor(id) {
   const event = (window.EVENTS || []).find(item => item.id === id);
@@ -90,7 +91,7 @@ function render(event, poster) {
   const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
   const compactDate = compactEventDate(event);
   const shareUrl = eventUrl(event.id);
-  const shareText = `${event.title} — ${date}, ${event.venue}, ${event.city}. Encontrado no Desvio.`;
+  const shareText = `${event.title}\n${compactDate} · ${event.venue}, ${event.city}`;
   const shareCaption = `${shareText}\n${shareUrl}`;
   const posterDownloadUrl = `${location.origin}/api/event-poster/${encodeURIComponent(event.id)}`;
   const programme = festivalProgramme(event);
@@ -105,8 +106,7 @@ function render(event, poster) {
       </div>
       <div class="event-information">
         ${programmeDates.length ? `<section class="festival-programme"><p class="event-eyebrow">Programação</p><div class="festival-tabs" role="tablist" aria-label="Dias do festival">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" id="programme-tab-${index}" data-programme-date="${itemDate}" aria-controls="programme-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? "0" : "-1"}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" role="tabpanel" id="programme-panel-${index}" aria-labelledby="programme-tab-${index}" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(programmeTitle(event, item.title))}</strong><small>${escapeHtml(item.venue)}</small></div></article>`).join("")}</div>`).join("")}</section>` : ""}
-        <div class="event-actions">${ticketButton(event)}<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ${arrowIcon}</span><span class="event-action-short">Percurso ${arrowIcon}</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ${arrowIcon}</span><span class="event-action-short">Fonte ${arrowIcon}</span></a></div>
-        <button class="event-calendar" type="button" data-calendar>Adicionar ao calendário</button>
+        <div class="event-actions">${ticketButton(event)}<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ${arrowIcon}</span><span class="event-action-short">Percurso ${arrowIcon}</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ${arrowIcon}</span><span class="event-action-short">Fonte ${arrowIcon}</span></a><button class="event-calendar" type="button" data-calendar><span class="event-action-full">Adicionar ao calendário ${calendarIcon}</span><span class="event-action-short">Calendário ${calendarIcon}</span></button></div>
       </div>
       ${related.length ? `<section class="similar-events" aria-labelledby="similar-title"><p class="event-eyebrow">Pelo caminho</p><h2 id="similar-title">Também pode interessar.</h2><div>${related.map(item => `<a href="${eventUrl(item.id)}" target="_blank" rel="noopener"><time datetime="${escapeHtml(item.date)}">${escapeHtml(compactEventDate(item))}</time><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(`${item.venue} · ${item.city}`)}</span></a>`).join("")}</div></section>` : ""}
       <p class="event-disclaimer">Confirma sempre horários e disponibilidade na fonte oficial.</p>

@@ -142,13 +142,12 @@ export async function onRequestPost(context) {
         ? "Link oficial enviado para revisão."
         : "Sugestão enviada para revisão.");
   const id = crypto.randomUUID();
-  const trackingCode = crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
   await context.env.EVENT_RADAR_DB.prepare(`
     INSERT INTO feedback (
       id, kind, event_id, event_name, event_date, city, official_url,
       poster_url, poster_object_key, poster_file_name, image_moderation_status, image_moderation_reason,
-      message, sender_name, sender_email, tracking_code, status, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
+      message, sender_name, sender_email, status, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
   `).bind(
     id,
     kind === "promoter" ? "suggestion" : kind,
@@ -164,9 +163,8 @@ export async function onRequestPost(context) {
     imageModerationReason || null,
     message,
     senderName || null,
-    email || null,
-    trackingCode
+    email || null
   ).run();
 
-  return json({ ok: true, id, reference: trackingCode });
+  return json({ ok: true, id });
 }

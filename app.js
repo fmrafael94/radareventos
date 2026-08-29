@@ -23,8 +23,12 @@ const posterLightbox = document.querySelector("#poster-lightbox");
 const posterLightboxImage = document.querySelector("#poster-lightbox-image");
 const nearbyButton = document.querySelector("#nearby-button");
 const nearbyHint = document.querySelector("#nearby-hint");
+const nearbyEvents = document.querySelector("#nearby-events");
+const nearbyRail = document.querySelector("#nearby-rail");
+const nearbyDescription = document.querySelector("#nearby-description");
 const featuredRail = document.querySelector("#featured-rail");
 let featuredAutoscroll;
+let nearbyPosition;
 const filterToggle = document.querySelector("#filter-toggle");
 const filterPanel = document.querySelector("#filter-panel");
 const calendarView = document.querySelector("#calendar-view");
@@ -340,6 +344,13 @@ const officialPosters = {
   ,"meo-sons-mar": ["https://peventertainment.pt/wp-content/uploads/2026/04/meo-sons-do-mar-reduzido-xl-768x218.webp", "https://peventertainment.pt/eventos/"]
   ,"fever-fado-chiado": ["https://applications-media.feverup.com/image/upload/f_auto,w_616,h_616,q_auto:good,c_fill,g_north/fever2/plan/photo/287f911e-bbfa-11f0-80eb-ea9fbc3a351c.jpeg", "https://feverup.com/m/67022/en?seasonal=p06e4dp"]
 };
+
+// Measured from the live official artwork on 2026-08-29. Editorial surfaces
+// prefer these full portrait posters; horizontal source images remain intact
+// and are never cropped or replaced with invented artwork.
+const portraitPosterIds = new Set([
+  "kalorama-2026", "iminente-2026", "matondi-celebration", "andru-donalds", "taguspark-carlos-bica", "taguspark-cabrita", "taguspark-ricardo-reis", "lagos-fado-jazz", "ivete-guimaraes", "rock-dao", "bota-francisco-sales", "theatrocirco-contraponto", "ana-bacalhau-almada", "esquecimento-global-guimaraes", "mario-pacheco-ccb", "natal-jop-almada", "chico-chico-ovar", "figl-lagoa-guitarras", "tt-coliseu", "gil-semedo-coliseu", "deva-premal-coliseu", "billy-corgan-coliseu", "irina-barros-monsantos", "operafest-anatema", "povoa-boney-m", "povoa-pedro-abrunhosa", "famalicao-samuel-uria", "vul-sobass-friends", "vul-omar-perry", "vul-micronova-bungee", "vul-afro-encircle", "vul-possivel", "vul-sensorial-sounds", "vul-kizomba-rua", "vul-afterglow", "vul-riot", "vul-beleza-abstracta", "vul-fatal-move", "campo-pequeno-alma-iberica", "campo-pequeno-dire-straits-legacy", "campo-pequeno-roupa-nova", "campo-pequeno-alphaville", "campo-pequeno-titas", "campo-pequeno-cat-power", "campo-pequeno-this-is-michael", "campo-pequeno-beatles-symphonic", "leiria-carolina-deus", "leiria-jazz-dixie-gang", "leiria-valter-lobo", "rui-veloso-porto", "theatrocirco-sensible-soccers", "theatrocirco-noite-branca-opera", "theatrocirco-xxx-trovas", "macy-gray-lisboa", "macy-gray-braga", "paredes-mxgpu", "paredes-musicos-tejo", "paredes-danto", "paredes-bia-ferreira", "paredes-flauta-magica", "paredes-regressados-fresco", "paredes-dama", "paredes-uhf-natal", "theatrocirco-gisela-joao", "rui-veloso-lisboa", "river-stone-fest-2026", "viriato-voz-rock", "viriato-luis-lapa", "viriato-nanook", "viriato-lagrimas-mar", "viriato-kevin-morby", "viriato-sophia", "viriato-manel-cruz", "viriato-carminho"
+]);
 // A festival's official bill is also the correct artwork for its programme
 // sessions. These are deliberately shared — never replaced by made-up art.
 const sharedProgrammePosters = {
@@ -784,6 +795,34 @@ const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl)
 const posterStyle = image => `style="--poster-image:url(&quot;${encodeURI(image)}&quot;)"`;
 const feedbackAction = event => `<button class="report-link feedback-open" type="button" data-feedback-kind="correction" data-feedback-event-id="${event.id}" data-feedback-event-title="${encodeURIComponent(event.title)}">Informação errada?</button>`;
 const eventUrl = event => `/evento/${encodeURIComponent(event.id)}`;
+const compactNearbyDate = event => {
+  const [startDay, startMonth] = dateParts(event.date);
+  if (!event.endDate) return `${startDay} ${startMonth}`;
+  const [endDay, endMonth] = dateParts(event.endDate);
+  return startMonth === endMonth ? `${startDay}–${endDay} ${startMonth}` : `${startDay} ${startMonth} — ${endDay} ${endMonth}`;
+};
+
+function renderNearby(latitude, longitude, area) {
+  const today = shiftedIso(0);
+  const matches = EVENTS
+    .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today && areaCentres[event.area])
+    .map(event => ({ event, distance: distanceTo(latitude, longitude, ...areaCentres[event.area]) }))
+    .sort((left, right) => left.distance - right.distance || left.event.date.localeCompare(right.event.date))
+    .slice(0, 16)
+    .sort((left, right) => Number(portraitPosterIds.has(right.event.id)) - Number(portraitPosterIds.has(left.event.id)) || left.distance - right.distance)
+    .slice(0, 8);
+  nearbyEvents.hidden = !matches.length;
+  if (!matches.length) return;
+  nearbyDescription.textContent = area;
+  nearbyRail.innerHTML = matches.map(({ event }) => `<article class="nearby-card">
+    <a href="${eventUrl(event)}" target="_blank" rel="noopener" aria-label="Abrir ${event.title}">
+      <span class="nearby-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy" decoding="async" /></span>
+      <time datetime="${event.date}">${compactNearbyDate(event)}</time>
+      <h3>${event.title}</h3>
+    </a>
+  </article>`).join("");
+  nearbyRail.querySelectorAll("img").forEach(image => image.addEventListener("error", () => image.closest(".nearby-card")?.remove(), { once: true }));
+}
 
 function renderFeatured() {
   const today = shiftedIso(0);
@@ -792,7 +831,7 @@ function renderFeatured() {
   const featured = EVENTS
     .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today)
     .filter(event => !["Bilhetes a confirmar", "Esgotado", "Cancelado"].includes(availabilityLabel(event)))
-    .sort((a, b) => Math.max(eventDate(a.date).getTime(), eventDate(today).getTime()) - Math.max(eventDate(b.date).getTime(), eventDate(today).getTime()))
+    .sort((a, b) => Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || Math.max(eventDate(a.date).getTime(), eventDate(today).getTime()) - Math.max(eventDate(b.date).getTime(), eventDate(today).getTime()))
     .slice(0, 5);
   featuredRail.innerHTML = featured.length ? featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
@@ -812,15 +851,19 @@ function renderFeatured() {
 
 function startFeaturedAutoscroll() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const mobile = window.matchMedia("(max-width: 580px)").matches;
-  if (reducedMotion || !mobile || featuredRail.children.length < 2) return;
+  if (reducedMotion || featuredRail.children.length < 2) return;
   let activeIndex = 0;
   const advance = () => {
     activeIndex = (activeIndex + 1) % featuredRail.children.length;
-    featuredRail.children[activeIndex].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    const nextCard = featuredRail.children[activeIndex];
+    featuredRail.scrollTo({
+      left: Math.max(0, nextCard.offsetLeft - featuredRail.offsetLeft),
+      behavior: "smooth"
+    });
   };
   featuredAutoscroll = window.setInterval(advance, 6200);
   featuredRail.addEventListener("pointerdown", () => window.clearInterval(featuredAutoscroll), { once: true });
+  featuredRail.addEventListener("focusin", () => window.clearInterval(featuredAutoscroll), { once: true });
 }
 
 function eventCard(event) {
@@ -986,9 +1029,11 @@ nearbyButton.addEventListener("click", () => {
     }, ["", Infinity]);
     state.area = [area];
     state.page = 1;
+    nearbyPosition = { latitude: coords.latitude, longitude: coords.longitude, area };
     refreshLocationOptions();
     areaMultiFilter.sync();
-    nearbyHint.textContent = `${area} · cerca de ${Math.round(distance)} km`;
+    nearbyHint.textContent = "";
+    renderNearby(coords.latitude, coords.longitude, area);
     nearbyButton.disabled = false;
     render();
   }, () => {
@@ -1240,8 +1285,7 @@ feedbackForm.addEventListener("submit", async event => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
-    const reference = result.reference ? ` <strong>${String(result.reference)}</strong>` : "";
-    feedbackStatus.innerHTML = `Recebido.${reference} Guarda esta referência para <a href="/acompanhar.html" target="_blank" rel="noopener">acompanhar o pedido</a>. Usamos o e-mail indicado se precisarmos de confirmar algo.`;
+    feedbackStatus.textContent = "Recebido. Avisamos-te por e-mail quando o pedido for analisado.";
     discardFeedbackDraft();
     feedbackForm.reset();
     refreshFeedbackDraftNote();
@@ -1291,6 +1335,7 @@ async function loadApprovedCloudflareEvents() {
     typeMultiFilter.refresh(EVENTS.map(eventType));
     refreshLocationOptions();
     renderFeatured();
+    if (nearbyPosition) renderNearby(nearbyPosition.latitude, nearbyPosition.longitude, nearbyPosition.area);
     render();
   } catch {
     // The static agenda is intentionally a complete offline-safe fallback.

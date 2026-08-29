@@ -211,7 +211,13 @@ reports.addEventListener("click", async event => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível atualizar o pedido.");
-    adminStatus.textContent = "Pedido atualizado.";
+    adminStatus.textContent = result.notification === "sent"
+      ? "Pedido atualizado e e-mail enviado."
+      : result.notification === "not_configured"
+        ? "Pedido atualizado. Configura o envio de e-mail para avisar a pessoa."
+        : result.notification === "failed"
+          ? "Pedido atualizado, mas o e-mail não foi enviado."
+          : "Pedido atualizado.";
     loadReports();
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível atualizar o pedido.";
