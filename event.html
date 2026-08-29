@@ -26,8 +26,9 @@
     <link rel="stylesheet" href="/event.css" />
   </head>
   <body class="event-page">
+    <a class="skip-link" href="#event-page">Saltar para o evento</a>
     <header class="site-header"><a class="brand" href="/" aria-label="Desvio — voltar à agenda">Desvio</a><p>Menos procura. <em>Mais música.</em></p><a class="back-to-agenda" href="/"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="m15 5-10 10M13 15H5V7" /></svg>Agenda</a></header>
-    <main class="event-page-shell" id="event-page" aria-live="polite"><p class="event-loading">A abrir evento…</p></main>
+    <main class="event-page-shell" id="event-page" aria-live="polite" aria-busy="true"><p class="event-loading"><span aria-hidden="true"></span>A abrir evento…</p></main>
     <dialog id="event-poster-lightbox" class="event-poster-lightbox" aria-label="Cartaz ampliado"><button type="button" data-close-poster aria-label="Fechar cartaz">×</button><img alt="Cartaz oficial ampliado" /></dialog>
     <footer><a class="brand" href="/">Desvio</a><p>Agenda pública de música em Portugal.</p><nav><a href="/privacidade.html">Privacidade</a><a href="/termos.html">Termos</a></nav></footer>
     <script src="/events.js"></script>

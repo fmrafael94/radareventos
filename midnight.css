@@ -335,6 +335,11 @@ html,body { overflow-x:clip; }
 .submit-link span { display:inline; margin-left:3px; font:400 1.1em/1 Arial,sans-serif; vertical-align:-.03em; }
 .submit-link span::before,.submit-link span::after { content:none; }
 
+/* Discovery starts with a few useful choices rather than an empty search box. */
+.agenda-shortcuts { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }.agenda-shortcuts button { min-height:34px; padding:0 11px; border:1px solid rgba(57,79,64,.28); border-radius:99px; color:#385140; background:rgba(255,255,255,.42); font:600 10px "DM Mono",monospace; cursor:pointer; }.agenda-shortcuts button:hover,.agenda-shortcuts button:focus-visible,.agenda-shortcuts button[aria-pressed="true"] { border-color:#315e3c; color:#f8f8f0; background:#315e3c; outline:0; }.agenda-shortcuts button[data-nearby-shortcut] { margin-left:auto; }
+@media (max-width:580px) { .agenda-shortcuts { flex-wrap:nowrap; margin-right:-14px; padding-right:14px; overflow-x:auto; scrollbar-width:none; }.agenda-shortcuts::-webkit-scrollbar { display:none; }.agenda-shortcuts button { flex:0 0 auto; }.agenda-shortcuts button[data-nearby-shortcut] { margin-left:0; } }
+.feedback-trap { position:absolute!important; width:1px!important; height:1px!important; margin:-1px!important; padding:0!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+
 /* Posters keep their original artwork visible while a softened version of the
    same image fills the frame. This removes the hard empty bands left by very
    wide or vertical official artwork without cropping the actual poster. */
@@ -473,3 +478,14 @@ footer nav a { font-size:14px; line-height:1.45; }
 @media (min-width:581px) { .featured-card { display:flex; flex-direction:column; }.featured-copy { flex:1; width:100%; }.featured-copy a { align-self:center; margin-top:auto; } }
 
 .featured-copy a { display:inline-flex; align-items:center; gap:4px; }.link-arrow { width:14px; height:14px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
+
+/* Final editorial pass: fewer tiny tiles on desktop, tactile controls, and
+   predictable focus for keyboard and assistive-technology users. */
+:where(a,button,input,select,textarea,summary):focus-visible { outline:3px solid rgba(87,130,76,.62); outline-offset:3px; }
+@media (min-width:1000px) { .featured-rail { grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }.featured-card { padding:10px; border-radius:15px; }.featured-poster { aspect-ratio:16 / 10; }.featured-copy { padding:4px 4px 2px; }.featured-copy h3 { min-height:0; font-size:20px; }.featured-copy time { min-height:0; }.browse-panel { margin-top:72px; }.agenda-search { padding:8px; border-radius:14px; background:rgba(242,245,235,.66); box-shadow:0 12px 32px rgba(45,66,49,.06); } }
+@media (max-width:580px) { .site-header { min-height:66px; }.intro { min-height:330px; }.agenda-search { position:sticky; z-index:8; top:8px; padding:5px; border:1px solid rgba(91,116,84,.18); border-radius:14px; background:rgba(248,247,239,.92); backdrop-filter:blur(14px); box-shadow:0 9px 24px rgba(41,60,44,.10); }.featured-card { border-radius:13px; }.featured-copy { padding:2px 2px 0; }.featured-copy h3 { letter-spacing:-.045em; }.event-list { gap:8px; }.event-card { border-radius:12px; }.event-card-link:hover,.event-card-link:focus-visible { padding-left:7px; }.calendar-day a { font-size:12px; line-height:1.3; } footer nav { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition-duration:.01ms!important; animation-duration:.01ms!important; animation-iteration-count:1!important; } }
+.featured-empty { margin:0; padding:24px; border:1px dashed rgba(68,91,72,.35); border-radius:12px; color:#637067; font-size:15px; }
+.featured-poster.poster-unavailable img { opacity:0; }
+.featured-rail[aria-busy="true"],.calendar-grid[aria-busy="true"] { min-height:118px; opacity:.58; background:linear-gradient(100deg,rgba(226,231,219,.48) 20%,rgba(255,255,255,.72) 38%,rgba(226,231,219,.48) 58%) 0 0/220% 100%; animation:desvio-shimmer 1.2s ease-in-out infinite; } @keyframes desvio-shimmer { to { background-position:-220% 0; } }
+@media (prefers-reduced-motion:reduce) { .featured-rail[aria-busy="true"],.calendar-grid[aria-busy="true"] { animation:none; } }

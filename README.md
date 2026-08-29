@@ -61,3 +61,7 @@ Um resultado `403` ou `429` pode significar uma proteção anti-bot da plataform
 Os ficheiros de imagem enviados com sugestões passam por validação do ficheiro e verificação automática no Workers AI. Nudez, conteúdo sexual/pornográfico, violência gráfica e imagens de ódio claramente identificadas são rejeitados e não ficam guardados no R2. Casos ambíguos são guardados em área privada de quarentena e assinalados no admin para revisão humana.
 
 Antes de ativar esta funcionalidade, executa a migração `database/migrations/0004_feedback_image_moderation.sql` na D1, acrescenta a binding `AI` (já declarada no `wrangler.jsonc`) e aceita uma vez a licença do modelo Meta Llama 3.2 Vision no Cloudflare.
+
+## Acompanhar pedidos
+
+Se a base já existia antes do acompanhamento de pedidos, executa também, uma única vez, `database/migrations/0006_feedback_tracking.sql`. O formulário entrega uma referência de 12 caracteres; a pessoa pode consultá-la em `/acompanhar.html` com o mesmo e-mail usado no envio. A consulta devolve apenas o estado do pedido.

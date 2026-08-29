@@ -31,6 +31,12 @@ Não é preciso adicionar Google Analytics nem editar o código. Verás visitas,
 
 Se já tinhas criado a base antes de esta opção de cartaz existir, executa também, uma única vez, o conteúdo de `database/migrations/0002_feedback_posters.sql`.
 
+Para ativar o acompanhamento público de pedidos e a proteção contra tentativas repetidas, executa também uma vez a migração `database/migrations/0006_feedback_tracking.sql`. A página `/acompanhar.html` só mostra o estado a quem tiver simultaneamente a referência de 12 caracteres e o e-mail usado no envio.
+
+### Limite de pedidos no Worker
+
+O Worker aplica um limite real antes de validar o Turnstile ou consultar pedidos: quatro envios de formulário em 15 minutos e 12 consultas de acompanhamento em 15 minutos, por origem com hash SHA-256. O IP em claro nunca é gravado na D1; os contadores expiram automaticamente. Mantém o Turnstile ativo — é a segunda camada contra abuso.
+
 ## 4. Guardar cartazes enviados para revisão
 
 1. No Cloudflare, abre **Storage & Databases** → **R2** → **Create bucket**.
