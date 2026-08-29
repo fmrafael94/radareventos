@@ -498,9 +498,28 @@ footer nav a { font-size:14px; line-height:1.45; }
 /* Five suggestions remain one horizontal story on large screens: three cards
    are visible and the rail advances without moving the document itself. */
 @media (min-width:761px) {
-  .featured-rail { display:flex; gap:16px; overflow:hidden; scroll-behavior:smooth; scroll-snap-type:x mandatory; }
-  .featured-card { flex:0 0:calc((100% - 32px) / 3); min-width:0; scroll-snap-align:start; }
+  .featured-rail { display:flex; align-items:flex-start; gap:16px; overflow:hidden; scroll-behavior:smooth; scroll-snap-type:x mandatory; }
+  .featured-card { flex:0 0:calc((100% - 32px) / 3); min-width:0; min-height:0; scroll-snap-align:start; }
 }
+
+/* Cards should finish with their content, not with a forced slab of empty space. */
+.featured-copy { flex:0; }
+.featured-copy a { align-self:center; margin-top:12px; }
+@media (max-width:580px) {
+  .featured-rail { align-items:flex-start; }
+  .featured-card { min-height:0; }
+}
+
+/* Suggested-event artwork is the original poster once, never a blurred copy
+   behind itself. Empty space is deliberately quiet rather than fabricated art. */
+.featured-poster { background:#e2e6dc!important; }
+.featured-poster::before,.featured-poster::after { content:none!important; display:none!important; }
+.featured-poster img { position:static!important; z-index:auto!important; background:transparent!important; filter:none!important; object-fit:contain!important; }
+
+/* Discovery shortcuts are primary touch targets, not micro-labels. */
+.agenda-shortcuts { gap:10px; margin-bottom:18px; }
+.agenda-shortcuts button { min-height:46px; padding:0 18px; font:600 14px "DM Mono",monospace; letter-spacing:.015em; }
+@media (max-width:580px) { .agenda-shortcuts button { min-height:44px; padding:0 16px; font-size:14px; } }
 
 /* On desktop the footer is a calm, centred navigation bar rather than four
    competing text blocks. The promoter invitation remains visually secondary. */
