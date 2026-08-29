@@ -117,7 +117,7 @@ function render(event, poster) {
           ${poster ? `<button type="button" class="event-poster-trigger" data-event-poster aria-label="Ampliar cartaz oficial de ${escapeHtml(event.title)}"><img src="${escapeHtml(posterDownloadUrl)}" data-fallback-poster="${escapeHtml(poster)}" alt="Cartaz oficial de ${escapeHtml(event.title)}" fetchpriority="high" decoding="async" /></button>` : `<div class="share-card-empty">Desvio</div>`}
         </div>
       </div>
-      <p class="event-meta"><span class="event-meta-date">${escapeHtml(compactDate)}</span><strong class="event-meta-time">${escapeHtml(event.time || "Horário a confirmar")}</strong><span class="event-meta-place">${escapeHtml(event.venue)}, ${escapeHtml(event.city)}</span></p>
+      <p class="event-meta"><span class="event-meta-date">${escapeHtml(compactDate)}</span><span class="event-meta-place">${escapeHtml(event.venue)}, ${escapeHtml(event.city)}</span></p>
       <section class="share-panel" aria-label="Partilhar evento">
         <div class="share-copy"><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>Escolhe a aplicação no menu de partilha do teu telemóvel.</p></div>
         <div class="share-actions"><button type="button" data-share>Partilhar evento</button></div>
