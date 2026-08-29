@@ -471,3 +471,5 @@ footer nav a { font-size:14px; line-height:1.45; }
 }
 
 @media (min-width:581px) { .featured-card { display:flex; flex-direction:column; }.featured-copy { flex:1; width:100%; }.featured-copy a { align-self:center; margin-top:auto; } }
+
+.featured-copy a { display:inline-flex; align-items:center; gap:4px; }.link-arrow { width:14px; height:14px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
