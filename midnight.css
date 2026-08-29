@@ -442,3 +442,9 @@ body { font-size:17px; line-height:1.5; }
 ::view-transition-old(root) { animation:desvio-page-out .18s ease both; } ::view-transition-new(root) { animation:desvio-page-in .28s ease both; } @keyframes desvio-page-out { to { opacity:0; transform:scale(.985); } } @keyframes desvio-page-in { from { opacity:0; transform:scale(1.018); } }
 @media (max-width:900px) { .event-card-link { grid-template-columns:58px 1fr 100px 24px; gap:12px; }.event-card-link .format { display:none; } }
 @media (max-width:580px) { body { font-size:16px; }.brand { font-size:19px; }.submit-link { font-size:14px; }.intro>p:not(.kicker) { font-size:17px; }.featured-copy h3 { font-size:17px; }.featured-copy time,.featured-copy a { font-size:14px; }.browse-heading h2 { font-size:30px; }.event-card-link { grid-template-columns:52px minmax(0,1fr) 23px; min-height:84px; gap:10px; padding:11px 2px; }.event-card-link .format,.event-card-link .status { display:none; }.date-box b { font-size:19px; }.date-box span { font-size:11px; }.event-title { font-size:18px; white-space:normal; line-height:1.15; }.event-venue { overflow:visible; white-space:normal; font-size:15px; }.chevron { font-size:19px; } }
+
+/* The footer is navigation, not fine print. Keep it readable at a glance. */
+footer { padding:30px 28px 38px; font-size:16px; line-height:1.45; }
+footer nav { gap:22px; }
+footer nav a { font-size:14px; line-height:1.45; }
+@media (max-width:580px) { footer { padding:26px 20px 34px; font-size:16px; } footer nav a { font-size:15px; } }
