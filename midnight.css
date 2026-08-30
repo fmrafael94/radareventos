@@ -592,3 +592,11 @@ footer nav a { font-size:14px; line-height:1.45; }
 @media (max-width:760px) {
   .featured-poster { aspect-ratio:1; }
 }
+
+/* The symbol establishes the brand at every entry point. */
+.brand { gap:8px; line-height:1; }
+.brand-logo { display:block; flex:0 0 auto; width:28px; height:28px; border-radius:7px; object-fit:contain; }
+
+@media (max-width:760px) {
+  .brand-logo { width:25px; height:25px; border-radius:6px; }
+}
