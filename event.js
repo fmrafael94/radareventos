@@ -23,7 +23,7 @@ function ticketButton(event) {
   if (event.availability === "Esgotado") return `<span class="event-ticket muted">Esgotado</span>`;
   if ((event.availability === "Entrada livre" || /entrada\s+(?:livre|gratuita)/i.test(event.tickets || "")) && !event.ticketUrl) return `<span class="event-ticket muted">${escapeHtml(event.tickets || "Entrada livre")}</span>`;
   if (!event.ticketUrl) return `<span class="event-ticket muted">Bilhetes por confirmar</span>`;
-  return `<a class="event-ticket" href="${escapeHtml(event.ticketUrl)}" target="_blank" rel="noopener"><span class="event-action-full">${escapeHtml(event.tickets || "Consultar bilheteira")} ${arrowIcon}</span><span class="event-action-short">Bilhetes ${arrowIcon}</span></a>`;
+  return `<a class="event-ticket" href="${escapeHtml(event.ticketUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Bilhetes ${arrowIcon}</span><span class="event-action-short">Bilhetes ${arrowIcon}</span></a>`;
 }
 
 const eventSeriesName = event => String(event.title || "").split(" — ")[0].replace(/\s+\d{4}$/, "").trim();
