@@ -6,10 +6,12 @@
     <meta name="view-transition" content="same-origin" />
     <meta name="description" content="Desvio — Menos procura. Mais música." />
     <title>Desvio — Menos procura. Mais música.</title>
-    <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png?v=2" />
-    <link rel="shortcut icon" href="/favicon.ico?v=2" />
-    <link rel="apple-touch-icon" sizes="512x512" href="/apple-touch-icon.png?v=2" />
-    <link rel="manifest" href="/site.webmanifest?v=2" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=3" />
+    <link rel="shortcut icon" href="/favicon.ico?v=3" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png?v=3" />
+    <link rel="manifest" href="/site.webmanifest?v=3" />
+    <meta name="apple-mobile-web-app-title" content="Desvio" />
     <meta name="theme-color" content="#193427" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,7 +25,7 @@
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início"><img class="brand-logo" src="/brand/logo-icon.png" alt="" width="28" height="28" /><span>Desvio</span></a>
       <p>Música em Portugal</p>
-      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Enviar ao Desvio <span>→</span></button>
+      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Completa a agenda — envia o teu evento <span>→</span></button>
     </header>
 
     <main id="top" class="shell">
@@ -51,7 +53,7 @@
       </section>
 
       <section id="nearby-events" class="nearby-events" aria-labelledby="nearby-title" hidden>
-        <div class="nearby-heading"><div><p class="kicker">Perto de ti</p><h2 id="nearby-title">Para ouvir já.</h2></div><p id="nearby-description"></p></div>
+        <div class="nearby-heading"><div><p class="kicker">Perto de ti</p><h2 id="nearby-title">A acontecer na tua área.</h2></div><div class="nearby-controls" aria-label="Navegar eventos próximos"><button id="nearby-previous" type="button" aria-label="Eventos anteriores">←</button><button id="nearby-next" type="button" aria-label="Mais eventos">→</button></div></div>
         <div id="nearby-rail" class="nearby-rail" aria-live="polite"></div>
       </section>
 
@@ -73,6 +75,10 @@
             <label><span>Quando</span><select id="date-filter"><option value="">Todas as datas</option><option value="today">Hoje</option><option value="weekend">Este fim de semana</option><option value="week">Próximos 7 dias</option><option value="month">Próximo mês</option></select></label>
             <label><span>Entrada</span><select id="price-filter"><option value="">Qualquer entrada</option><option value="free">Entrada livre</option><option value="available">Com bilhetes</option><option value="pending">Por confirmar</option><option value="sold">Esgotado</option></select></label>
             <div class="multi-filter-wrap">
+              <button id="ticket-price-filter" class="multi-filter" type="button" aria-expanded="false"><span>Preço</span><strong>Qualquer preço</strong><i>⌄</i></button>
+              <div id="ticket-price-menu" class="multi-select-menu" role="group" aria-label="Selecionar preços de bilhete"></div>
+            </div>
+            <div class="multi-filter-wrap">
               <button id="genre-filter" class="multi-filter" type="button" aria-expanded="false"><span>Género</span><strong>Todos os géneros</strong><i>⌄</i></button>
               <div id="genre-menu" class="multi-select-menu" role="group" aria-label="Selecionar géneros"></div>
             </div>
@@ -85,12 +91,12 @@
           <div class="location-bar" aria-label="Filtros de localização">
             <span>Onde</span>
             <div class="multi-filter-wrap">
-              <button id="area-filter" class="multi-filter" type="button" aria-expanded="false"><span>Área</span><strong>Todas as áreas</strong><i>⌄</i></button>
-              <div id="area-menu" class="multi-select-menu" role="group" aria-label="Selecionar áreas"></div>
-            </div>
-            <div class="multi-filter-wrap">
               <button id="district-filter" class="multi-filter" type="button" aria-expanded="false"><span>Distrito</span><strong>Todos os distritos</strong><i>⌄</i></button>
               <div id="district-menu" class="multi-select-menu" role="group" aria-label="Selecionar distritos"></div>
+            </div>
+            <div class="multi-filter-wrap">
+              <button id="area-filter" class="multi-filter" type="button" aria-expanded="false"><span>Área</span><strong>Todas as áreas</strong><i>⌄</i></button>
+              <div id="area-menu" class="multi-select-menu" role="group" aria-label="Selecionar áreas"></div>
             </div>
             <div class="multi-filter-wrap">
               <button id="city-filter" class="multi-filter" type="button" aria-expanded="false"><span>Concelho / cidade</span><strong>Todos os concelhos</strong><i>⌄</i></button>
@@ -115,7 +121,7 @@
         <div class="event-list-heading" aria-hidden="true"><span>Data</span><span>Evento</span><span>Formato</span><span>Bilhetes</span><span>Detalhes</span></div>
         <div id="event-list" class="event-list" aria-live="polite"></div>
         <section id="calendar-view" class="calendar-view" aria-label="Calendário de eventos" hidden><header class="calendar-heading"><button id="calendar-previous" type="button" aria-label="Mês anterior">←</button><h3 id="calendar-label"></h3><button id="calendar-next" type="button" aria-label="Mês seguinte">→</button></header><div id="calendar-grid" class="calendar-grid"></div></section>
-        <p id="empty-state" class="empty-state" hidden>Não encontrámos eventos com esta seleção.</p>
+        <section id="empty-state" class="empty-state" aria-live="polite" hidden><p>Não encontrámos eventos com esta seleção.</p><button id="clear-empty-state" type="button">Limpar seleção</button></section>
         <nav id="pagination" class="pagination" aria-label="Paginação de eventos" hidden>
           <button id="previous-page" type="button">← Anterior</button>
           <span id="page-label"></span>

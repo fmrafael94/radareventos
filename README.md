@@ -33,6 +33,7 @@ The custom domain can be connected later from the same Cloudflare project.
 - Publicar `sitemap.xml`, `robots.txt` e configurar a propriedade no Google Search Console.
 - Configurar o Resend com o domínio verificado para enviar notificações de aprovação ou recusa de pedidos.
 - Trocar o contacto público nos Termos e na Política de Privacidade para `ola@odesvio.pt`.
+- Preparar alertas opcionais por cidade e artista, enviados apenas a quem os subscrever.
 
 ## Public suggestions, corrections and legal pages
 

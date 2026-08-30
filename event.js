@@ -146,6 +146,7 @@ function render(event, poster) {
     </aside>
   </article>`;
   page.setAttribute("aria-busy", "false");
+  page.classList.add("is-ready");
   const status = page.querySelector(".share-status");
   page.querySelector("[data-calendar]").addEventListener("click", () => {
     const file = calendarFile(event, shareUrl);

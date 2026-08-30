@@ -72,6 +72,7 @@ async function eventPage(request, env, id) {
       .replaceAll("{{EVENT_DESCRIPTION}}", escapeHtml(description))
       .replaceAll("{{EVENT_IMAGE}}", escapeHtml(image))
       .replaceAll("{{SITE_ICON}}", escapeHtml(`${url.origin}/brand/logo-icon.png`))
+      .replaceAll("{{EVENT_ID}}", escapeHtml(id))
       .replaceAll("{{CANONICAL_URL}}", escapeHtml(canonical))
       .replaceAll("{{EVENT_SCHEMA}}", eventSchema);
     return new Response(html, { headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "public, max-age=300" } });

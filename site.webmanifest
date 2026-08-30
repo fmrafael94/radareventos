@@ -3,6 +3,12 @@
   "short_name": "Desvio",
   "icons": [
     {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/brand/logo-icon.png",
       "sizes": "512x512",
       "type": "image/png",

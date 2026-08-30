@@ -1,4 +1,4 @@
-const state = { search: "", date: "", price: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", view: "list", page: 1 };
+const state = { search: "", date: "", price: "", ticketPrice: [], genre: [], area: [], district: [], city: [], type: [], highlight: "", view: "list", page: 1 };
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
@@ -10,6 +10,8 @@ const nextPage = document.querySelector("#next-page");
 const genreFilter = document.querySelector("#genre-filter");
 const dateSelect = document.querySelector("#date-filter");
 const priceSelect = document.querySelector("#price-filter");
+const ticketPriceFilter = document.querySelector("#ticket-price-filter");
+const ticketPriceMenu = document.querySelector("#ticket-price-menu");
 const areaFilter = document.querySelector("#area-filter");
 const genreMenu = document.querySelector("#genre-menu");
 const areaMenu = document.querySelector("#area-menu");
@@ -25,7 +27,8 @@ const nearbyButton = document.querySelector("#nearby-button");
 const nearbyHint = document.querySelector("#nearby-hint");
 const nearbyEvents = document.querySelector("#nearby-events");
 const nearbyRail = document.querySelector("#nearby-rail");
-const nearbyDescription = document.querySelector("#nearby-description");
+const nearbyPrevious = document.querySelector("#nearby-previous");
+const nearbyNext = document.querySelector("#nearby-next");
 const featuredRail = document.querySelector("#featured-rail");
 let featuredAutoscroll;
 let featuredRefreshTimer;
@@ -733,6 +736,7 @@ const refreshLocationOptions = (changedKey = "") => {
 };
 const genreMultiFilter = setupMultiFilter(genreFilter, genreMenu, EVENTS.flatMap(event => event.genres), "genre", "Todos os géneros");
 const typeMultiFilter = setupMultiFilter(typeFilter, typeMenu, EVENTS.map(eventType), "type", "Todos os formatos");
+const ticketPriceMultiFilter = setupMultiFilter(ticketPriceFilter, ticketPriceMenu, ["Entrada livre", "Até 10 €", "10–25 €", "25–50 €", "Mais de 50 €", "Preço por confirmar"], "ticketPrice", "Qualquer preço");
 areaMultiFilter = setupMultiFilter(areaFilter, areaMenu, EVENTS.map(event => event.area), "area", "Todas as áreas", refreshLocationOptions);
 districtMultiFilter = setupMultiFilter(districtFilter, districtMenu, EVENTS.map(event => event.district), "district", "Todos os distritos", refreshLocationOptions);
 cityMultiFilter = setupMultiFilter(cityFilter, cityMenu, EVENTS.map(event => event.city), "city", "Todos os concelhos", refreshLocationOptions);
@@ -741,7 +745,7 @@ document.addEventListener("click", event => {
   if (!event.target.closest(".custom-select")) document.querySelectorAll(".custom-select.open").forEach(select => select.classList.remove("open"));
   if (!event.target.closest(".multi-filter-wrap")) {
     document.querySelectorAll(".multi-select-menu.open").forEach(menu => menu.classList.remove("open"));
-    [genreFilter, typeFilter, areaFilter, districtFilter, cityFilter].forEach(button => button.setAttribute("aria-expanded", "false"));
+    [genreFilter, typeFilter, ticketPriceFilter, areaFilter, districtFilter, cityFilter].forEach(button => button.setAttribute("aria-expanded", "false"));
   }
 });
 // A link is only presented as a ticket button when it points to a concrete
@@ -805,6 +809,19 @@ const matchesPrice = event => !state.price ||
   (state.price === "available" && !isFreeEvent(event) && !["Esgotado", "Cancelado", "Bilhetes a confirmar"].includes(availabilityLabel(event))) ||
   (state.price === "pending" && availabilityLabel(event) === "Bilhetes a confirmar") ||
   (state.price === "sold" && availabilityLabel(event) === "Esgotado");
+const ticketPriceCategory = event => {
+  if (freeEntryOnly(event)) return "Entrada livre";
+  const prices = [...String(event.tickets || "").matchAll(/(\d{1,4}(?:[.,]\d{1,2})?)\s*€/g)]
+    .map(match => Number(match[1].replace(",", ".")))
+    .filter(Number.isFinite);
+  if (!prices.length) return "Preço por confirmar";
+  const price = Math.min(...prices);
+  if (price <= 10) return "Até 10 €";
+  if (price <= 25) return "10–25 €";
+  if (price <= 50) return "25–50 €";
+  return "Mais de 50 €";
+};
+const matchesTicketPrice = event => !state.ticketPrice.length || state.ticketPrice.includes(ticketPriceCategory(event));
 const isUnderground = event => event.genres.some(genre => /metal|hardcore|punk|doom|death/i.test(genre)) || /bar|local/i.test(eventType(event));
 const matchesHighlight = event => !state.highlight ||
   (state.highlight === "free" && isFreeEvent(event)) ||
@@ -833,15 +850,29 @@ function renderNearby(latitude, longitude, area) {
     .slice(0, 8);
   nearbyEvents.hidden = !matches.length;
   if (!matches.length) return;
-  nearbyDescription.textContent = area;
   nearbyRail.innerHTML = matches.map(({ event }) => `<article class="nearby-card">
     <a href="${eventUrl(event)}" target="_blank" rel="noopener" aria-label="Abrir ${event.title}">
       <span class="nearby-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy" decoding="async" /></span>
-      <time datetime="${event.date}">${compactNearbyDate(event)}</time>
-      <h3>${event.title}</h3>
+      <span class="nearby-copy"><time datetime="${event.date}">${compactNearbyDate(event)}</time><h3>${event.title}</h3></span>
     </a>
   </article>`).join("");
   nearbyRail.querySelectorAll("img").forEach(image => image.addEventListener("error", () => image.closest(".nearby-card")?.remove(), { once: true }));
+  nearbyRail.scrollLeft = 0;
+  syncNearbyControls();
+  nearbyEvents.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+
+function syncNearbyControls() {
+  if (!nearbyPrevious || !nearbyNext) return;
+  const remaining = nearbyRail.scrollWidth - nearbyRail.clientWidth - nearbyRail.scrollLeft;
+  nearbyPrevious.disabled = nearbyRail.scrollLeft < 4;
+  nearbyNext.disabled = remaining < 4;
+}
+
+function moveNearby(direction) {
+  const card = nearbyRail.querySelector(".nearby-card");
+  const step = card ? card.getBoundingClientRect().width + 12 : nearbyRail.clientWidth * .8;
+  nearbyRail.scrollBy({ left: direction * step, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 }
 
 function renderFeatured() {
@@ -918,6 +949,7 @@ function filteredEvents() {
       (!state.city.length || group.some(item => state.city.includes(item.city))) &&
       (!state.type.length || group.some(item => state.type.includes(eventType(item)))) &&
       matchesPrice(event) &&
+      matchesTicketPrice(event) &&
       matchesHighlight(event);
   }).sort((a, b) => a.date.localeCompare(b.date));
 }
@@ -962,7 +994,9 @@ function render() {
   list.setAttribute("aria-busy", "true");
   calendarView.hidden = !calendarMode;
   document.querySelector(".event-list-heading").hidden = calendarMode;
+  list.classList.remove("is-updating");
   list.innerHTML = visible.map(eventCard).join("");
+  window.requestAnimationFrame(() => list.classList.add("is-updating"));
   list.setAttribute("aria-busy", "false");
   if (calendarMode) renderCalendar(matches);
   if (resultCount) resultCount.textContent = `${matches.length} ${matches.length === 1 ? "evento" : "eventos"}`;
@@ -975,7 +1009,7 @@ function render() {
 }
 
 function syncFilterToggle() {
-  const active = [state.date, state.price, state.highlight].filter(Boolean).length + state.genre.length + state.type.length + state.area.length + state.district.length + state.city.length;
+  const active = [state.date, state.price, state.highlight].filter(Boolean).length + state.ticketPrice.length + state.genre.length + state.type.length + state.area.length + state.district.length + state.city.length;
   const isOpen = !filterPanel.hidden;
   filterToggle.querySelector("span").textContent = isOpen ? "Fechar filtros" : active ? `Filtros · ${active}` : "Filtros";
   filterToggle.querySelector("i").textContent = isOpen ? "×" : "+";
@@ -984,7 +1018,7 @@ function syncFilterToggle() {
 
 function updateFilter(key, value) { state[key] = value; state.page = 1; render(); }
 function resetAgendaSelection() {
-  Object.assign(state, { search: "", date: "", price: "", genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
+  Object.assign(state, { search: "", date: "", price: "", ticketPrice: [], genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
   document.querySelector("#search").value = "";
   dateSelect.value = "";
   priceSelect.value = "";
@@ -1025,6 +1059,11 @@ document.querySelector("#clear-filters").addEventListener("click", () => {
   resetAgendaSelection();
   render();
 });
+document.querySelector("#clear-empty-state").addEventListener("click", () => {
+  resetAgendaSelection();
+  render();
+  document.querySelector("#search").focus();
+});
 document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEventListener("click", () => {
   const pick = button.dataset.quickPick;
   const isDatePick = ["today", "weekend", "week"].includes(pick);
@@ -1037,6 +1076,9 @@ document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEvent
   dateSelect.dispatchEvent(new Event("change"));
 }));
 document.querySelectorAll("[data-nearby-shortcut]").forEach(button => button.addEventListener("click", () => nearbyButton.click()));
+nearbyPrevious?.addEventListener("click", () => moveNearby(-1));
+nearbyNext?.addEventListener("click", () => moveNearby(1));
+nearbyRail.addEventListener("scroll", syncNearbyControls, { passive: true });
 nearbyButton.addEventListener("click", () => {
   if (!navigator.geolocation) {
     nearbyHint.textContent = "Localização não disponível neste browser.";
@@ -1272,6 +1314,20 @@ renderSources();
 renderFeatured();
 scheduleFeaturedRefresh();
 render();
+
+function openCorrectionFromUrl() {
+  const eventId = new URLSearchParams(location.search).get("corrigir");
+  const event = EVENTS.find(item => item.id === eventId);
+  if (!event) return;
+  setFeedbackMode("correction", event.id, event.title);
+  configureTurnstile();
+  feedbackDialog.showModal();
+  const url = new URL(location.href);
+  url.searchParams.delete("corrigir");
+  history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+openCorrectionFromUrl();
 
 // Community suggestions only arrive here after the private review area has
 // confirmed a direct official source. The bundled list remains the fast,
