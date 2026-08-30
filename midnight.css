@@ -423,16 +423,6 @@ html,body { overflow-x:clip; }
 .event-art.poster-trigger:hover .event-art-caption,
 .event-art.poster-trigger:focus-visible .event-art-caption { opacity:1; }
 
-.feedback-draft-note {
-  margin:12px 0 0;
-  padding:8px 10px;
-  border-left:2px solid #78965b;
-  border-radius:0 7px 7px 0;
-  color:#51604f;
-  background:rgba(224,235,205,.62);
-  font:500 10px/1.45 "DM Sans",Arial,sans-serif;
-}
-
 /* Comfortable reading is a product feature: controls and event information
    remain legible at arm's length on a phone as well as on a large screen. */
 body { font-size:17px; line-height:1.5; }
@@ -534,6 +524,17 @@ footer nav a { font-size:14px; line-height:1.45; }
 
 /* The three legal links are a single, aligned row on phones. */
 @media (max-width:580px) { footer nav { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+/* Featured cards use one consistent mobile frame too. Each poster adapts to
+   the portrait window and every card in the rail shares the same height. */
+@media (max-width:760px) {
+  .featured-rail { align-items:stretch; }
+  .featured-card { display:flex; flex-direction:column; }
+  .featured-poster { aspect-ratio:4 / 5; }
+  .featured-poster img { width:100%!important; height:100%!important; object-fit:cover!important; object-position:center; }
+  .featured-copy { flex:1; }
+  .featured-copy a { margin-top:auto; }
+}
 
 /* On desktop the footer is a calm, centred navigation bar rather than four
    competing text blocks. The promoter invitation remains visually secondary. */

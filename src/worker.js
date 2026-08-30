@@ -125,6 +125,44 @@ async function eventPoster(request, env, id, executionCtx) {
   }
 }
 
+async function purgeExpiredPersonalData(env) {
+  if (!env.EVENT_RADAR_DB) return;
+
+  const currentWindow = Math.floor(Date.now() / (15 * 60 * 1000));
+  await env.EVENT_RADAR_DB.prepare("DELETE FROM request_rate_limits WHERE window_start < ?")
+    .bind(currentWindow - 3)
+    .run();
+
+  const { results: expired } = await env.EVENT_RADAR_DB.prepare(`
+    SELECT id, poster_object_key FROM feedback
+    WHERE (
+      status IN ('new', 'reviewing') AND created_at < datetime('now', '-90 days')
+    ) OR (
+      status IN ('published', 'rejected', 'closed')
+      AND COALESCE(reviewed_at, created_at) < datetime('now', '-12 months')
+    )
+    LIMIT 100
+  `).all();
+  const deletableIds = [];
+  for (const feedback of expired) {
+    if (feedback.poster_object_key && env.EVENT_POSTERS) {
+      try {
+        await env.EVENT_POSTERS.delete(feedback.poster_object_key);
+      } catch {
+        continue;
+      }
+    }
+    deletableIds.push(feedback.id);
+  }
+  if (deletableIds.length) {
+    await env.EVENT_RADAR_DB.batch(deletableIds.map(id => env.EVENT_RADAR_DB.prepare("DELETE FROM feedback WHERE id = ?").bind(id)));
+  }
+  await env.EVENT_RADAR_DB.prepare(`
+    DELETE FROM admin_users
+    WHERE status = 'disabled' AND role != 'owner' AND updated_at < datetime('now', '-12 months')
+  `).run();
+}
+
 export default {
   async fetch(request, env, executionCtx) {
     const { pathname } = new URL(request.url);
@@ -158,4 +196,7 @@ export default {
 
     return secureResponse(await env.ASSETS.fetch(request));
   },
+  async scheduled(_controller, env, executionCtx) {
+    executionCtx.waitUntil(purgeExpiredPersonalData(env));
+  }
 };
