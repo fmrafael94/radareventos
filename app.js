@@ -117,20 +117,6 @@ const festivalChildren = event => {
   }));
 };
 const festivalParent = event => event.seriesId ? EVENTS.find(parent => parent.id === event.seriesId) : event;
-const festivalSeriesPrefixes = {
-  "festas-mar-cascais-2026": "festas-mar-",
-  "corroios-2026": "corroios-",
-  "guimaraes-jazz-2026": "guimaraes-jazz-",
-  "kalorama-2026": "kalorama-2026-",
-  "outfest-2026": "outfest-2026-",
-  "faro-festival-f": "festival-f-2026-",
-  "iminente-2026": "iminente-2026-"
-};
-Object.entries(festivalSeriesPrefixes).forEach(([parentId, prefix]) => {
-  EVENTS.forEach(event => {
-    if (event.id.startsWith(prefix) && event.id !== parentId) event.seriesId = parentId;
-  });
-});
 
 // Poster rule: always look in this order before publishing a visual:
 // 1) official event site, 2) that event's concrete Ticketline/BOL/FNAC/etc.
