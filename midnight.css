@@ -332,8 +332,8 @@ html,body { overflow-x:clip; }
 .featured-poster { cursor:pointer; }
 .featured-copy { pointer-events:none; }
 .featured-copy a { pointer-events:auto; }
-.submit-link span { display:inline; margin-left:3px; font:400 1.1em/1 Arial,sans-serif; vertical-align:-.03em; }
-.submit-link span::before,.submit-link span::after { content:none; }
+.submit-link-arrow { display:inline; margin-left:3px; font:400 1.1em/1 Arial,sans-serif; vertical-align:-.03em; }
+.submit-link-arrow::before,.submit-link-arrow::after { content:none; }
 
 /* Discovery starts with a few useful choices rather than an empty search box. */
 .agenda-shortcuts { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }.agenda-shortcuts button { min-height:34px; padding:0 11px; border:1px solid rgba(57,79,64,.28); border-radius:99px; color:#385140; background:rgba(255,255,255,.42); font:600 10px "DM Mono",monospace; cursor:pointer; }.agenda-shortcuts button:hover,.agenda-shortcuts button:focus-visible,.agenda-shortcuts button[aria-pressed="true"] { border-color:#315e3c; color:#f8f8f0; background:#315e3c; outline:0; }.agenda-shortcuts button[data-nearby-shortcut] { margin-left:auto; }
@@ -612,3 +612,8 @@ footer nav a { font-size:14px; line-height:1.45; }
 @media (max-width:1049px) and (min-width:761px) { .nearby-card { flex-basis:calc((100% - 36px) / 4); } }
 @media (max-width:760px) { .nearby-events { margin:32px 0 36px; padding:18px 14px 19px; border-radius:15px; }.nearby-heading { align-items:center; margin:0 3px 13px; }.nearby-heading h2 { font-size:26px; }.nearby-controls { gap:5px; }.nearby-controls button { width:34px; height:34px; font-size:17px; }.nearby-rail { gap:11px; margin-right:-14px; padding:2px 14px 7px 3px; }.nearby-card { flex-basis:min(57vw,220px); min-width:0; }.nearby-copy { padding:9px 9px 11px; }.nearby-card h3 { font-size:16px; }.empty-state { padding:28px 14px; }.empty-state p { font-size:15px; } }
 @media (prefers-reduced-motion:reduce) { .nearby-rail { scroll-behavior:auto; }.nearby-card a,.nearby-controls button { transition:none; }.event-list.is-updating { animation:none; } }
+
+/* The mobile header keeps one clear call to action without squeezing the brand. */
+.submit-link { display:inline-flex; align-items:center; justify-content:flex-end; gap:5px; white-space:nowrap; }
+.submit-link-compact { display:none; }.submit-link-arrow { display:inline!important; margin:0!important; font:400 1.1em/1 Arial,sans-serif!important; }
+@media (max-width:580px) { .site-header { min-height:64px; padding:0 15px; }.submit-link { min-height:42px; padding:0 2px; font-size:13px!important; }.submit-link-wide { display:none; }.submit-link-compact { display:inline; }.submit-link-arrow { font-size:16px!important; } }
