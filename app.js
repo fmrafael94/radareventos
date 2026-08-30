@@ -137,6 +137,10 @@ Object.entries(festivalSeriesPrefixes).forEach(([parentId, prefix]) => {
 // Never create an artificial flyer; when this record is absent, the UI says
 // so plainly.
 const officialPosters = {
+  "festa-avante-2026": ["https://www.festadoavante.pcp.pt/images/imagecache/1800_850/7560.jpeg", "https://www.festadoavante.pcp.pt/2026/musica"],
+  "festival-moscatel-douro-2026": ["https://cdn.visitportugal.com/sites/default/files/styles/large/public/mediateca/principal-8995.jpg?itok=Wh6jMhYM", "https://www.visitportugal.com/pt-pt/content/festival-do-moscatel-do-douro-4"],
+  "festival-jovens-musicos-2026": ["https://antena2.rtp.pt/wp-content/uploads/2026/08/Concerto-Laureados-2025-PJM-Gulbenkian-18-09-2025.jpg", "https://antena2.rtp.pt/pjm/festival-jovens-musicos/em-contagem-decrescente-para-o-festival-jovens-musicos-2026/"],
+  "festival-colombo-2026": ["https://www.madeira.gov.pt/Portals/55/Imagens/Eventos/FC%202026%20mupi-696x864-EN.png", "https://eventsmadeira.com/en/event/columbus-festival-2/"],
   "corroios-2026": ["https://www.cm-seixal.pt/sites/default/files/styles/640x426/public/festas_populares_corroios_2026.png?itok=CsM8ke8c&timestamp=1783007117", "https://www.cm-seixal.pt/evento/festas-populares-de-corroios-2026"],
   "festas-mar-cascais-2026": ["https://www.cascais.pt/sites/default/files/styles/galeria-new/public/imagens/galerias/new/2026_ge_fm_site_1000x500px_programa.jpg?itok=COquiY-c", "https://www.cascais.pt/noticia/musica-esta-de-volta-ao-palco-mais-proximo-do-atlantico"],
   "kalorama-2026": ["https://meokalorama.pt/wp-content/uploads/2026/04/MEO_KLR_BILLING_1080x1350_NO_LOGOS.jpg", "https://meokalorama.pt/en/"],
@@ -517,6 +521,36 @@ const officialEventPages = {
   ,"portalegre-core-fest-nov": ["https://www.portalegrecore.com/portalegre-core-fest", "https://www.portalegrecore.com/portalegre-core-fest", "Portalegre Core — página oficial do festival"]
 };
 const auditedEventDetails = {
+  "festa-avante-2026": {
+    venue: "Quinta da Atalaia", source:"Festa do Avante! — programação oficial", sourceUrl:"https://www.festadoavante.pcp.pt/2026/musica", posterVerifiedAt:"2026-08-30", mapsUrl: "https://www.google.com/maps/search/?api=1&query=Quinta%20da%20Atalaia%2C%20Avenida%20Ba%C3%ADa%20Natural%20do%20Seixal%20415%2C%20Amora",
+    tickets: "Entrada Permanente 35 € até 3 setembro", ticketUrl: "https://www.festadoavante.pcp.pt/2026/comprar-ep", availability: "Disponível",
+    programme: [
+      { date:"2026-09-04", time:"18:45–00:00", title:"Malabá · Fjords · DEVASSAS · Baleia Baleia Baleia · Ex-Votos", venue:"Palco Paz" },
+      { date:"2026-09-04", time:"20:00–00:00", title:"Eneiva Lapa · Batucadeiras da Quinta da Princesa · Irma · Beethoven 9.ª Sinfonia · The Black Mamba · Yuri da Cunha", venue:"Cidade da Juventude · Auditório 1.º de Maio · Palco 25 de Abril" },
+      { date:"2026-09-05", time:"15:30–00:30", title:"Grupo Coral de São Brás do Regedouro · Grupo Coral do Sindicato da Indústria Mineira de Aljustrel · Adufeiras em Flor · Impasse B · Fala Povo Fala · Roda Ibérica · Cabra Çega · Piropop", venue:"Palco Paz" },
+      { date:"2026-09-05", time:"14:30–00:30", title:"Chico Romelo · Ja Yl’ Son · Anarchicks · Erica Brown and The Bluegrass Connection · King Bigs · Bombino · Gabriel Gomes convida Rodrigo Leão · Janita Salomé c/ Maria João e Ana Bacalhau · Tim c/ Mário Laginha, Pedro Jóia e Coro Feminino TuttiEncantus · António Zambujo · 47 Soul · Cara de Espelho · Pedro Jóia convida Ney Matogrosso · Talismán · Ivandro · Rave Avante! · Carlão", venue:"Palco 25 de Abril · Auditório 1.º de Maio" },
+      { date:"2026-09-05", time:"21:00–00:00", title:"Batalha do conhecimento · Yzulado", venue:"Cidade da Juventude" },
+      { date:"2026-09-06", time:"14:30–22:00", title:"Cores do Vietname · donaranha · Espiral · Xoteiras · G-Combo · Moro Acid · Tropicaustica + O gringo sou eu?", venue:"Palco Paz" },
+      { date:"2026-09-06", time:"15:00–21:30", title:"Coro Lopes Graça · Ghoya · Laurent Filipe · Luta livre · JP Simões · Diana Vilarinho · Regula · Pedro Moutinho e Hélder Moutinho · Carolina Deslandes · Aldina Duarte", venue:"Palco 25 de Abril · Auditório 1.º de Maio" },
+      { date:"2026-09-06", time:"19:30–22:00", title:"Francisco Antunes · Naomy", venue:"Cidade da Juventude" }
+    ]
+  },
+  "festival-moscatel-douro-2026": {
+    venue: "Adega de Favaios", posterVerifiedAt:"2026-08-30", mapsUrl: "https://www.google.com/maps/search/?api=1&query=Adega%20de%20Favaios%2C%20Alij%C3%B3", tickets: "Entrada e bilheteira por confirmar", ticketUrl: "", availability: "Por confirmar",
+    programme: ["2026-09-11", "2026-09-12", "2026-09-13"].map(date => ({ date, time:"Horário por anunciar", title:"Programação musical por dia ainda não publicada pela organização", venue:"Favaios" }))
+  },
+  "festival-jovens-musicos-2026": {
+    source:"RTP Antena 2 — programação oficial", sourceUrl:"https://antena2.rtp.pt/pjm/festival-jovens-musicos/em-contagem-decrescente-para-o-festival-jovens-musicos-2026/", posterVerifiedAt:"2026-08-30", mapsUrl: "https://www.google.com/maps/search/?api=1&query=Funda%C3%A7%C3%A3o%20Calouste%20Gulbenkian%2C%20Lisboa", tickets: "Entrada livre", ticketUrl: "", availability: "Entrada livre",
+    programme: [
+      { date:"2026-09-15", time:"15:00–21:00", title:"Instalação sonora Lugares Invisíveis · entrega de prémios · Henrique Pinto Quarteto · Orquestra GeraJazz c/ João Barradas · Solistas SAMP", venue:"Lisboa Incomum · Auditório 3 · Grande Auditório Gulbenkian" },
+      { date:"2026-09-16", time:"16:00–21:00", title:"CD de João Diogo Leitão · mesa redonda do Instituto Gregoriano · KerberosTrio EPME · Flowing Reeds Duo · Orquestra Metropolitana de Lisboa c/ Teresa Macedo Ferreira", venue:"Auditório 2 · Grande Auditório Gulbenkian" },
+      { date:"2026-09-17", time:"16:00–21:00", title:"Mesa redonda arte, ciência e tecnologia · homenagem a Maria Teresa de Macedo · Quarteto Tágide · Cecília Quartet · Irene Lima · solistas laureados PJM 2026 com Orquestra Gulbenkian", venue:"Auditório 3 · Grande Auditório Gulbenkian" }
+    ]
+  },
+  "festival-colombo-2026": {
+    venue: "Vila Baleira", source:"Events Madeira — cartaz oficial", sourceUrl:"https://eventsmadeira.com/en/event/columbus-festival-2/", posterVerifiedAt:"2026-08-30", mapsUrl: "https://www.google.com/maps?q=33.078403181695826,-16.334833570347325", time: "17 setembro 15:00 — 20 setembro 23:00", tickets: "Entrada e bilheteira por confirmar", ticketUrl: "", availability: "Por confirmar",
+    programme: ["2026-09-17", "2026-09-18", "2026-09-19", "2026-09-20"].map(date => ({ date, time: date === "2026-09-17" ? "A partir das 15:00" : date === "2026-09-20" ? "Até às 23:00" : "Horário por anunciar", title:"Concertos, encenações e mercado quinhentista — programa detalhado por dia ainda não publicado", venue:"Vila Baleira, Porto Santo" }))
+  },
   "vul-afro-encircle": { tickets: "Entrada gratuita (19:00–23:00); bilhetes em breve" },
   "vul-kizomba-rua": { tickets: "Entrada gratuita; RSVP em breve" },
   "vul-afterglow": { tickets: "Registo obrigatório; bilhetes em breve" },
@@ -559,7 +593,7 @@ EVENTS.forEach(event => {
   }
   if (auditedEventDetails[event.id]) Object.assign(event, auditedEventDetails[event.id]);
   if (legacyOfficialPosterIds.has(event.id) && event.image) event.posterSourceUrl = event.sourceUrl;
-  if (event.posterSourceUrl) event.posterVerifiedAt = "2026-08-23";
+  if (event.posterSourceUrl) event.posterVerifiedAt ||= "2026-08-23";
 });
 
 // Caminhos Metálicos is a valuable discovery calendar, but its public agenda
@@ -849,20 +883,10 @@ function renderFeatured() {
 }
 
 function startFeaturedAutoscroll() {
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reducedMotion || featuredRail.children.length < 2) return;
-  let activeIndex = 0;
-  const advance = () => {
-    activeIndex = (activeIndex + 1) % featuredRail.children.length;
-    const nextCard = featuredRail.children[activeIndex];
-    featuredRail.scrollTo({
-      left: Math.max(0, nextCard.offsetLeft - featuredRail.offsetLeft),
-      behavior: "smooth"
-    });
-  };
-  featuredAutoscroll = window.setInterval(advance, 6200);
-  featuredRail.addEventListener("pointerdown", () => window.clearInterval(featuredAutoscroll), { once: true });
-  featuredRail.addEventListener("focusin", () => window.clearInterval(featuredAutoscroll), { once: true });
+  // A suggestion should stay where the visitor leaves it. On desktop all five
+  // are visible; on mobile the rail is deliberately explored by touch.
+  window.clearInterval(featuredAutoscroll);
+  featuredAutoscroll = undefined;
 }
 
 function eventCard(event) {

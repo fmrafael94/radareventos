@@ -21,6 +21,7 @@ async function posterFor(id) {
 
 function ticketButton(event) {
   if (event.availability === "Esgotado") return `<span class="event-ticket muted">Esgotado</span>`;
+  if ((event.availability === "Entrada livre" || /entrada\s+(?:livre|gratuita)/i.test(event.tickets || "")) && !event.ticketUrl) return `<span class="event-ticket muted">${escapeHtml(event.tickets || "Entrada livre")}</span>`;
   if (!event.ticketUrl) return `<span class="event-ticket muted">Bilhetes por confirmar</span>`;
   return `<a class="event-ticket" href="${escapeHtml(event.ticketUrl)}" target="_blank" rel="noopener"><span class="event-action-full">${escapeHtml(event.tickets || "Consultar bilheteira")} ${arrowIcon}</span><span class="event-action-short">Bilhetes ${arrowIcon}</span></a>`;
 }
@@ -28,6 +29,7 @@ function ticketButton(event) {
 const eventSeriesName = event => String(event.title || "").split(" — ")[0].replace(/\s+\d{4}$/, "").trim();
 const festivalProgramme = event => {
   if (!event.endDate) return [];
+  if (Array.isArray(event.programme) && event.programme.length) return event.programme;
   return (window.EVENTS || [])
     .filter(item => programmeParent(item)?.id === event.id)
     .sort((a, b) => a.date.localeCompare(b.date) || String(a.time || "").localeCompare(String(b.time || "")));
@@ -115,7 +117,7 @@ function render(event, poster) {
   const programme = festivalProgramme(event);
   const programmeDates = [...new Set(programme.map(item => item.date))];
   const related = similarEvents(event);
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
+  const mapsUrl = event.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
   page.innerHTML = `<article class="event-view">
     <div class="event-main">
       <div class="event-overview">

@@ -544,3 +544,51 @@ footer nav a { font-size:14px; line-height:1.45; }
   footer nav { gap:20px; }
   footer p { justify-self:end; max-width:330px; text-align:right; }
 }
+
+/* Featured posters are an editorial grid, never five unrelated crops. The
+   square frame works for both vertical official posters and landscape photos:
+   the full original is always visible and every card has the same geometry. */
+.featured-rail { align-items:stretch; }
+.featured-card { display:flex; min-width:0; min-height:0; flex-direction:column; }
+.featured-poster {
+  display:grid;
+  width:100%;
+  aspect-ratio:1;
+  place-items:center;
+  overflow:hidden;
+  background:#e2e6dc!important;
+}
+.featured-poster img {
+  display:block;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center;
+}
+.featured-copy { display:flex; flex:1; flex-direction:column; }
+.featured-copy a { margin-top:auto; }
+
+@media (min-width:1200px) {
+  .featured-rail {
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:16px;
+    overflow:visible;
+    scroll-snap-type:none;
+  }
+  .featured-card { width:auto; flex:auto; }
+}
+
+@media (min-width:761px) and (max-width:1199px) {
+  .featured-rail {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    overflow:visible;
+    scroll-snap-type:none;
+  }
+  .featured-card { width:auto; flex:auto; }
+}
+
+@media (max-width:760px) {
+  .featured-poster { aspect-ratio:1; }
+}
