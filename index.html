@@ -25,7 +25,7 @@
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início"><img class="brand-logo" src="/brand/logo-icon.png" alt="" width="28" height="28" /><span>Desvio</span></a>
       <p>Música em Portugal</p>
-      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion"><span class="submit-link-wide">Completa a agenda — envia o teu evento</span><span class="submit-link-compact">Envia evento</span><span class="submit-link-arrow" aria-hidden="true">→</span></button>
+      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Completa a agenda <span class="submit-link-arrow" aria-hidden="true">→</span></button>
     </header>
 
     <main id="top" class="shell">
@@ -64,7 +64,6 @@
           <button type="button" data-quick-pick="weekend">Este fim de semana</button>
           <button type="button" data-quick-pick="week">Próximos 7 dias</button>
           <button type="button" data-quick-pick="free">Entrada livre</button>
-          <button type="button" data-nearby-shortcut>Perto de mim</button>
         </nav>
         <div class="agenda-search">
           <label class="agenda-search-input"><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" aria-label="Procurar artista, sala ou cidade" /></label>
@@ -86,10 +85,9 @@
               <button id="type-filter" class="multi-filter" type="button" aria-expanded="false"><span>Formato</span><strong>Todos os formatos</strong><i>⌄</i></button>
               <div id="type-menu" class="multi-select-menu" role="group" aria-label="Selecionar formatos"></div>
             </div>
-            <button id="clear-filters" class="clear-button" type="button">Limpar seleção</button>
           </div>
           <div class="location-bar" aria-label="Filtros de localização">
-            <span>Onde</span>
+            <div class="location-bar-heading"><span>Onde</span><button id="nearby-button" class="nearby-button" type="button">Usar a minha localização</button><small id="nearby-hint" aria-live="polite"></small></div>
             <div class="multi-filter-wrap">
               <button id="district-filter" class="multi-filter" type="button" aria-expanded="false"><span>Distrito</span><strong>Todos os distritos</strong><i>⌄</i></button>
               <div id="district-menu" class="multi-select-menu" role="group" aria-label="Selecionar distritos"></div>
@@ -103,15 +101,14 @@
               <div id="city-menu" class="multi-select-menu" role="group" aria-label="Selecionar concelhos e cidades"></div>
             </div>
           </div>
+          <div class="filter-panel-actions"><button id="clear-filters" class="clear-button" type="button">Limpar seleção</button></div>
           <div class="quick-picks" aria-label="Destaques rápidos">
             <span>Destaques</span>
-            <button id="nearby-button" class="nearby-button" type="button">⌖ Perto de mim</button>
             <button type="button" data-quick-pick="week">Próximos 7 dias</button>
             <button type="button" data-quick-pick="free">Entrada livre</button>
             <button type="button" data-quick-pick="festival">Festivais</button>
             <button type="button" data-quick-pick="underground">Underground</button>
             <button type="button" data-quick-pick="sold">Esgotados</button>
-            <small id="nearby-hint" aria-live="polite"></small>
           </div>
         </div>
       </section>

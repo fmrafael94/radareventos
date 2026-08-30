@@ -848,8 +848,13 @@ function renderNearby(latitude, longitude, area) {
     .slice(0, 16)
     .sort((left, right) => Number(portraitPosterIds.has(right.event.id)) - Number(portraitPosterIds.has(left.event.id)) || left.distance - right.distance)
     .slice(0, 8);
-  nearbyEvents.hidden = !matches.length;
-  if (!matches.length) return;
+  nearbyEvents.hidden = false;
+  if (!matches.length) {
+    nearbyRail.innerHTML = '<p class="nearby-empty">Ainda não há eventos com cartaz oficial perto de ti.</p>';
+    nearbyHint.textContent = `Ainda não encontrámos cartazes oficiais perto de ${area}.`;
+    syncNearbyControls();
+    return;
+  }
   nearbyRail.innerHTML = matches.map(({ event }) => `<article class="nearby-card">
     <a href="${eventUrl(event)}" target="_blank" rel="noopener" aria-label="Abrir ${event.title}">
       <span class="nearby-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy" decoding="async" /></span>
@@ -1075,13 +1080,16 @@ document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEvent
   document.querySelectorAll("[data-quick-pick]").forEach(item => item.setAttribute("aria-pressed", String(item === button && Boolean(next))));
   dateSelect.dispatchEvent(new Event("change"));
 }));
-document.querySelectorAll("[data-nearby-shortcut]").forEach(button => button.addEventListener("click", () => nearbyButton.click()));
 nearbyPrevious?.addEventListener("click", () => moveNearby(-1));
 nearbyNext?.addEventListener("click", () => moveNearby(1));
 nearbyRail.addEventListener("scroll", syncNearbyControls, { passive: true });
-nearbyButton.addEventListener("click", () => {
+function requestNearby() {
   if (!navigator.geolocation) {
     nearbyHint.textContent = "Localização não disponível neste browser.";
+    return;
+  }
+  if (!window.isSecureContext) {
+    nearbyHint.textContent = "A localização só funciona numa ligação segura.";
     return;
   }
   nearbyButton.disabled = true;
@@ -1096,15 +1104,20 @@ nearbyButton.addEventListener("click", () => {
     nearbyPosition = { latitude: coords.latitude, longitude: coords.longitude, area };
     refreshLocationOptions();
     areaMultiFilter.sync();
-    nearbyHint.textContent = "";
+    nearbyHint.textContent = `A mostrar eventos perto de ${area}.`;
     renderNearby(coords.latitude, coords.longitude, area);
     nearbyButton.disabled = false;
     render();
-  }, () => {
-    nearbyHint.textContent = "Ativa a localização para ver eventos próximos.";
+  }, error => {
+    nearbyHint.textContent = error?.code === 1
+      ? "Autoriza a localização no browser para ver eventos perto de ti."
+      : error?.code === 3
+        ? "A localização demorou demasiado. Tenta novamente."
+        : "Não foi possível determinar a tua localização. Tenta novamente.";
     nearbyButton.disabled = false;
   }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 3600000 });
-});
+}
+nearbyButton.addEventListener("click", requestNearby);
 previousPage.addEventListener("click", () => { state.page -= 1; render(); });
 nextPage.addEventListener("click", () => { state.page += 1; render(); });
 document.addEventListener("click", event => {
