@@ -28,16 +28,28 @@ function ticketButton(event) {
 const eventSeriesName = event => String(event.title || "").split(" — ")[0].replace(/\s+\d{4}$/, "").trim();
 const festivalProgramme = event => {
   if (!event.endDate) return [];
-  const seriesName = eventSeriesName(event);
   return (window.EVENTS || [])
-    .filter(item => item.id !== event.id && item.title.startsWith(`${seriesName} —`) && item.date >= event.date && item.date <= event.endDate)
+    .filter(item => programmeParent(item)?.id === event.id)
     .sort((a, b) => a.date.localeCompare(b.date) || String(a.time || "").localeCompare(String(b.time || "")));
 };
+const titleTokens = title => String(title || "")
+  .toLocaleLowerCase("pt-PT")
+  .replace(/\b\d{4}\b/g, "")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .split(/[^a-z0-9]+/)
+  .filter(token => token.length > 2 && !new Set(["com", "para", "dos", "das", "uma", "uns", "dia", "sessao", "sessoes", "programacao"]).has(token));
+const sharesSeriesName = (parent, candidate) => {
+  const parentTokens = new Set(titleTokens(parent.title));
+  const overlap = titleTokens(candidate.title).filter(token => parentTokens.has(token));
+  return overlap.length >= 2 || (overlap.length === 1 && parentTokens.size <= 3);
+};
 const programmeParent = candidate => (window.EVENTS || []).find(parent => {
-  if (parent.id === candidate.id || !parent.endDate) return false;
-  return candidate.title.startsWith(`${eventSeriesName(parent)} —`)
-    && candidate.date >= parent.date
-    && candidate.date <= parent.endDate;
+  if (parent.id === candidate.id || !parent.endDate || parent.date === parent.endDate) return false;
+  const inRange = candidate.date >= parent.date && candidate.date <= parent.endDate;
+  if (!inRange || candidate.endDate) return false;
+  const sameSource = Boolean(parent.sourceUrl && candidate.sourceUrl && parent.sourceUrl === candidate.sourceUrl);
+  const samePlace = parent.city === candidate.city && parent.venue === candidate.venue;
+  return sharesSeriesName(parent, candidate) && (sameSource || samePlace);
 });
 const isMainAgendaEvent = candidate => !candidate.seriesId && !programmeParent(candidate);
 const shortDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(eventDate(iso)).replace(".", "");
