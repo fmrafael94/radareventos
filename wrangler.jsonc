@@ -23,6 +23,9 @@
   "ai": {
     "binding": "AI"
   },
+  "triggers": {
+    "crons": ["17 3 * * *"]
+  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",

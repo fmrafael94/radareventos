@@ -56,10 +56,9 @@ const feedbackMessageLabel = document.querySelector("#feedback-message-label");
 const feedbackStatus = document.querySelector("#feedback-status");
 const feedbackSubmit = document.querySelector("#feedback-submit");
 const turnstileWrap = document.querySelector("#turnstile-wrap");
-const feedbackDraftNote = document.querySelector("#feedback-draft-note");
 const maxPosterUploadBytes = 2 * 1024 * 1024;
 const maxPosterDimension = 2400;
-const feedbackDraftPrefix = "desvio-feedback-draft:";
+let turnstileConfigured = false;
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const eventType = event => event.type || "Concerto";
@@ -1104,15 +1103,9 @@ function setFeedbackMode(kind, eventId = "", eventTitle = "") {
     ? "O que está errado ou desatualizado?"
     : promoter ? "Conta-nos brevemente o que programas" : "O que devemos adicionar?";
   feedbackForm.dataset.draftContext = context;
-  if (contextChanged) restoreFeedbackDraft();
-  refreshFeedbackDraftNote();
   feedbackStatus.textContent = "";
   feedbackSubmit.disabled = false;
   feedbackSubmit.innerHTML = "Enviar para revisão <span>↗</span>";
-}
-
-function feedbackDraftKey() {
-  return `${feedbackDraftPrefix}${feedbackForm.dataset.draftContext || "suggestion:"}`;
 }
 
 function feedbackHasContent() {
@@ -1123,52 +1116,8 @@ function feedbackHasContent() {
   return hasText || hasPoster || hasConsent;
 }
 
-function refreshFeedbackDraftNote() {
-  const hasDraft = feedbackHasContent() || Boolean(localStorage.getItem(feedbackDraftKey()));
-  feedbackDraftNote.hidden = !hasDraft;
-  if (hasDraft) feedbackDraftNote.textContent = "Rascunho guardado só neste dispositivo. Podes fechar e continuar mais tarde.";
-}
-
-function saveFeedbackDraft() {
-  if (!feedbackForm.dataset.draftContext || !feedbackHasContent()) {
-    if (feedbackForm.dataset.draftContext) localStorage.removeItem(feedbackDraftKey());
-    refreshFeedbackDraftNote();
-    return;
-  }
-  const fields = ["name", "email", "eventName", "eventDate", "city", "promoterLocation", "genres", "instagramUrl", "agendaUrl", "officialUrl", "posterUrl", "message"];
-  const values = Object.fromEntries(fields.map(name => [name, feedbackForm.elements[name]?.value || ""]));
-  values.privacyAcknowledged = Boolean(feedbackForm.elements.privacyAcknowledged?.checked);
-  try {
-    localStorage.setItem(feedbackDraftKey(), JSON.stringify(values));
-  } catch {
-    // A full or private browser storage should never block a contribution.
-  }
-  refreshFeedbackDraftNote();
-}
-
-function restoreFeedbackDraft() {
-  let values;
-  try {
-    values = JSON.parse(localStorage.getItem(feedbackDraftKey()) || "null");
-  } catch {
-    values = null;
-  }
-  if (!values || typeof values !== "object") return;
-  Object.entries(values).forEach(([name, value]) => {
-    const field = feedbackForm.elements[name];
-    if (!field) return;
-    if (name === "privacyAcknowledged") field.checked = Boolean(value);
-    else if (!(field.readOnly && field.value)) field.value = String(value || "");
-  });
-}
-
-function discardFeedbackDraft() {
-  try { localStorage.removeItem(feedbackDraftKey()); } catch {}
-}
-
 function requestFeedbackClose() {
-  if (feedbackHasContent() && !window.confirm("O teu rascunho fica guardado neste dispositivo. Queres fechar o formulário?")) return;
-  saveFeedbackDraft();
+  if (feedbackHasContent() && !window.confirm("Ao fechar, os dados ainda não enviados serão perdidos. Queres continuar?")) return;
   feedbackDialog.close();
 }
 
@@ -1177,10 +1126,12 @@ function openFeedback(button) {
   const eventId = button.dataset.feedbackEventId || "";
   const eventTitle = button.dataset.feedbackEventTitle ? decodeURIComponent(button.dataset.feedbackEventTitle) : "";
   setFeedbackMode(kind, eventId, eventTitle);
+  configureTurnstile();
   feedbackDialog.showModal();
 }
 
 async function configureTurnstile() {
+  if (turnstileConfigured) return;
   try {
     const response = await fetch("/api/config", { headers: { Accept: "application/json" } });
     if (!response.ok) return;
@@ -1193,6 +1144,7 @@ async function configureTurnstile() {
     script.async = true;
     script.defer = true;
     document.head.append(script);
+    turnstileConfigured = true;
   } catch {
     // The public form only becomes live after the Cloudflare Function is deployed.
   }
@@ -1252,8 +1204,6 @@ feedbackDialog.addEventListener("cancel", event => {
   event.preventDefault();
   requestFeedbackClose();
 });
-feedbackForm.addEventListener("input", saveFeedbackDraft);
-feedbackForm.addEventListener("change", saveFeedbackDraft);
 feedbackForm.addEventListener("submit", async event => {
   event.preventDefault();
   const suggestion = feedbackKind.value === "suggestion";
@@ -1286,9 +1236,7 @@ feedbackForm.addEventListener("submit", async event => {
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
     feedbackStatus.textContent = "Recebido. Avisamos-te por e-mail quando o pedido for analisado.";
-    discardFeedbackDraft();
     feedbackForm.reset();
-    refreshFeedbackDraftNote();
     feedbackSubmit.textContent = "Enviado ✓";
   } catch (error) {
     feedbackStatus.textContent = error.message || "Não foi possível enviar agora. Tenta novamente mais tarde.";
@@ -1300,7 +1248,6 @@ feedbackForm.addEventListener("submit", async event => {
 renderSources();
 renderFeatured();
 render();
-configureTurnstile();
 
 // Community suggestions only arrive here after the private review area has
 // confirmed a direct official source. The bundled list remains the fast,
