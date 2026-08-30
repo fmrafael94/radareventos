@@ -28,6 +28,7 @@ const nearbyRail = document.querySelector("#nearby-rail");
 const nearbyDescription = document.querySelector("#nearby-description");
 const featuredRail = document.querySelector("#featured-rail");
 let featuredAutoscroll;
+let featuredRefreshTimer;
 let nearbyPosition;
 const filterToggle = document.querySelector("#filter-toggle");
 const filterPanel = document.querySelector("#filter-panel");
@@ -344,7 +345,7 @@ const officialPosters = {
   ,"fever-candlelight-pink-floyd": ["https://applications-media.feverup.com/image/upload/f_auto,w_308,h_308,q_auto:good,c_fill,g_north/fever2/plan/photo/05b2963c-84a5-11ef-be66-5e2f96afade7.jpg", "https://feverup.com/pt/lisboa/candlelight/"]
   ,"rui-veloso-lisboa": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz145612_grande.jpg?v=1", "https://centraldeartistas.bol.pt/Comprar/Bilhetes/169511-rui_veloso_trio-sagres_campo_pequeno/"]
   ,"river-stone-fest-2026": ["https://bolimg.blob.core.windows.net/producao/imagens/espectaculos/cartaz147015_grande.jpg?v=2", "https://riverstone.bol.pt/Comprar/Bilhetes/171321-x_river_stone_fest-river_stone_fest/"]
-  ,"meo-sons-mar": ["https://peventertainment.pt/wp-content/uploads/2026/04/meo-sons-do-mar-reduzido-xl-768x218.webp", "https://peventertainment.pt/eventos/"]
+  ,"meo-sons-mar": ["https://fundacao.meo.pt/media/images/events/40/MEO%20Sons%20do%20Mar%202026%20cartaz_6a8d52407ea24.webp", "https://fundacao.meo.pt/pt/events/view/id/40"]
   ,"fever-fado-chiado": ["https://applications-media.feverup.com/image/upload/f_auto,w_616,h_616,q_auto:good,c_fill,g_north/fever2/plan/photo/287f911e-bbfa-11f0-80eb-ea9fbc3a351c.jpeg", "https://feverup.com/m/67022/en?seasonal=p06e4dp"]
 };
 
@@ -573,11 +574,11 @@ const auditedEventDetails = {
   "leiria-diz-concerto": { tickets: "Bilheteira oficial ainda não localizada" },
   "leiria-orquestra-jazz": { tickets: "Bilheteira oficial ainda não localizada" }
   ,"faro-alternativo-2026": { tickets: "Informação e bilhetes para a edição 2026 por confirmar", availability: "Por confirmar" }
-  ,"vialonga-fest-2026": { time: "17:00", venue: "Sociedade Recreativa da Granja", tickets: "Entrada livre", availability: "Disponível", lineup: "Last Piss Before Death · DALAI LUME · Lesados · Cobra ao Pescoço · chaosaddiction · FAEMINE · Endless2.0 · Vasco Rodrigues" }
+  ,"vialonga-fest-2026": { time: "17:00", venue: "Sociedade Recreativa da Granja", tickets: "Entrada livre · recolha solidária para a Kausa Animal", availability: "Entrada livre", lineup: "Lesados · Endless 2.0 · Dalai Lume · Last Piss Before Death · Faemine · Cobra ao Pescoço · Chaos Addiction · Vasco Rodrigues" }
   ,"viseu-rock-fest-2026": { tickets: "Informação e bilhetes por confirmar", availability: "Por confirmar" }
-  ,"colapso-fest-2026": { tickets: "Informação e bilhetes por confirmar", availability: "Por confirmar" }
+  ,"colapso-fest-2026": { time: "Portas 17:00 · concertos 18:00", tickets: "Pré-venda 17,50 € · 20 € no dia", availability: "Disponível", lineup: "Hetta · Soul of Anubis · Pledge · Dokuga · Lord of Confusion · So Dead" }
   ,"black-box-fest-2026": { venue: "Sede dos Trovadores do Cano", tickets: "Pré-venda online", availability: "Disponível", lineup: "Cutterred Flesh · Totengott · Booby Trap · Warside · The Small Hours · Vomitous Iniquity · Viledög · Putrid Offal · Xerión · Sonneillon · Square · Nojo · Armatilha" }
-  ,"heavy-duty-fest-2026": { tickets: "Informação e bilhetes por confirmar", availability: "Por confirmar" }
+  ,"heavy-duty-fest-2026": { tickets: "35 € pré-venda · 40 € no dia", availability: "Disponível", lineup: "Medieval Steel · Elixir · Tarantula · Venator · Wicked Leather · Toxik Attack" }
   ,"portalegre-core-fest-set": { time: "Portas 21:00 · concertos 21:30", tickets: "5 € por dia · sócios: entrada gratuita", availability: "Disponível", lineup: "Henriette B · Destroyers of All · Incordian · António Freitas DJ" }
   ,"portalegre-core-fest-nov": { time: "Portas 21:00 · concertos 21:30", tickets: "5 € por dia · sócios: entrada gratuita", availability: "Disponível", lineup: "Alchemists · Empire of Disease · Vaneno · Black Flamingo DJ" }
 };
@@ -862,9 +863,11 @@ function renderFeatured() {
   featuredRail.setAttribute("aria-busy", "true");
   window.clearInterval(featuredAutoscroll);
   const featured = EVENTS
-    .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today)
-    .filter(event => !["Bilhetes a confirmar", "Esgotado", "Cancelado"].includes(availabilityLabel(event)))
-    .sort((a, b) => Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || Math.max(eventDate(a.date).getTime(), eventDate(today).getTime()) - Math.max(eventDate(b.date).getTime(), eventDate(today).getTime()))
+    // This rail is chronological, not editorial: an event which already began
+    // never occupies a future slot, even when a multi-day festival is ongoing.
+    .filter(event => !event.seriesId && hasOfficialPoster(event) && event.date > today)
+    .filter(event => event.availability !== "Cancelado")
+    .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 5);
   featuredRail.innerHTML = featured.length ? featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
@@ -877,9 +880,19 @@ function renderFeatured() {
     image.closest(".featured-poster")?.classList.add("poster-unavailable");
     image.alt = "Cartaz oficial temporariamente indisponível";
   }, { once: true }));
-  featuredRail.setAttribute("aria-label", "Cinco próximos eventos com entrada disponível");
+  featuredRail.setAttribute("aria-label", "Cinco próximos eventos por ordem cronológica");
   featuredRail.setAttribute("aria-busy", "false");
   startFeaturedAutoscroll();
+}
+
+function scheduleFeaturedRefresh() {
+  window.clearTimeout(featuredRefreshTimer);
+  const nextDay = new Date();
+  nextDay.setHours(24, 0, 3, 0);
+  featuredRefreshTimer = window.setTimeout(() => {
+    renderFeatured();
+    scheduleFeaturedRefresh();
+  }, Math.max(1_000, nextDay.getTime() - Date.now()));
 }
 
 function startFeaturedAutoscroll() {
@@ -1271,6 +1284,7 @@ feedbackForm.addEventListener("submit", async event => {
 
 renderSources();
 renderFeatured();
+scheduleFeaturedRefresh();
 render();
 
 // Community suggestions only arrive here after the private review area has

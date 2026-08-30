@@ -31,7 +31,7 @@ const festivalProgramme = event => {
   if (!event.endDate) return [];
   if (Array.isArray(event.programme) && event.programme.length) return event.programme;
   return (window.EVENTS || [])
-    .filter(item => programmeParent(item)?.id === event.id)
+    .filter(item => item.seriesId === event.id || programmeParent(item)?.id === event.id)
     .sort((a, b) => a.date.localeCompare(b.date) || String(a.time || "").localeCompare(String(b.time || "")));
 };
 const titleTokens = title => String(title || "")
@@ -134,7 +134,7 @@ function render(event, poster) {
     <aside class="event-sidebar">
       <div class="event-poster-panel">
         <div class="share-card">
-          ${poster ? `<button type="button" class="event-poster-trigger" data-event-poster aria-label="Ampliar cartaz oficial de ${escapeHtml(event.title)}"><img src="${escapeHtml(posterDownloadUrl)}" data-fallback-poster="${escapeHtml(poster)}" alt="Cartaz oficial de ${escapeHtml(event.title)}" fetchpriority="high" decoding="async" /></button>` : `<div class="share-card-empty">Desvio</div>`}
+          ${poster ? `<button type="button" class="event-poster-trigger" data-event-poster aria-label="Ampliar cartaz oficial de ${escapeHtml(event.title)}"><img src="${escapeHtml(posterDownloadUrl)}" data-fallback-poster="${escapeHtml(poster)}" alt="Cartaz oficial de ${escapeHtml(event.title)}" fetchpriority="high" decoding="async" /></button>` : `<div class="share-card-empty" role="status"><strong>Cartaz oficial<br>ainda não publicado.</strong><span>Estamos a acompanhar a fonte do evento.</span></div>`}
         </div>
       </div>
       <p class="event-meta"><span class="event-meta-date">${escapeHtml(compactDate)}</span><span class="event-meta-place">${escapeHtml(event.venue)}, ${escapeHtml(event.city)}</span></p>

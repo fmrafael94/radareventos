@@ -25,9 +25,9 @@ function readBrowserData(source, variable) {
 }
 
 function readOfficialPosters(source) {
-  const match = source.match(/const officialPosters = (\{[\s\S]*?\n\});\nconst officialEventPages/);
+  const match = source.match(/const officialPosters = (\{[\s\S]*?\n\};)/);
   if (!match) return {};
-  return readBrowserData(`${match[1]}; window.OFFICIAL_POSTERS = officialPosters;`, "OFFICIAL_POSTERS") || {};
+  return readBrowserData(`window.OFFICIAL_POSTERS = ${match[1]}`, "OFFICIAL_POSTERS") || {};
 }
 
 function usableUrl(value) {
@@ -81,14 +81,25 @@ const events = readBrowserData(eventsSource, "EVENTS") || [];
 const appSource = await readFile(path.join(root, "app.js"), "utf8");
 const posters = readOfficialPosters(appSource);
 const targets = [];
+const missingOfficialPosters = [];
 for (const event of events) {
   for (const [kind, value] of [["Página oficial", event.sourceUrl], ["Bilheteira", event.ticketUrl]]) {
     const url = usableUrl(value);
     if (url) targets.push({ id: event.id, title: event.title, kind, url });
   }
   const poster = posters[event.id];
-  const posterUrl = usableUrl(Array.isArray(poster) ? poster[0] : "");
+  // Newer editorial entries keep the verified poster next to the event data;
+  // older ones are still served by the homepage's officialPosters map.
+  const posterUrl = usableUrl(event.image) || usableUrl(Array.isArray(poster) ? poster[0] : "");
   if (posterUrl) targets.push({ id: event.id, title: event.title, kind: "Cartaz", url: posterUrl });
+  else if (!event.seriesId) {
+    missingOfficialPosters.push({
+      id: event.id,
+      title: event.title,
+      date: event.date,
+      sourceUrl: event.sourceUrl || ""
+    });
+  }
 }
 
 // Every two-hour run checks every known direct event page and ticket page.
@@ -114,6 +125,7 @@ const report = {
   generatedAt: now.toISOString(),
   mode,
   coverage: { checked: results.length, knownTargets: unique.length },
+  editorialQueue: { missingOfficialPosters },
   results
 };
 const reportDirectory = path.join(root, "reports");
@@ -126,6 +138,7 @@ const summary = [
   `- Execução: ${report.generatedAt}`,
   `- Links diretos verificados: ${report.coverage.checked} de ${report.coverage.knownTargets}`,
   `- Com atenção necessária: ${failures.length}`,
+  `- Cartazes oficiais ainda pendentes: ${missingOfficialPosters.length}`,
   "",
   "> Esta verificação só confirma se uma página responde. Não altera eventos, preços, cartazes ou disponibilidade; todas essas decisões continuam a exigir revisão humana e uma fonte oficial.",
   ""
@@ -135,6 +148,10 @@ if (failures.length) {
   for (const result of failures) summary.push(`| ${result.title} | ${result.kind} | ${result.status || result.error || "sem resposta"} | ${result.url} |`);
 } else {
   summary.push("Nenhum link deste lote ficou inacessível.");
+}
+if (missingOfficialPosters.length) {
+  summary.push("", "## Cartazes oficiais pendentes", "", "| Evento | Data | Fonte a rever |", "| --- | --- | --- |");
+  for (const event of missingOfficialPosters) summary.push(`| ${event.title} | ${event.date} | ${event.sourceUrl || "Por localizar"} |`);
 }
 const text = summary.join("\n");
 if (process.env.GITHUB_STEP_SUMMARY) await writeFile(process.env.GITHUB_STEP_SUMMARY, `${text}\n`, { flag: "a" });
