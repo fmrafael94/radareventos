@@ -40,7 +40,7 @@ export async function onRequestPatch(context) {
   if (!id || !statuses.has(status)) return json({ message: "Pedido inválido." }, 400);
 
   const feedback = await context.env.EVENT_RADAR_DB.prepare(`
-    SELECT id, kind, event_id, event_name, event_date, city, official_url, sender_name, sender_email, status
+    SELECT id, kind, event_id, event_name, event_date, city, official_url, poster_url, poster_object_key, sender_name, sender_email, status
     FROM feedback WHERE id = ?
   `).bind(id).first();
   if (!feedback) return json({ message: "Pedido não encontrado." }, 404);
@@ -48,12 +48,17 @@ export async function onRequestPatch(context) {
   const reviewValues = {
     eventName: text(payload.eventName, 180) || feedback.event_name || "",
     eventDate: text(payload.eventDate, 10) || feedback.event_date || "",
+    eventEndDate: text(payload.eventEndDate, 10),
     city: text(payload.city, 100) || feedback.city || "",
+    venue: text(payload.venue, 180),
+    tickets: text(payload.tickets, 220),
+    ticketUrl: validUrl(text(payload.ticketUrl, 1000)),
+    posterUrl: validUrl(text(payload.posterUrl, 1000) || feedback.poster_url || ""),
     officialUrl: validUrl(text(payload.officialUrl, 1000) || feedback.official_url || "")
   };
   if (status === "published" && feedback.kind === "suggestion" && feedback.event_id !== "promoter-page") {
-    if (!reviewValues.eventName || !/^\d{4}-\d{2}-\d{2}$/.test(reviewValues.eventDate) || !reviewValues.city || !reviewValues.officialUrl) {
-      return json({ message: "Para publicar, confirma título, data, cidade e uma página oficial direta." }, 400);
+    if (!reviewValues.eventName || !/^\d{4}-\d{2}-\d{2}$/.test(reviewValues.eventDate) || (reviewValues.eventEndDate && !/^\d{4}-\d{2}-\d{2}$/.test(reviewValues.eventEndDate)) || !reviewValues.city || !reviewValues.venue || !reviewValues.tickets || !reviewValues.posterUrl || !reviewValues.officialUrl) {
+      return json({ message: "Para publicar, confirma título, data, cidade, local, cartaz, bilheteira/entrada e uma página oficial direta." }, 400);
     }
     await ensureEventStore(context.env.EVENT_RADAR_DB);
     const event = canonicalEventFromReview(feedback, reviewValues);

@@ -58,7 +58,7 @@ function reportCard(item) {
       ${item.poster_file_name ? `<div><dt>Ficheiro enviado</dt><dd>${escapeHtml(item.poster_file_name)}</dd></div>` : ""}
       ${moderation}
     </dl>
-    ${item.kind === "suggestion" && !promoterPage ? `<fieldset class="event-review-fields"><legend>Dados para publicação</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${escapeHtml(item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${escapeHtml(item.event_date || "")}" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${escapeHtml(item.city || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${escapeHtml(item.official_url || "")}" /></label></fieldset>` : ""}
+    ${item.kind === "suggestion" && !promoterPage ? `<fieldset class="event-review-fields"><legend>Dados para publicação</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${escapeHtml(item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${escapeHtml(item.event_date || "")}" /></label><label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${escapeHtml(item.city || "")}" /></label><label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" /></label><label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 € · Bilheteira por confirmar" /></label><label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1000" placeholder="https://" /></label><label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" value="${escapeHtml(item.poster_url || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${escapeHtml(item.official_url || "")}" /></label></fieldset>` : ""}
     <label class="staff-note"><span>Nota privada</span><textarea maxlength="1500" placeholder="O que verificaste ou o que falta confirmar?">${escapeHtml(item.staff_note || "")}</textarea></label>
     <div class="report-actions">
       <button type="button" data-next-status="reviewing">Em análise</button>
@@ -205,7 +205,12 @@ reports.addEventListener("click", async event => {
         staffNote: card.querySelector("textarea").value,
         eventName: card.querySelector('[name="eventName"]')?.value,
         eventDate: card.querySelector('[name="eventDate"]')?.value,
+        eventEndDate: card.querySelector('[name="eventEndDate"]')?.value,
         city: card.querySelector('[name="city"]')?.value,
+        venue: card.querySelector('[name="venue"]')?.value,
+        tickets: card.querySelector('[name="tickets"]')?.value,
+        ticketUrl: card.querySelector('[name="ticketUrl"]')?.value,
+        posterUrl: card.querySelector('[name="posterUrl"]')?.value,
         officialUrl: card.querySelector('[name="officialUrl"]')?.value
       })
     });
