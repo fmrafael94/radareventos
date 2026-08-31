@@ -25,10 +25,14 @@ jobs:
           AUDIT_INGEST_TOKEN: ${{ secrets.DESVIO_AUDIT_INGEST_TOKEN }}
         if: ${{ env.AUDIT_INGEST_URL != '' && env.AUDIT_INGEST_TOKEN != '' }}
         run: |
-          curl --fail --silent --show-error --request POST "$AUDIT_INGEST_URL" \
+          {
+            printf '%s' '{"kind":"source_watch","report":'
+            cat reports/source-watch.json
+            printf '%s' '}'
+          } | curl --fail --silent --show-error --request POST "$AUDIT_INGEST_URL" \
             --header "Authorization: Bearer $AUDIT_INGEST_TOKEN" \
             --header "Content-Type: application/json" \
-            --data-binary "{\"kind\":\"source_watch\",\"report\":$(cat reports/source-watch.json)}"
+            --data-binary @-
       - name: Guardar fila de pesquisa
         uses: actions/upload-artifact@v4
         with:
