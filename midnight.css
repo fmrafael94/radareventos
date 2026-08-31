@@ -234,7 +234,8 @@ footer nav a { color:var(--muted); font:500 9px "DM Mono",monospace; text-decora
 .feedback-dialog input:not([type="checkbox"]),.feedback-dialog textarea { box-sizing:border-box; width:100%; padding:11px 12px; border:1px solid #c8cec5; border-radius:7px; outline:0; color:#202a23; background:#fffefa; font:500 13px "DM Sans",Arial,sans-serif; letter-spacing:0; text-transform:none; transition:border-color .15s,box-shadow .15s; }
 .feedback-dialog textarea { resize:vertical; min-height:102px; line-height:1.45; }
 .feedback-dialog input:focus,.feedback-dialog textarea:focus { border-color:#78965b; box-shadow:0 0 0 3px rgba(119,150,91,.15); }
-.feedback-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.feedback-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.feedback-grid>label,.feedback-dialog input:not([type="checkbox"]) { min-width:0; }
 .poster-contribution { display:grid; gap:10px; margin:0; padding:14px; border:1px solid #d7ddd1; border-radius:9px; background:#f1f4ea; }
 .poster-contribution legend { padding:0 5px; color:#4d5b51; font:700 10px "DM Mono",monospace; letter-spacing:.045em; text-transform:uppercase; }
 .poster-contribution legend small,.poster-contribution p { color:#758075; font:400 9px "DM Mono",monospace; letter-spacing:0; text-transform:none; }
@@ -250,6 +251,9 @@ footer nav a { color:var(--muted); font:500 9px "DM Mono",monospace; text-decora
 .feedback-submit:hover { background:#b9df62; }.feedback-submit:disabled { opacity:.65; cursor:wait; }
 .report-link { padding:0; border:0; color:var(--accent); background:transparent; font:inherit; cursor:pointer; }
 @media (max-width:580px) { footer { grid-template-columns:1fr; gap:9px; } footer nav { justify-content:flex-start; } footer p { max-width:none; text-align:left; }.feedback-dialog { width:calc(100vw - 22px); border-radius:14px; }.feedback-dialog>div,.feedback-dialog form { padding-left:19px; padding-right:19px; }.feedback-intro { padding-top:25px; }.feedback-intro h2 { font-size:27px; }.feedback-grid,.feedback-type-picker { grid-template-columns:1fr; gap:14px; } }
+
+/* The atmosphere should add depth, not make the page appear to drift sideways. */
+.atmosphere-beam { animation:none; }
 
 /* Five compact cards on wide screens; mobile turns the same five cards into a two-up carousel. */
 .featured-rail { grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
