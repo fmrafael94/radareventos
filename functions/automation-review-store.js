@@ -59,9 +59,9 @@ function resultLabel(item) {
   return text(item.status, 40) || text(item.error, 120) || "Sem resposta";
 }
 
-async function upsert(db, item) {
+function upsertStatement(db, item) {
   const id = reviewId(item.key);
-  await db.prepare(`
+  return db.prepare(`
     INSERT INTO automation_reviews (
       id, dedupe_key, category, event_id, target_kind, title, detail, url, result,
       proposal_title, proposal_url,
@@ -83,43 +83,49 @@ async function upsert(db, item) {
   `).bind(
     id, item.key, item.category, item.eventId || null, item.targetKind || null, item.title,
     item.detail || null, item.url, item.result || null, item.title, item.url
-  ).run();
+  );
 }
 
-async function resolveLink(db, key) {
-  await db.prepare(`
+function resolveLinkStatement(db, key) {
+  return db.prepare(`
     UPDATE automation_reviews
     SET status = CASE WHEN status IN ('new', 'reviewing') THEN 'resolved' ELSE status END,
         resolved_at = CASE WHEN status IN ('new', 'reviewing') THEN datetime('now') ELSE resolved_at END,
         last_seen_at = datetime('now')
     WHERE dedupe_key = ?
-  `).bind(key).run();
+  `).bind(key);
 }
 
-async function sourceChanged(db, item) {
-  const sourceUrl = text(item?.url, 1600);
-  const fingerprint = text(item?.fingerprint, 100);
-  if (!sourceUrl || !fingerprint) return false;
-  const existing = await db.prepare("SELECT fingerprint FROM source_watch_snapshots WHERE source_url = ?").bind(sourceUrl).first();
-  await db.prepare(`
+function sourceSnapshotStatement(db, sourceUrl, fingerprint, pageTitle) {
+  return db.prepare(`
     INSERT INTO source_watch_snapshots (source_url, fingerprint, page_title, checked_at)
     VALUES (?, ?, ?, datetime('now'))
     ON CONFLICT(source_url) DO UPDATE SET fingerprint = excluded.fingerprint, page_title = excluded.page_title, checked_at = excluded.checked_at
-  `).bind(sourceUrl, fingerprint, text(item?.pageTitle, 300) || null).run();
-  return Boolean(existing && existing.fingerprint !== fingerprint);
+  `).bind(sourceUrl, fingerprint, pageTitle || null);
 }
 
-async function linkChanged(db, item) {
-  const key = `link:${text(item?.kind, 60)}:${text(item?.url, 1600)}`;
-  const fingerprint = [text(item?.finalUrl, 1600), text(item?.etag, 300), text(item?.lastModified, 300), text(item?.contentLength, 80)].join("|");
-  if (!text(item?.url, 1600) || !fingerprint.replace(/\|/g, "")) return false;
-  const existing = await db.prepare("SELECT fingerprint FROM link_audit_snapshots WHERE audit_key = ?").bind(key).first();
-  await db.prepare(`
+function linkSnapshotStatement(db, key, fingerprint) {
+  return db.prepare(`
     INSERT INTO link_audit_snapshots (audit_key, fingerprint, checked_at)
     VALUES (?, ?, datetime('now'))
     ON CONFLICT(audit_key) DO UPDATE SET fingerprint = excluded.fingerprint, checked_at = excluded.checked_at
-  `).bind(key, fingerprint).run();
-  return Boolean(existing && existing.fingerprint !== fingerprint);
+  `).bind(key, fingerprint);
+}
+
+async function batchInChunks(db, statements, size = 500) {
+  const results = [];
+  for (let index = 0; index < statements.length; index += size) {
+    results.push(...await db.batch(statements.slice(index, index + size)));
+  }
+  return results;
+}
+
+function firstRow(result) {
+  return Array.isArray(result?.results) ? result.results[0] : null;
+}
+
+function uniqueByKey(items) {
+  return [...new Map(items.map(item => [item.key, item])).values()];
 }
 
 export async function ingestAutomationReport(db, reportKind, report) {
@@ -129,18 +135,32 @@ export async function ingestAutomationReport(db, reportKind, report) {
   let resolved = 0;
 
   if (reportKind === "link_audit") {
-    for (const item of results) {
+    const items = uniqueByKey(results.map(item => {
       const url = text(item?.url, 1600);
-      if (!url) continue;
+      if (!url) return null;
       const key = `link:${text(item.kind, 60)}:${url}`;
+      const fingerprint = [text(item?.finalUrl, 1600), text(item?.etag, 300), text(item?.lastModified, 300), text(item?.contentLength, 80)].join("|");
+      return { item, url, key, fingerprint, hasFingerprint: Boolean(fingerprint.replace(/\|/g, "")) };
+    }).filter(Boolean));
+    const snapshots = items.filter(({ item, hasFingerprint }) => item.ok === true && hasFingerprint);
+    const existing = await batchInChunks(db, snapshots.map(({ key }) =>
+      db.prepare("SELECT fingerprint FROM link_audit_snapshots WHERE audit_key = ?").bind(key)
+    ));
+    const changed = new Map(snapshots.map((snapshot, index) => [
+      snapshot.key,
+      Boolean(firstRow(existing[index]) && firstRow(existing[index]).fingerprint !== snapshot.fingerprint)
+    ]));
+    const writes = [];
+    for (const entry of items) {
+      const { item, url, key, fingerprint, hasFingerprint } = entry;
       if (item.ok === true) {
-        const changed = await linkChanged(db, item);
-        if (!changed) {
-          await resolveLink(db, key);
+        if (hasFingerprint) writes.push(linkSnapshotStatement(db, key, fingerprint));
+        if (!changed.get(key)) {
+          writes.push(resolveLinkStatement(db, key));
           resolved += 1;
           continue;
         }
-        await upsert(db, {
+        writes.push(upsertStatement(db, {
           key,
           category: "link",
           eventId: text(item.id, 180),
@@ -149,11 +169,11 @@ export async function ingestAutomationReport(db, reportKind, report) {
           detail: `${text(item.kind, 60) || "Página"} alterou-se desde a última verificação. Confirma manualmente se houve mudança de bilheteira, cartaz ou informação do evento.`,
           url,
           result: "Página alterada"
-        });
+        }));
         queued += 1;
         continue;
       }
-      await upsert(db, {
+      writes.push(upsertStatement(db, {
         key,
         category: "link",
         eventId: text(item.id, 180),
@@ -162,18 +182,36 @@ export async function ingestAutomationReport(db, reportKind, report) {
         detail: `${text(item.kind, 60) || "Link"} devolveu ${resultLabel(item)}. Confirma manualmente: algumas plataformas bloqueiam verificações automáticas.`,
         url,
         result: resultLabel(item)
-      });
+      }));
       queued += 1;
     }
+    await batchInChunks(db, writes);
   } else if (reportKind === "source_watch") {
-    for (const item of results) {
+    const items = uniqueByKey(results.map(item => {
       const url = text(item?.url, 1600);
-      if (!url) continue;
+      if (!url) return null;
       const key = `source:${url}`;
-      const changed = item.ok === true ? await sourceChanged(db, item) : false;
-      if (item.ok === true && !changed) continue;
+      const fingerprint = text(item?.fingerprint, 100);
+      return { item, url, key, fingerprint };
+    }).filter(Boolean));
+    const snapshots = items.filter(({ item, fingerprint }) => item.ok === true && fingerprint);
+    const existing = await batchInChunks(db, snapshots.map(({ url }) =>
+      db.prepare("SELECT fingerprint FROM source_watch_snapshots WHERE source_url = ?").bind(url)
+    ));
+    const changed = new Map(snapshots.map((snapshot, index) => [
+      snapshot.key,
+      Boolean(firstRow(existing[index]) && firstRow(existing[index]).fingerprint !== snapshot.fingerprint)
+    ]));
+    const writes = [];
+    for (const entry of items) {
+      const { item, url, key, fingerprint } = entry;
+      if (item.ok === true && fingerprint) {
+        writes.push(sourceSnapshotStatement(db, url, fingerprint, text(item?.pageTitle, 300)));
+      }
+      const sourceWasChanged = item.ok === true && Boolean(fingerprint) && changed.get(key);
+      if (item.ok === true && !sourceWasChanged) continue;
       const checkResult = item.ok === true ? "Página alterada desde a última ronda" : resultLabel(item);
-      await upsert(db, {
+      writes.push(upsertStatement(db, {
         key,
         category: "source",
         title: text(item.name, 240) || "Fonte sem nome",
@@ -182,9 +220,10 @@ export async function ingestAutomationReport(db, reportKind, report) {
           : `Ronda diária: a fonte precisa de atenção (${checkResult}). Confirma manualmente antes de a usar.`,
         url,
         result: checkResult
-      });
+      }));
       queued += 1;
     }
+    await batchInChunks(db, writes);
   } else {
     throw new Error("Tipo de relatório inválido.");
   }
