@@ -2,7 +2,6 @@ const state = { search: "", date: "", price: "", ticketPrice: [], genre: [], are
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
-const emptyState = document.querySelector("#empty-state");
 const pagination = document.querySelector("#pagination");
 const pageLabel = document.querySelector("#page-label");
 const previousPage = document.querySelector("#previous-page");
@@ -1005,7 +1004,6 @@ function render() {
   list.setAttribute("aria-busy", "false");
   if (calendarMode) renderCalendar(matches);
   if (resultCount) resultCount.textContent = `${matches.length} ${matches.length === 1 ? "evento" : "eventos"}`;
-  emptyState.hidden = matches.length !== 0;
   pagination.hidden = calendarMode || matches.length <= perPage;
   pageLabel.textContent = `Página ${state.page} de ${pages}`;
   previousPage.disabled = state.page === 1;
@@ -1063,11 +1061,6 @@ calendarNext.addEventListener("click", () => { calendarCursor = new Date(calenda
 document.querySelector("#clear-filters").addEventListener("click", () => {
   resetAgendaSelection();
   render();
-});
-document.querySelector("#clear-empty-state").addEventListener("click", () => {
-  resetAgendaSelection();
-  render();
-  document.querySelector("#search").focus();
 });
 document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEventListener("click", () => {
   const pick = button.dataset.quickPick;
