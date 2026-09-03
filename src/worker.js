@@ -9,6 +9,7 @@ import { requireAdmin } from "../functions/admin-auth.js";
 import { onRequestPost as postAuditReport } from "../functions/api/internal/audit-report.js";
 
 const contextFor = (request, env) => ({ request, env });
+const canonicalHost = "odesvio.pt";
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
 const escapeXml = value => escapeHtml(value).replace(/\"/g, "&quot;");
 
@@ -167,10 +168,15 @@ async function purgeExpiredPersonalData(env) {
 
 export default {
   async fetch(request, env, executionCtx) {
-    const { pathname } = new URL(request.url);
+    const url = new URL(request.url);
+    if (url.hostname === `www.${canonicalHost}`) {
+      url.hostname = canonicalHost;
+      return secureResponse(new Response(null, { status: 308, headers: { Location: url.toString() } }));
+    }
+    const { pathname } = url;
     const context = contextFor(request, env);
     const origin = request.headers.get("Origin");
-    if (origin && origin !== new URL(request.url).origin && request.method !== "GET" && request.method !== "HEAD") {
+    if (origin && origin !== url.origin && request.method !== "GET" && request.method !== "HEAD") {
       return secureResponse(new Response("Origem não autorizada.", { status: 403, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } }));
     }
 

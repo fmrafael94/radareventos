@@ -4,6 +4,10 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-08-25",
   "keep_vars": true,
+  "routes": [
+    { "pattern": "odesvio.pt", "custom_domain": true },
+    { "pattern": "www.odesvio.pt", "custom_domain": true }
+  ],
   "vars": {
     "TURNSTILE_SITEKEY": "0x4AAAAAAEb5SRCl-A_PcNBx"
   },

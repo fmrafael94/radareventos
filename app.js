@@ -72,7 +72,16 @@ const dateParts = iso => {
 };
 const prettyDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
 const monthLabel = date => new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(date);
-const nextAgendaDate = EVENTS.find(event => !event.seriesId && event.date >= new Date().toISOString().slice(0, 10))?.date || EVENTS.find(event => !event.seriesId)?.date;
+// Keep the agenda forward-looking. Multi-day events remain visible until
+// their final day, but a finished festival must never keep the calendar in
+// a previous month.
+const eventLastDate = event => event.endDate || event.date;
+const initialDate = new Date();
+initialDate.setHours(12, 0, 0, 0);
+const initialToday = `${initialDate.getFullYear()}-${String(initialDate.getMonth() + 1).padStart(2, "0")}-${String(initialDate.getDate()).padStart(2, "0")}`;
+const nextAgendaEvent = EVENTS.filter(event => !event.seriesId && eventLastDate(event) >= initialToday)
+  .sort((left, right) => left.date.localeCompare(right.date))[0];
+const nextAgendaDate = nextAgendaEvent ? (nextAgendaEvent.date < initialToday ? initialToday : nextAgendaEvent.date) : EVENTS.find(event => !event.seriesId)?.date;
 let calendarCursor = nextAgendaDate ? eventDate(nextAgendaDate) : new Date();
 const areaCentres = {
   "Algarve":[37.02,-7.93], "Alto Alentejo":[39.29,-7.43], "Alto Minho":[41.69,-8.83], "Ave":[41.44,-8.30], "Aveiro":[40.64,-8.65], "Beira Baixa":[40.28,-7.50], "Cávado":[41.55,-8.43], "Douro":[41.16,-7.79], "Grande Lisboa":[38.72,-9.14], "Grande Porto":[41.16,-8.63], "Lezíria do Tejo":[39.24,-8.69], "Madeira":[32.65,-16.91], "Minho":[41.57,-8.29], "Oeiras":[38.69,-9.31], "Oeste":[39.35,-9.38], "Península de Setúbal":[38.53,-8.89], "Região de Aveiro":[40.64,-8.65], "Região de Coimbra":[40.21,-8.43], "Região de Leiria":[39.74,-8.81], "São Miguel":[37.74,-25.67], "Tâmega e Sousa":[41.21,-8.28], "Vale do Sousa":[41.20,-8.28], "Viseu Dão Lafões":[40.66,-7.91], "Área Metropolitana do Porto":[41.16,-8.63]
@@ -786,6 +795,7 @@ const shiftedIso = days => {
   date.setDate(date.getDate() + days);
   return localIso(date);
 };
+const isCurrentOrUpcoming = (event, today = shiftedIso(0)) => eventLastDate(event) >= today;
 const dateFilterRange = value => {
   if (!value) return null;
   const today = shiftedIso(0);
@@ -841,7 +851,7 @@ const compactNearbyDate = event => {
 function renderNearby(latitude, longitude, area) {
   const today = shiftedIso(0);
   const matches = EVENTS
-    .filter(event => !event.seriesId && hasOfficialPoster(event) && (event.endDate || event.date) >= today && areaCentres[event.area])
+    .filter(event => !event.seriesId && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && areaCentres[event.area])
     .map(event => ({ event, distance: distanceTo(latitude, longitude, ...areaCentres[event.area]) }))
     .sort((left, right) => left.distance - right.distance || left.event.date.localeCompare(right.event.date))
     .slice(0, 16)
@@ -884,9 +894,9 @@ function renderFeatured() {
   featuredRail.setAttribute("aria-busy", "true");
   window.clearInterval(featuredAutoscroll);
   const featured = EVENTS
-    // This rail is chronological, not editorial: an event which already began
-    // never occupies a future slot, even when a multi-day festival is ongoing.
-    .filter(event => !event.seriesId && hasOfficialPoster(event) && event.date > today)
+    // These are the five events whose programmes still begin today or later.
+    // A festival from the previous month never occupies a future slot.
+    .filter(event => !event.seriesId && hasOfficialPoster(event) && event.date >= today)
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 5);
@@ -911,7 +921,15 @@ function scheduleFeaturedRefresh() {
   const nextDay = new Date();
   nextDay.setHours(24, 0, 3, 0);
   featuredRefreshTimer = window.setTimeout(() => {
+    const today = shiftedIso(0);
+    const cursorMonth = `${calendarCursor.getFullYear()}-${String(calendarCursor.getMonth() + 1).padStart(2, "0")}`;
+    if (cursorMonth < today.slice(0, 7)) {
+      const next = EVENTS.filter(event => !event.seriesId && isCurrentOrUpcoming(event, today))
+        .sort((left, right) => left.date.localeCompare(right.date))[0];
+      calendarCursor = eventDate(next ? (next.date < today ? today : next.date) : today);
+    }
     renderFeatured();
+    render();
     scheduleFeaturedRefresh();
   }, Math.max(1_000, nextDay.getTime() - Date.now()));
 }
@@ -942,7 +960,8 @@ function eventCard(event) {
 function filteredEvents() {
   const query = state.search.trim().toLocaleLowerCase("pt-PT");
   const selectedRange = dateFilterRange(state.date);
-  return EVENTS.filter(event => !event.seriesId).filter(event => {
+  const today = shiftedIso(0);
+  return EVENTS.filter(event => !event.seriesId && isCurrentOrUpcoming(event, today)).filter(event => {
     const group = [event, ...festivalChildren(event)];
     const text = group.flatMap(item => [item.title, item.venue, item.city, item.district, item.area, eventType(item), ...item.genres]).join(" ").toLocaleLowerCase("pt-PT");
     return (!query || text.includes(query)) &&

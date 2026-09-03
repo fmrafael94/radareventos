@@ -101,7 +101,7 @@ Depois de rever, atualiza o estado para `reviewing`, `published`, `rejected` ou 
 
 O formulário deixa de expor uma página de acompanhamento. Quando o pedido é aceite ou recusado no admin, o Worker envia uma mensagem para o e-mail submetido.
 
-1. Cria uma conta no [Resend](https://resend.com) e verifica o domínio de envio. Enquanto o `odesvio.pt` não estiver disponível, podes usar um domínio que controles; o endereço remetente tem de pertencer a um domínio verificado.
+1. Cria uma conta no [Resend](https://resend.com) e verifica o domínio de envio `odesvio.pt`; o endereço remetente tem de pertencer a um domínio verificado.
 2. Cria uma API key no Resend e, no Worker, guarda estes dois valores como secrets:
 
 ```sh
@@ -109,7 +109,7 @@ npx wrangler secret put RESEND_API_KEY
 npx wrangler secret put OUTBOUND_EMAIL_FROM
 ```
 
-3. Para `OUTBOUND_EMAIL_FROM`, usa por exemplo `Desvio <ola@teudominio.pt>`.
+3. Para `OUTBOUND_EMAIL_FROM`, usa `Desvio <ola@odesvio.pt>`.
 4. Faz deploy. Ao publicar ou recusar um pedido, o admin confirma se o e-mail foi enviado.
 
 O segredo nunca entra no GitHub. Sem estes dois valores, o pedido continua a ser atualizado normalmente, mas o admin avisa que o e-mail ainda não está configurado.
@@ -118,8 +118,7 @@ O segredo nunca entra no GitHub. Sem estes dois valores, o pedido continua a ser
 
 Quando comprares o domínio, criaremos pelo menos:
 
-- `ola@teudominio.pt` — contacto geral.
-- `correcoes@teudominio.pt` — correções e direitos de privacidade.
+- `ola@odesvio.pt` — contacto geral, correções e direitos de privacidade.
 
 Esses endereços podem encaminhar para a tua caixa de email atual. Antes de ativar os formulários para o público, atualiza `privacidade.html` com o nome legal do responsável e esse contacto de privacidade.
 
