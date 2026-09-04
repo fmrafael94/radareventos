@@ -199,9 +199,15 @@ export default {
     if (pathname === "/api/admin/users" && request.method === "GET") return secureResponse(await getAdminUsers(context));
     if (pathname === "/api/admin/users" && request.method === "POST") return secureResponse(await postAdminUser(context));
     if (pathname === "/api/admin/users" && request.method === "PATCH") return secureResponse(await patchAdminUser(context));
-    if (pathname === "/admin.html" && request.method === "GET") {
+    const adminPage = ["/admin", "/admin/", "/admin.html"].includes(pathname);
+    if (adminPage && request.method === "GET") {
       const session = await requireAdmin(context);
       if (session.response) return secureResponse(new Response("Acesso privado necessário.", { status: session.response.status, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } }));
+      if (pathname !== "/admin.html") {
+        const assetUrl = new URL(request.url);
+        assetUrl.pathname = "/admin.html";
+        return secureResponse(await env.ASSETS.fetch(new Request(assetUrl.toString(), request)));
+      }
     }
     if (pathname === "/api/internal/audit-report" && request.method === "POST") return secureResponse(await postAuditReport(context));
 
