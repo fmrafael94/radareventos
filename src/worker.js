@@ -180,8 +180,11 @@ export default {
       return secureResponse(new Response("Origem não autorizada.", { status: 403, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } }));
     }
 
-    if (pathname === "/robots.txt" && request.method === "GET") return secureResponse(new Response(`User-agent: *\nAllow: /\nSitemap: ${new URL(request.url).origin}/sitemap.xml\n`, { headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "public, max-age=3600" } }));
-    if (pathname === "/sitemap.xml" && request.method === "GET") return secureResponse(await sitemap(request, env));
+    if (pathname === "/robots.txt" && ["GET", "HEAD"].includes(request.method)) return secureResponse(new Response(request.method === "HEAD" ? null : `User-agent: *\nAllow: /\nSitemap: ${new URL(request.url).origin}/sitemap.xml\n`, { headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "public, max-age=3600" } }));
+    if (pathname === "/sitemap.xml" && ["GET", "HEAD"].includes(request.method)) {
+      const response = await sitemap(request, env);
+      return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);
+    }
     if (pathname.startsWith("/api/event-poster/") && request.method === "GET") return secureResponse(await eventPoster(request, env, decodeURIComponent(pathname.slice("/api/event-poster/".length)), executionCtx));
     if (pathname.startsWith("/evento/") && request.method === "GET") return secureResponse(await eventPage(request, env, decodeURIComponent(pathname.slice("/evento/".length))));
 
