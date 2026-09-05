@@ -4,6 +4,9 @@ const viewFilters = document.querySelector("#review-views");
 const communityFilters = document.querySelector("#status-filters");
 const automationFilters = document.querySelector("#automation-status-filters");
 const filterContext = document.querySelector("#filter-context");
+const automationBulkActions = document.querySelector("#automation-bulk-actions");
+const bulkResolve = document.querySelector("#bulk-resolve");
+const bulkApply = document.querySelector("#bulk-apply");
 let activeView = "community";
 let activeCommunityStatus = "new";
 let activeAutomationStatus = "new";
@@ -113,6 +116,7 @@ function updateReviewControls() {
   const automated = activeView === "automation";
   communityFilters.hidden = automated;
   automationFilters.hidden = !automated;
+  automationBulkActions.hidden = !automated || !["new", "reviewing"].includes(activeAutomationStatus);
   filterContext.textContent = automated
     ? "Resultados das rondas — confirma sempre na fonte oficial"
     : "Pedidos enviados por utilizadores";
@@ -131,6 +135,7 @@ automationFilters.addEventListener("click", event => {
   if (!button) return;
   activeAutomationStatus = button.dataset.status;
   automationFilters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  updateReviewControls();
   loadAutomationReviews();
 });
 
@@ -217,6 +222,38 @@ reports.addEventListener("click", async event => {
 });
 
 document.querySelector("#refresh").addEventListener("click", loadActiveView);
+async function bulkReview(action) {
+  const applying = action === "apply-confirmed";
+  const confirmation = applying
+    ? "Aplicar todas as ligações já confirmadas à agenda? Só entram as que têm URL confirmado guardado; as restantes mantêm-se na fila."
+    : "Marcar todos os sinais visíveis como revistos? Isto não altera a agenda.";
+  if (!window.confirm(confirmation)) return;
+  [bulkResolve, bulkApply].forEach(button => { button.disabled = true; });
+  adminStatus.textContent = "A atualizar a ronda…";
+  try {
+    const response = await fetch("/api/admin/automation-reviews/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ action, status: activeAutomationStatus })
+    });
+    requireCurrentSession(response);
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível atualizar a ronda.");
+    const appliedLabel = result.applied === 1 ? "ligação aplicada" : "ligações aplicadas";
+    const resolvedLabel = result.resolved === 1 ? "sinal marcado como revisto" : "sinais marcados como revistos";
+    adminStatus.textContent = applying
+      ? `${result.applied || 0} ${appliedLabel}${result.skipped ? ` · ${result.skipped} mantida${result.skipped === 1 ? "" : "s"} para revisão` : ""}.`
+      : `${result.resolved || 0} ${resolvedLabel}.`;
+    loadAutomationReviews();
+  } catch (error) {
+    adminStatus.textContent = error.message || "Não foi possível atualizar a ronda.";
+  } finally {
+    [bulkResolve, bulkApply].forEach(button => { button.disabled = false; });
+  }
+}
+bulkResolve.addEventListener("click", () => bulkReview("resolve"));
+bulkApply.addEventListener("click", () => bulkReview("apply-confirmed"));
 document.querySelector("#logout").addEventListener("click", async () => {
   await fetch("/api/admin/logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
   window.location.replace("/painel");

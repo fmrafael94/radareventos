@@ -14,6 +14,22 @@ const validUrl = value => {
   }
 };
 
+async function applyAgendaPatch(db, item, proposalUrl, proposalTitle = "") {
+  const patch = item.target_kind === "Bilheteira"
+    ? { ticketUrl: proposalUrl, tickets: "Consultar bilheteira oficial", availability: "Bilhetes a confirmar" }
+    : { sourceUrl: proposalUrl };
+  if (proposalTitle && proposalTitle !== item.title) patch.title = proposalTitle;
+  await db.prepare(`
+    INSERT INTO event_overrides (event_id, patch_json, source_url, verified_at, updated_at)
+    VALUES (?, ?, ?, date('now'), datetime('now'))
+    ON CONFLICT(event_id) DO UPDATE SET
+      patch_json = json_patch(event_overrides.patch_json, excluded.patch_json),
+      source_url = excluded.source_url,
+      verified_at = date('now'),
+      updated_at = datetime('now')
+  `).bind(item.event_id, JSON.stringify(patch), proposalUrl).run();
+}
+
 export async function onRequestGet(context) {
   const session = await requireAdmin(context);
   if (session.response) return session.response;
@@ -53,20 +69,8 @@ export async function onRequestPatch(context) {
     if (item.category !== "link" || !item.event_id || !proposalUrl) {
       return json({ message: "Para aplicar à agenda, confirma primeiro um link direto e válido para este evento." }, 400);
     }
-    const patch = item.target_kind === "Bilheteira"
-      ? { ticketUrl: proposalUrl, tickets: "Consultar bilheteira oficial", availability: "Bilhetes a confirmar" }
-      : { sourceUrl: proposalUrl };
-    if (proposalTitle && proposalTitle !== item.title) patch.title = proposalTitle;
     await ensureEventStore(context.env.EVENT_RADAR_DB);
-    await context.env.EVENT_RADAR_DB.prepare(`
-      INSERT INTO event_overrides (event_id, patch_json, source_url, verified_at, updated_at)
-      VALUES (?, ?, ?, date('now'), datetime('now'))
-      ON CONFLICT(event_id) DO UPDATE SET
-        patch_json = json_patch(event_overrides.patch_json, excluded.patch_json),
-        source_url = excluded.source_url,
-        verified_at = date('now'),
-        updated_at = datetime('now')
-    `).bind(item.event_id, JSON.stringify(patch), proposalUrl).run();
+    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, proposalUrl, proposalTitle);
   }
   const result = await context.env.EVENT_RADAR_DB.prepare(`
     UPDATE automation_reviews
@@ -83,4 +87,47 @@ export async function onRequestPatch(context) {
   ).run();
   if (!result.meta.changes) return json({ message: "Item não encontrado." }, 404);
   return json({ ok: true });
+}
+
+// Bulk review intentionally has two distinct modes. "resolve" only clears
+// the visible queue; "apply-confirmed" changes the public agenda exclusively
+// for link reviews that already carry a saved, valid confirmed URL.
+export async function onRequestPost(context) {
+  const session = await requireAdmin(context);
+  if (session.response) return session.response;
+  if (!context.env.EVENT_RADAR_DB) return json({ message: "Base de dados ainda não ligada." }, 503);
+  let payload;
+  try { payload = await context.request.json(); } catch { return json({ message: "Pedido inválido." }, 400); }
+  const status = text(payload.status, 20);
+  const action = text(payload.action, 32);
+  if (!new Set(["new", "reviewing"]).has(status) || !new Set(["resolve", "apply-confirmed"]).has(action)) {
+    return json({ message: "Pedido inválido." }, 400);
+  }
+  await ensureAutomationReviewStore(context.env.EVENT_RADAR_DB);
+  const { results = [] } = await context.env.EVENT_RADAR_DB.prepare(`
+    SELECT id, category, event_id, target_kind, title, proposal_title, proposal_url
+    FROM automation_reviews WHERE status = ? ORDER BY last_seen_at DESC LIMIT 250
+  `).bind(status).all();
+  if (!results.length) return json({ ok: true, resolved: 0, applied: 0, skipped: 0 });
+
+  if (action === "resolve") {
+    await context.env.EVENT_RADAR_DB.batch(results.map(item => context.env.EVENT_RADAR_DB.prepare(`
+      UPDATE automation_reviews SET status = 'resolved', resolved_at = datetime('now') WHERE id = ?
+    `).bind(item.id)));
+    return json({ ok: true, resolved: results.length, applied: 0, skipped: 0 });
+  }
+
+  const eligible = results.flatMap(item => {
+    const proposalUrl = validUrl(item.proposal_url || "");
+    return item.category === "link" && item.event_id && proposalUrl ? [{ item, proposalUrl }] : [];
+  });
+  if (!eligible.length) return json({ message: "Não há ligações confirmadas guardadas nesta fila para aplicar." }, 400);
+  await ensureEventStore(context.env.EVENT_RADAR_DB);
+  for (const { item, proposalUrl } of eligible) {
+    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, proposalUrl, text(item.proposal_title, 240));
+  }
+  await context.env.EVENT_RADAR_DB.batch(eligible.map(({ item }) => context.env.EVENT_RADAR_DB.prepare(`
+    UPDATE automation_reviews SET status = 'resolved', resolved_at = datetime('now') WHERE id = ?
+  `).bind(item.id)));
+  return json({ ok: true, resolved: eligible.length, applied: eligible.length, skipped: results.length - eligible.length });
 }
