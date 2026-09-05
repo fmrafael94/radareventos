@@ -179,6 +179,15 @@ export default {
     const { pathname } = url;
     const isAdminHost = url.hostname === adminHost;
     const legacyAdminPath = ["/admin", "/admin/", "/admin.html"].includes(pathname);
+    // The private host has a single canonical entry point. Without this,
+    // Workers Assets normalises admin.html back to /admin and Safari sees a
+    // redirect cycle.
+    if (isAdminHost && legacyAdminPath && ["GET", "HEAD"].includes(request.method)) {
+      const destination = new URL(request.url);
+      destination.pathname = "/";
+      destination.search = "";
+      return secureResponse(new Response(null, { status: 308, headers: { Location: destination.toString() } }));
+    }
     // The public shortcut remains stable, but the protected session lives on a
     // dedicated hostname. It is deliberately a redirect before any app logic.
     if (!isAdminHost && legacyAdminPath && ["GET", "HEAD"].includes(request.method)) {
