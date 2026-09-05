@@ -163,6 +163,17 @@ async function sitemap(request, env) {
   }
 }
 
+async function shareFallback(request, env) {
+  const url = new URL(request.url);
+  url.pathname = "/share-card.svg";
+  url.search = "";
+  const response = await env.ASSETS.fetch(new Request(url.toString()));
+  const headers = new Headers(response.headers);
+  headers.set("Content-Type", "image/svg+xml; charset=UTF-8");
+  headers.set("Cache-Control", "public, max-age=86400, s-maxage=86400");
+  return new Response(response.body, { status: response.ok ? 200 : 503, headers });
+}
+
 async function eventPoster(request, env, id, executionCtx) {
   if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Cartaz não encontrado.", { status: 404 });
   try {
@@ -176,12 +187,12 @@ async function eventPoster(request, env, id, executionCtx) {
     if (!match && !cloudEvent) return new Response("Cartaz não encontrado.", { status: 404 });
     const app = await assetText(request, env, "/app.js");
     const poster = app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(match?.[0] || "", "image");
-    if (!poster) return new Response("Este evento não tem cartaz disponível.", { status: 404 });
+    if (!poster) return shareFallback(request, env);
     const posterUrl = new URL(poster);
-    if (!/^https?:$/.test(posterUrl.protocol)) return new Response("Cartaz inválido.", { status: 400 });
+    if (!/^https?:$/.test(posterUrl.protocol)) return shareFallback(request, env);
     const response = await fetch(posterUrl.toString());
     const type = response.headers.get("Content-Type") || "";
-    if (!response.ok || !type.startsWith("image/")) return new Response("Não foi possível obter o cartaz.", { status: 502 });
+    if (!response.ok || !type.startsWith("image/")) return shareFallback(request, env);
     const result = new Response(response.body, {
       headers: {
         "Content-Type": type,
@@ -192,7 +203,7 @@ async function eventPoster(request, env, id, executionCtx) {
     executionCtx?.waitUntil(cache.put(request, result.clone()));
     return result;
   } catch {
-    return new Response("Não foi possível obter o cartaz.", { status: 502 });
+    return shareFallback(request, env);
   }
 }
 
