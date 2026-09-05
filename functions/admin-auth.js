@@ -1,6 +1,5 @@
 const json = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-let keyCache = { expiresAt: 0, keys: [] };
 const sessionCookie = "desvio_admin_session";
 const encoder = new TextEncoder();
 
@@ -14,11 +13,17 @@ const encodePart = value => btoa(String.fromCharCode(...encoder.encode(typeof va
   .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 const cookieValue = (request, name) => request.headers.get("Cookie")?.split(";").map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1) || "";
 
-function equalValues(left, right) {
-  const a = encoder.encode(String(left || ""));
-  const b = encoder.encode(String(right || ""));
-  let difference = a.length ^ b.length;
-  for (let index = 0; index < Math.max(a.length, b.length); index += 1) difference |= (a[index] || 0) ^ (b[index] || 0);
+async function equalValues(left, right) {
+  const [a, b] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(String(left || ""))),
+    crypto.subtle.digest("SHA-256", encoder.encode(String(right || "")))
+  ]);
+  if (typeof crypto.subtle.timingSafeEqual === "function") return crypto.subtle.timingSafeEqual(a, b);
+  // Node's local test runtime may not expose Cloudflare's timingSafeEqual yet.
+  const leftHash = new Uint8Array(a);
+  const rightHash = new Uint8Array(b);
+  let difference = 0;
+  for (let index = 0; index < leftHash.length; index += 1) difference |= leftHash[index] ^ rightHash[index];
   return difference === 0;
 }
 
@@ -67,13 +72,14 @@ export async function loginWithAdminPassword(context, password) {
   const expected = String(env.ADMIN_PASSWORD || "");
   if (!emailPattern.test(owner) || !expected) return { response: json({ message: "O acesso privado ainda não foi configurado." }, 503) };
   const address = request.headers.get("CF-Connecting-IP") || "sem-ip";
-  const key = `admin:${address}`;
+  const addressHash = new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(address)));
+  const key = `admin:${[...addressHash].map(byte => byte.toString(16).padStart(2, "0")).join("")}`;
   await env.EVENT_RADAR_DB.prepare(`CREATE TABLE IF NOT EXISTS admin_login_attempts (key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, window_started INTEGER NOT NULL)`).run();
   const now = Date.now();
   const previous = await env.EVENT_RADAR_DB.prepare("SELECT attempts, window_started FROM admin_login_attempts WHERE key = ?").bind(key).first();
   const attempts = previous && now - Number(previous.window_started) < 15 * 60 * 1000 ? Number(previous.attempts) : 0;
   if (attempts >= 5) return { response: json({ message: "Demasiadas tentativas. Tenta novamente dentro de alguns minutos." }, 429) };
-  if (!equalValues(password, expected)) {
+  if (!(await equalValues(password, expected))) {
     await env.EVENT_RADAR_DB.prepare(`INSERT INTO admin_login_attempts (key, attempts, window_started) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET attempts = excluded.attempts, window_started = excluded.window_started`)
       .bind(key, attempts + 1, attempts ? previous.window_started : now).run();
     return { response: json({ message: "Password incorreta." }, 401) };
@@ -103,48 +109,13 @@ export async function ensureAdminUserStore(db, ownerEmail) {
   return true;
 }
 
-async function accessKey(teamDomain, kid) {
-  if (keyCache.expiresAt < Date.now()) {
-    const response = await fetch(`${teamDomain}/cdn-cgi/access/certs`);
-    if (!response.ok) throw new Error("Não foi possível obter as chaves do Cloudflare Access.");
-    const data = await response.json();
-    keyCache = { keys: Array.isArray(data.keys) ? data.keys : [], expiresAt: Date.now() + 60 * 60 * 1000 };
-  }
-  const jwk = keyCache.keys.find(key => key.kid === kid);
-  if (!jwk) throw new Error("A chave de acesso não é reconhecida.");
-  return crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-}
-
-async function verifiedAccessIdentity(request, env) {
-  const token = request.headers.get("Cf-Access-Jwt-Assertion");
-  const teamDomain = String(env.TEAM_DOMAIN || "").replace(/\/$/, "");
-  const expectedAudiences = String(env.POLICY_AUD || "").split(",").map(value => value.trim()).filter(Boolean);
-  if (!teamDomain || !expectedAudiences.length) throw new Error("O login privado ainda não foi configurado.");
-  if (!token) throw new Error("Inicia sessão para aceder ao painel.");
-  const parts = token.split(".");
-  if (parts.length !== 3) throw new Error("A sessão de acesso é inválida.");
-  const header = decodeJson(parts[0]);
-  const payload = decodeJson(parts[1]);
-  if (header.alg !== "RS256" || !header.kid) throw new Error("A sessão de acesso usa um formato inválido.");
-  const key = await accessKey(teamDomain, header.kid);
-  const signed = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
-  const verified = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, decodePart(parts[2]), signed);
-  const now = Math.floor(Date.now() / 1000);
-  const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
-  if (!verified || payload.iss !== teamDomain || !audiences.some(value => expectedAudiences.includes(value)) || payload.type !== "app" || !Number.isFinite(payload.exp) || payload.exp <= now || (payload.nbf && payload.nbf > now + 60)) {
-    throw new Error("A sessão de acesso expirou ou não é válida para este painel.");
-  }
-  const email = normaliseEmail(payload.email);
-  if (!emailPattern.test(email)) throw new Error("A sessão não inclui um e-mail válido.");
-  return email;
-}
-
 export async function requireAdmin(context, { ownerOnly = false } = {}) {
   if (!context.env.EVENT_RADAR_DB) return { response: json({ message: "Base de dados ainda não ligada." }, 503) };
   try {
     const configured = await ensureAdminUserStore(context.env.EVENT_RADAR_DB, context.env.ADMIN_OWNER_EMAIL);
     if (!configured) return { response: json({ message: "O proprietário do painel ainda não foi configurado." }, 503) };
-    const email = await localSessionIdentity(context.request, context.env) || await verifiedAccessIdentity(context.request, context.env);
+    const email = await localSessionIdentity(context.request, context.env);
+    if (!email) return { response: json({ message: "Inicia sessão para aceder ao painel." }, 401) };
     const user = await context.env.EVENT_RADAR_DB.prepare(`
       SELECT email, role FROM admin_users WHERE email = ? AND status = 'active'
     `).bind(email).first();

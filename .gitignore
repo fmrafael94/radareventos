@@ -2,6 +2,7 @@
 .DS_Store
 node_modules
 .wrangler/
+reports/*.json
 
 # Codex workspace instructions are local project metadata, not website content.
 AGENTS.md

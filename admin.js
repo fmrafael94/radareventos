@@ -217,7 +217,7 @@ reports.addEventListener("click", async event => {
 document.querySelector("#refresh").addEventListener("click", loadActiveView);
 document.querySelector("#logout").addEventListener("click", async () => {
   await fetch("/api/admin/logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
-  window.location.replace("/");
+  window.location.replace("/painel");
 });
 updateReviewControls();
 loadActiveView();

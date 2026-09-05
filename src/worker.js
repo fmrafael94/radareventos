@@ -10,14 +10,13 @@ import { onRequestPost as postAuditReport } from "../functions/api/internal/audi
 
 const contextFor = (request, env) => ({ request, env });
 const canonicalHost = "odesvio.pt";
-// Keeping the Access session on its own hostname prevents the private-login
-// return from colliding with the public site's cookies (notably in Safari).
 const adminHost = "admin.odesvio.pt";
+const canonicalAdminPath = "/painel";
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
 const escapeXml = value => escapeHtml(value).replace(/\"/g, "&quot;");
 
-// Access blocks private routes at the edge. These headers protect every
-// response that reaches the Worker, including static pages and API replies.
+// These headers protect every response that reaches the Worker, including
+// static pages and API replies.
 function secureResponse(response) {
   const headers = new Headers(response.headers);
   headers.set("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests");
@@ -38,6 +37,18 @@ async function assetText(request, env, path) {
   const response = await env.ASSETS.fetch(new Request(url.toString()));
   if (!response.ok) throw new Error("Asset não encontrado");
   return response.text();
+}
+
+async function privateAssetPage(request, env, path) {
+  const url = new URL(request.url);
+  url.hostname = canonicalHost;
+  url.pathname = path;
+  url.search = "";
+  const response = await env.ASSETS.fetch(new Request(url.toString()));
+  if (!response.ok) return new Response("Página indisponível.", { status: 503 });
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "no-store");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
 async function eventPage(request, env, id) {
@@ -138,6 +149,10 @@ async function purgeExpiredPersonalData(env) {
   await env.EVENT_RADAR_DB.prepare("DELETE FROM request_rate_limits WHERE window_start < ?")
     .bind(currentWindow - 3)
     .run();
+  await env.EVENT_RADAR_DB.prepare("CREATE TABLE IF NOT EXISTS admin_login_attempts (key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, window_started INTEGER NOT NULL)").run();
+  await env.EVENT_RADAR_DB.prepare("DELETE FROM admin_login_attempts WHERE window_started < ?")
+    .bind(Date.now() - 24 * 60 * 60 * 1000)
+    .run();
 
   const { results: expired } = await env.EVENT_RADAR_DB.prepare(`
     SELECT id, poster_object_key FROM feedback
@@ -179,23 +194,18 @@ export default {
     const { pathname } = url;
     const isAdminHost = url.hostname === adminHost;
     const legacyAdminPath = ["/admin", "/admin/", "/admin.html"].includes(pathname);
-    // The private host has a single canonical entry point. Without this,
-    // Workers Assets normalises admin.html back to /admin and Safari sees a
-    // redirect cycle.
-    if (isAdminHost && legacyAdminPath && ["GET", "HEAD"].includes(request.method)) {
-      const destination = new URL(request.url);
-      destination.pathname = "/";
-      destination.search = "";
-      return secureResponse(new Response(null, { status: 308, headers: { Location: destination.toString() } }));
+    const canonicalAdminPage = [canonicalAdminPath, `${canonicalAdminPath}/`, `${canonicalAdminPath}.html`].includes(pathname);
+    // Previous permanent redirects can remain cached by Safari. Always leave
+    // the old hostname through a fresh path that was never part of that cycle.
+    if (isAdminHost && ["GET", "HEAD"].includes(request.method)) {
+      const destination = new URL(`${url.protocol}//${canonicalHost}${canonicalAdminPath}`);
+      destination.hostname = canonicalHost;
+      return secureResponse(new Response(null, { status: 302, headers: { Location: destination.toString(), "Cache-Control": "no-store" } }));
     }
-    // The public shortcut remains stable, but the protected session lives on a
-    // dedicated hostname. It is deliberately a redirect before any app logic.
-    if (!isAdminHost && legacyAdminPath && ["GET", "HEAD"].includes(request.method)) {
-      const destination = new URL(request.url);
-      destination.hostname = adminHost;
-      destination.pathname = "/";
-      destination.search = "";
-      return secureResponse(new Response(null, { status: 308, headers: { Location: destination.toString() } }));
+    // Keep old public bookmarks usable without creating another permanent
+    // browser-level redirect.
+    if (legacyAdminPath && ["GET", "HEAD"].includes(request.method)) {
+      return secureResponse(new Response(null, { status: 302, headers: { Location: canonicalAdminPath, "Cache-Control": "no-store" } }));
     }
     const context = contextFor(request, env);
     const origin = request.headers.get("Origin");
@@ -215,7 +225,10 @@ export default {
     if (pathname === "/api/events" && request.method === "GET") return secureResponse(await getEvents(context));
     if (pathname === "/api/feedback" && request.method === "POST") return secureResponse(await postFeedback(context));
     if (pathname === "/api/admin/login" && request.method === "POST") {
-      const body = await request.json().catch(() => ({}));
+      const rawBody = await request.text();
+      if (rawBody.length > 4_096) return secureResponse(Response.json({ message: "Pedido demasiado grande." }, { status: 413, headers: { "Cache-Control": "no-store" } }));
+      let body = {};
+      try { body = JSON.parse(rawBody); } catch { /* handled as an empty login */ }
       const login = await loginWithAdminPassword(context, typeof body.password === "string" ? body.password : "");
       if (login.response) return secureResponse(login.response);
       const response = Response.json({ ok: true }, { headers: { "Cache-Control": "no-store", "Set-Cookie": login.cookie } });
@@ -232,24 +245,10 @@ export default {
     if (pathname === "/api/admin/users" && request.method === "GET") return secureResponse(await getAdminUsers(context));
     if (pathname === "/api/admin/users" && request.method === "POST") return secureResponse(await postAdminUser(context));
     if (pathname === "/api/admin/users" && request.method === "PATCH") return secureResponse(await patchAdminUser(context));
-    const adminPage = isAdminHost
-      ? ["/", "/admin", "/admin/", "/admin.html"].includes(pathname)
-      : legacyAdminPath;
-    if (adminPage && request.method === "GET") {
+    if (canonicalAdminPage && ["GET", "HEAD"].includes(request.method)) {
       const session = await requireAdmin(context);
-      if (session.response) {
-        if (isAdminHost) {
-          const loginUrl = new URL(request.url);
-          loginUrl.pathname = "/admin-login.html";
-          return secureResponse(await env.ASSETS.fetch(new Request(loginUrl.toString(), request)));
-        }
-        return secureResponse(new Response("Acesso privado necessário.", { status: session.response.status, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } }));
-      }
-      if (pathname !== "/admin.html") {
-        const assetUrl = new URL(request.url);
-        assetUrl.pathname = "/admin.html";
-        return secureResponse(await env.ASSETS.fetch(new Request(assetUrl.toString(), request)));
-      }
+      const response = await privateAssetPage(request, env, session.response ? "/admin-login" : "/admin");
+      return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);
     }
     if (pathname === "/api/internal/audit-report" && request.method === "POST") return secureResponse(await postAuditReport(context));
 

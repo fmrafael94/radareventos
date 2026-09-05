@@ -16,7 +16,7 @@ form.addEventListener("submit", async event => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível iniciar sessão.");
-    window.location.replace("/");
+    window.location.replace("/painel");
   } catch (error) {
     message.textContent = error.message || "Não foi possível iniciar sessão.";
     password.select();

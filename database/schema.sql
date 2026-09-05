@@ -40,3 +40,9 @@ CREATE TABLE IF NOT EXISTS admin_users (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS admin_login_attempts (
+  key TEXT PRIMARY KEY,
+  attempts INTEGER NOT NULL,
+  window_started INTEGER NOT NULL
+);
