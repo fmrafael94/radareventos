@@ -1,7 +1,7 @@
 import { onRequestGet as getConfig } from "../functions/api/config.js";
 import { onRequestGet as getEvents } from "../functions/api/events.js";
 import { onRequestPost as postFeedback } from "../functions/api/feedback.js";
-import { onRequestGet as getAdminFeedback, onRequestPatch as patchAdminFeedback } from "../functions/api/admin/feedback.js";
+import { onRequestGet as getAdminFeedback, onRequestPatch as patchAdminFeedback, onRequestPostBulk as postAdminFeedbackBulk } from "../functions/api/admin/feedback.js";
 import { onRequestGet as getAutomationReviews, onRequestPatch as patchAutomationReview, onRequestPost as postAutomationReviewBulk } from "../functions/api/admin/automation-reviews.js";
 import { onRequestGet as getAdminPoster } from "../functions/api/admin/poster.js";
 import { clearAdminSession, loginWithAdminPassword, requireAdmin } from "../functions/admin-auth.js";
@@ -310,6 +310,7 @@ export default {
     }
     if (pathname === "/api/admin/feedback" && request.method === "GET") return secureResponse(await getAdminFeedback(context));
     if (pathname === "/api/admin/feedback" && request.method === "PATCH") return secureResponse(await patchAdminFeedback(context));
+    if (pathname === "/api/admin/feedback/bulk" && request.method === "POST") return secureResponse(await postAdminFeedbackBulk(context));
     if (pathname === "/api/admin/automation-reviews" && request.method === "GET") return secureResponse(await getAutomationReviews(context));
     if (pathname === "/api/admin/automation-reviews" && request.method === "PATCH") return secureResponse(await patchAutomationReview(context));
     if (pathname === "/api/admin/automation-reviews/bulk" && request.method === "POST") return secureResponse(await postAutomationReviewBulk(context));

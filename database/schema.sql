@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS feedback (
   sender_email TEXT,
   status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'published', 'rejected', 'closed')),
   staff_note TEXT,
+  review_data_json TEXT,
   created_at TEXT NOT NULL,
   reviewed_at TEXT
 );

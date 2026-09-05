@@ -90,9 +90,9 @@ const eventLastDate = event => event.endDate || event.date;
 const initialDate = new Date();
 initialDate.setHours(12, 0, 0, 0);
 const initialToday = `${initialDate.getFullYear()}-${String(initialDate.getMonth() + 1).padStart(2, "0")}-${String(initialDate.getDate()).padStart(2, "0")}`;
-const nextAgendaEvent = EVENTS.filter(event => !event.seriesId && eventLastDate(event) >= initialToday)
+const nextAgendaEvent = EVENTS.filter(event => isMainAgendaEvent(event) && eventLastDate(event) >= initialToday)
   .sort((left, right) => left.date.localeCompare(right.date))[0];
-const nextAgendaDate = nextAgendaEvent ? (nextAgendaEvent.date < initialToday ? initialToday : nextAgendaEvent.date) : EVENTS.find(event => !event.seriesId)?.date;
+const nextAgendaDate = nextAgendaEvent ? (nextAgendaEvent.date < initialToday ? initialToday : nextAgendaEvent.date) : EVENTS.find(isMainAgendaEvent)?.date;
 let calendarCursor = nextAgendaDate ? eventDate(nextAgendaDate) : new Date();
 const areaCentres = {
   "Algarve":[37.02,-7.93], "Alto Alentejo":[39.29,-7.43], "Alto Minho":[41.69,-8.83], "Ave":[41.44,-8.30], "Aveiro":[40.64,-8.65], "Beira Baixa":[40.28,-7.50], "Cávado":[41.55,-8.43], "Douro":[41.16,-7.79], "Grande Lisboa":[38.72,-9.14], "Grande Porto":[41.16,-8.63], "Lezíria do Tejo":[39.24,-8.69], "Madeira":[32.65,-16.91], "Minho":[41.57,-8.29], "Oeiras":[38.69,-9.31], "Oeste":[39.35,-9.38], "Península de Setúbal":[38.53,-8.89], "Região de Aveiro":[40.64,-8.65], "Região de Coimbra":[40.21,-8.43], "Região de Leiria":[39.74,-8.81], "São Miguel":[37.74,-25.67], "Tâmega e Sousa":[41.21,-8.28], "Vale do Sousa":[41.20,-8.28], "Viseu Dão Lafões":[40.66,-7.91], "Área Metropolitana do Porto":[41.16,-8.63]
@@ -139,6 +139,29 @@ const festivalChildren = event => {
   }));
 };
 const festivalParent = event => event.seriesId ? EVENTS.find(parent => parent.id === event.seriesId) : event;
+function titleTokens(title) { return String(title || "")
+  .toLocaleLowerCase("pt-PT")
+  .replace(/\b\d{4}\b/g, "")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .split(/[^a-z0-9]+/)
+  .filter(token => token.length > 2 && !new Set(["com", "para", "dos", "das", "uma", "uns", "dia", "sessao", "sessoes", "programacao"]).has(token)); }
+function sharesSeriesName(parent, candidate) {
+  const parentTokens = new Set(titleTokens(parent.title));
+  const overlap = titleTokens(candidate.title).filter(token => parentTokens.has(token));
+  return overlap.length >= 2 || (overlap.length === 1 && parentTokens.size <= 3);
+}
+function programmeParent(candidate) { return EVENTS.find(parent => {
+  if (parent.id === candidate.id || !parent.endDate || parent.date === parent.endDate) return false;
+  const inRange = candidate.date >= parent.date && candidate.date <= parent.endDate;
+  if (!inRange || candidate.endDate) return false;
+  const sameSource = Boolean(parent.sourceUrl && candidate.sourceUrl && parent.sourceUrl === candidate.sourceUrl);
+  const samePlace = parent.city === candidate.city && parent.venue === candidate.venue;
+  return sharesSeriesName(parent, candidate) && (sameSource || samePlace);
+}); }
+// A daily line-up belongs inside its festival page, never as a competing card
+// in the public agenda. Explicit children use seriesId; this also catches old
+// imported records that pre-date that field.
+function isMainAgendaEvent(event) { return !event.seriesId && !programmeParent(event); }
 
 // Poster rule: always look in this order before publishing a visual:
 // 1) official event site, 2) that event's concrete Ticketline/BOL/FNAC/etc.
@@ -875,7 +898,7 @@ const compactNearbyDate = event => {
 function renderNearby(latitude, longitude, area) {
   const today = shiftedIso(0);
   const matches = EVENTS
-    .filter(event => !event.seriesId && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && areaCentres[event.area])
+    .filter(event => isMainAgendaEvent(event) && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && areaCentres[event.area])
     .map(event => ({ event, distance: distanceTo(latitude, longitude, ...areaCentres[event.area]) }))
     .sort((left, right) => left.distance - right.distance || left.event.date.localeCompare(right.event.date))
     .slice(0, 16)
@@ -919,7 +942,7 @@ function renderFeatured() {
   const featured = EVENTS
     // These are the five events whose programmes still begin today or later.
     // A festival from the previous month never occupies a future slot.
-    .filter(event => !event.seriesId && hasOfficialPoster(event) && event.date >= today)
+    .filter(event => isMainAgendaEvent(event) && hasOfficialPoster(event) && event.date >= today)
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 5);
@@ -947,7 +970,7 @@ function scheduleFeaturedRefresh() {
     const today = shiftedIso(0);
     const cursorMonth = `${calendarCursor.getFullYear()}-${String(calendarCursor.getMonth() + 1).padStart(2, "0")}`;
     if (cursorMonth < today.slice(0, 7)) {
-      const next = EVENTS.filter(event => !event.seriesId && isCurrentOrUpcoming(event, today))
+      const next = EVENTS.filter(event => isMainAgendaEvent(event) && isCurrentOrUpcoming(event, today))
         .sort((left, right) => left.date.localeCompare(right.date))[0];
       calendarCursor = eventDate(next ? (next.date < today ? today : next.date) : today);
     }
@@ -984,7 +1007,7 @@ function filteredEvents() {
   const query = searchableText(state.search.trim());
   const selectedRange = dateFilterRange(state.date);
   const today = shiftedIso(0);
-  return EVENTS.filter(event => !event.seriesId && isCurrentOrUpcoming(event, today)).filter(event => {
+  return EVENTS.filter(event => isMainAgendaEvent(event) && isCurrentOrUpcoming(event, today)).filter(event => {
     const group = [event, ...festivalChildren(event)];
     const text = searchableText(group.flatMap(item => [item.title, item.venue, item.city, item.district, item.area, eventType(item), ...item.genres]).join(" "));
     return (!query || text.includes(query)) &&

@@ -7,6 +7,8 @@ const filterContext = document.querySelector("#filter-context");
 const automationBulkActions = document.querySelector("#automation-bulk-actions");
 const bulkResolve = document.querySelector("#bulk-resolve");
 const bulkApply = document.querySelector("#bulk-apply");
+const communityBulkActions = document.querySelector("#community-bulk-actions");
+const bulkPublishReady = document.querySelector("#bulk-publish-ready");
 let activeView = "community";
 let activeCommunityStatus = "new";
 let activeAutomationStatus = "new";
@@ -20,6 +22,42 @@ const requireCurrentSession = response => {
   throw new Error("A sessão terminou. A voltar ao início de sessão…");
 };
 
+const checklistMarkup = publication => {
+  const entries = Array.isArray(publication?.items) ? publication.items : [];
+  const duplicate = Array.isArray(publication?.duplicate) && publication.duplicate.length;
+  return `<section class="publication-checklist" data-publication-checklist data-known-duplicate="${duplicate ? "true" : "false"}" aria-label="Checklist de publicação"><p>Checklist de publicação</p><ul>${entries.map(item => `<li class="${item.present ? "present" : "missing"}" data-check="${escapeHtml(item.id)}"><span aria-hidden="true">${item.present ? "✓" : "–"}</span>${escapeHtml(item.label)}<b>${item.present ? "Existe" : "Em falta"}</b></li>`).join("")}</ul>${duplicate ? `<small class="duplicate-warning">Possível duplicado: ${escapeHtml(publication.duplicate[0].title)}. Confirma antes de publicar.</small>` : `<small>Duplicados são verificados novamente antes de publicar.</small>`}</section>`;
+};
+
+function syncPublicationChecklist(card) {
+  const checklist = card.querySelector("[data-publication-checklist]");
+  if (!checklist) return true;
+  const required = {
+    title: card.querySelector('[name="eventName"]')?.value.trim(),
+    date: card.querySelector('[name="eventDate"]')?.value.trim(),
+    city: card.querySelector('[name="city"]')?.value.trim(),
+    venue: card.querySelector('[name="venue"]')?.value.trim(),
+    poster: card.querySelector('[name="posterUrl"]')?.value.trim(),
+    ticketing: card.querySelector('[name="tickets"]')?.value.trim(),
+    source: card.querySelector('[name="officialUrl"]')?.value.trim()
+  };
+  let complete = !Object.values(required).some(value => !value);
+  Object.entries(required).forEach(([key, value]) => {
+    const row = checklist.querySelector(`[data-check="${key}"]`);
+    if (!row) return;
+    row.classList.toggle("present", Boolean(value));
+    row.classList.toggle("missing", !value);
+    row.querySelector("span").textContent = value ? "✓" : "–";
+    row.querySelector("b").textContent = value ? "Existe" : "Em falta";
+  });
+  if (checklist.dataset.knownDuplicate === "true") complete = false;
+  const publish = card.querySelector('[data-next-status="published"]');
+  if (publish) {
+    publish.disabled = !complete;
+    publish.title = complete ? "" : "Completa todos os pontos obrigatórios antes de publicar.";
+  }
+  return complete;
+}
+
 function reportCard(item) {
   const title = item.event_name || "Evento sem nome";
   const promoterPage = item.event_id === "promoter-page";
@@ -31,6 +69,9 @@ function reportCard(item) {
     : item.poster_url
       ? `<a class="submitted-poster" href="${escapeHtml(item.poster_url)}" target="_blank" rel="noopener"><img src="${escapeHtml(item.poster_url)}" alt="Cartaz indicado para ${escapeHtml(title)}" /></a>`
       : "";
+  const review = item.review_data || {};
+  const values = (key, fallback = "") => escapeHtml(review[key] || fallback);
+  const checklist = item.kind === "suggestion" && !promoterPage ? checklistMarkup(item.publication) : "";
   return `<article class="report" data-id="${escapeHtml(item.id)}">
     <div class="report-meta"><span class="kind">${promoterPage ? "Página de promotora" : item.kind === "correction" ? "Correção" : "Sugestão"}</span><time>${dateTime(item.created_at)}</time></div>
     <div class="report-heading"><div><h2>${escapeHtml(title)}</h2><p>${escapeHtml([item.event_date, item.city].filter(Boolean).join(" · ") || "Data ou local por confirmar")}</p></div>${poster}</div>
@@ -41,7 +82,7 @@ function reportCard(item) {
       ${item.poster_file_name ? `<div><dt>Ficheiro enviado</dt><dd>${escapeHtml(item.poster_file_name)}</dd></div>` : ""}
       ${moderation}
     </dl>
-    ${item.kind === "suggestion" && !promoterPage ? `<fieldset class="event-review-fields"><legend>Dados para publicação</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${escapeHtml(item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${escapeHtml(item.event_date || "")}" /></label><label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${escapeHtml(item.city || "")}" /></label><label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" /></label><label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 € · Bilheteira por confirmar" /></label><label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1000" placeholder="https://" /></label><label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" value="${escapeHtml(item.poster_url || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${escapeHtml(item.official_url || "")}" /></label></fieldset>` : ""}
+    ${item.kind === "suggestion" && !promoterPage ? `${checklist}<fieldset class="event-review-fields"><legend>Dados para publicação</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${values("eventName", item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${values("eventDate", item.event_date || "")}" /></label><label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" value="${values("eventEndDate")}" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${values("city", item.city || "")}" /></label><label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" value="${values("venue")}" /></label><label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 € · Bilheteira por confirmar" value="${values("tickets")}" /></label><label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1000" placeholder="https://" value="${values("ticketUrl")}" /></label><label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" value="${values("posterUrl", item.poster_url || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${values("officialUrl", item.official_url || "")}" /></label></fieldset>` : ""}
     <label class="staff-note"><span>Nota privada</span><textarea maxlength="1500" placeholder="O que verificaste ou o que falta confirmar?">${escapeHtml(item.staff_note || "")}</textarea></label>
     <div class="report-actions">
       <button type="button" data-next-status="reviewing">Em análise</button>
@@ -86,6 +127,7 @@ async function loadReports() {
       throw new Error("A área de revisão ainda está a ser configurada. Até ligares o domínio próprio e o acesso privado, revê os pedidos pela base de dados D1.");
     }
     reports.innerHTML = result.items.length ? result.items.map(reportCard).join("") : document.querySelector("#empty-state").innerHTML;
+    reports.querySelectorAll(".report").forEach(syncPublicationChecklist);
     adminStatus.textContent = result.items.length ? `${result.items.length} pedido${result.items.length === 1 ? "" : "s"}.` : "";
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar os pedidos.";
@@ -117,6 +159,7 @@ function updateReviewControls() {
   communityFilters.hidden = automated;
   automationFilters.hidden = !automated;
   automationBulkActions.hidden = !automated || !["new", "reviewing"].includes(activeAutomationStatus);
+  communityBulkActions.hidden = automated || !["new", "reviewing"].includes(activeCommunityStatus);
   filterContext.textContent = automated
     ? "Resultados das rondas — confirma sempre na fonte oficial"
     : "Pedidos enviados por utilizadores";
@@ -127,6 +170,7 @@ communityFilters.addEventListener("click", event => {
   if (!button) return;
   activeCommunityStatus = button.dataset.status;
   communityFilters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  updateReviewControls();
   loadReports();
 });
 
@@ -221,6 +265,10 @@ reports.addEventListener("click", async event => {
   }
 });
 
+reports.addEventListener("input", event => {
+  if (event.target.closest(".event-review-fields")) syncPublicationChecklist(event.target.closest(".report"));
+});
+
 document.querySelector("#refresh").addEventListener("click", loadActiveView);
 async function bulkReview(action) {
   const applying = action === "apply-confirmed";
@@ -254,6 +302,29 @@ async function bulkReview(action) {
 }
 bulkResolve.addEventListener("click", () => bulkReview("resolve"));
 bulkApply.addEventListener("click", () => bulkReview("apply-confirmed"));
+async function publishReadyCommunity() {
+  if (!window.confirm("Publicar todos os eventos prontos? Só entram os que têm todos os pontos do checklist guardados e não duplicam a agenda. Os restantes ficam para revisão.")) return;
+  bulkPublishReady.disabled = true;
+  adminStatus.textContent = "A validar e publicar os eventos prontos…";
+  try {
+    const response = await fetch("/api/admin/feedback/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ action: "publish-ready", status: activeCommunityStatus })
+    });
+    requireCurrentSession(response);
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível publicar os eventos.");
+    adminStatus.textContent = `${result.published || 0} publicado${result.published === 1 ? "" : "s"} · ${result.incomplete || 0} incompleto${result.incomplete === 1 ? "" : "s"} · ${result.duplicates || 0} duplicado${result.duplicates === 1 ? "" : "s"} mantido${(result.incomplete || result.duplicates) === 1 ? "" : "s"} para revisão.`;
+    loadReports();
+  } catch (error) {
+    adminStatus.textContent = error.message || "Não foi possível publicar os eventos.";
+  } finally {
+    bulkPublishReady.disabled = false;
+  }
+}
+bulkPublishReady.addEventListener("click", publishReadyCommunity);
 document.querySelector("#logout").addEventListener("click", async () => {
   await fetch("/api/admin/logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
   window.location.replace("/painel");
