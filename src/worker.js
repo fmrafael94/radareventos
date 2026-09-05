@@ -5,7 +5,7 @@ import { onRequestGet as getAdminFeedback, onRequestPatch as patchAdminFeedback 
 import { onRequestGet as getAutomationReviews, onRequestPatch as patchAutomationReview } from "../functions/api/admin/automation-reviews.js";
 import { onRequestGet as getAdminPoster } from "../functions/api/admin/poster.js";
 import { onRequestGet as getAdminUsers, onRequestPost as postAdminUser, onRequestPatch as patchAdminUser } from "../functions/api/admin/users.js";
-import { requireAdmin } from "../functions/admin-auth.js";
+import { clearAdminSession, loginWithAdminPassword, requireAdmin } from "../functions/admin-auth.js";
 import { onRequestPost as postAuditReport } from "../functions/api/internal/audit-report.js";
 
 const contextFor = (request, env) => ({ request, env });
@@ -205,6 +205,16 @@ export default {
     if (pathname === "/api/config" && request.method === "GET") return secureResponse(await getConfig(context));
     if (pathname === "/api/events" && request.method === "GET") return secureResponse(await getEvents(context));
     if (pathname === "/api/feedback" && request.method === "POST") return secureResponse(await postFeedback(context));
+    if (pathname === "/api/admin/login" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const login = await loginWithAdminPassword(context, typeof body.password === "string" ? body.password : "");
+      if (login.response) return secureResponse(login.response);
+      const response = Response.json({ ok: true }, { headers: { "Cache-Control": "no-store", "Set-Cookie": login.cookie } });
+      return secureResponse(response);
+    }
+    if (pathname === "/api/admin/logout" && request.method === "POST") {
+      return secureResponse(new Response(null, { status: 204, headers: { "Cache-Control": "no-store", "Set-Cookie": clearAdminSession() } }));
+    }
     if (pathname === "/api/admin/feedback" && request.method === "GET") return secureResponse(await getAdminFeedback(context));
     if (pathname === "/api/admin/feedback" && request.method === "PATCH") return secureResponse(await patchAdminFeedback(context));
     if (pathname === "/api/admin/automation-reviews" && request.method === "GET") return secureResponse(await getAutomationReviews(context));
@@ -218,7 +228,14 @@ export default {
       : legacyAdminPath;
     if (adminPage && request.method === "GET") {
       const session = await requireAdmin(context);
-      if (session.response) return secureResponse(new Response("Acesso privado necessário.", { status: session.response.status, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } }));
+      if (session.response) {
+        if (isAdminHost) {
+          const loginUrl = new URL(request.url);
+          loginUrl.pathname = "/admin-login.html";
+          return secureResponse(await env.ASSETS.fetch(new Request(loginUrl.toString(), request)));
+        }
+        return secureResponse(new Response("Acesso privado necessário.", { status: session.response.status, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } }));
+      }
       if (pathname !== "/admin.html") {
         const assetUrl = new URL(request.url);
         assetUrl.pathname = "/admin.html";

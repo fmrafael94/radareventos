@@ -4,9 +4,6 @@ const viewFilters = document.querySelector("#review-views");
 const communityFilters = document.querySelector("#status-filters");
 const automationFilters = document.querySelector("#automation-status-filters");
 const filterContext = document.querySelector("#filter-context");
-const accessManagement = document.querySelector("#access-management");
-const adminUsers = document.querySelector("#admin-users");
-const addAdminUser = document.querySelector("#add-admin-user");
 let activeView = "community";
 let activeCommunityStatus = "new";
 let activeAutomationStatus = "new";
@@ -22,19 +19,6 @@ function userRow(user) {
     <div><b>${escapeHtml(user.email)}</b><small>${owner ? "Proprietário" : active ? "Autorizado" : "Acesso suspenso"}</small></div>
     ${owner ? "" : `<button type="button" class="secondary" data-user-status="${active ? "disabled" : "active"}">${active ? "Suspender" : "Reativar"}</button>`}
   </div>`;
-}
-
-async function loadAdminUsers() {
-  try {
-    const response = await fetch("/api/admin/users", { headers: { Accept: "application/json" }, credentials: "same-origin" });
-    if (response.status === 403) return;
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok || !Array.isArray(result.items)) return;
-    accessManagement.hidden = false;
-    adminUsers.innerHTML = result.items.map(userRow).join("");
-  } catch {
-    // A gestão de utilizadores é opcional para editores e nunca impede a revisão de eventos.
-  }
 }
 
 function reportCard(item) {
@@ -231,44 +215,9 @@ reports.addEventListener("click", async event => {
 });
 
 document.querySelector("#refresh").addEventListener("click", loadActiveView);
-addAdminUser.addEventListener("submit", async event => {
-  event.preventDefault();
-  const button = addAdminUser.querySelector("button");
-  button.disabled = true;
-  try {
-    const response = await fetch("/api/admin/users", {
-      method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ email: new FormData(addAdminUser).get("email") })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || "Não foi possível autorizar este e-mail.");
-    addAdminUser.reset();
-    adminStatus.textContent = "E-mail autorizado.";
-    loadAdminUsers();
-  } catch (error) {
-    adminStatus.textContent = error.message || "Não foi possível autorizar este e-mail.";
-  } finally {
-    button.disabled = false;
-  }
-});
-adminUsers.addEventListener("click", async event => {
-  const button = event.target.closest("[data-user-status]");
-  if (!button) return;
-  button.disabled = true;
-  try {
-    const response = await fetch("/api/admin/users", {
-      method: "PATCH", credentials: "same-origin", headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ email: button.closest(".admin-user").dataset.email, status: button.dataset.userStatus })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || "Não foi possível alterar o acesso.");
-    adminStatus.textContent = button.dataset.userStatus === "active" ? "Acesso reativado." : "Acesso suspenso.";
-    loadAdminUsers();
-  } catch (error) {
-    adminStatus.textContent = error.message || "Não foi possível alterar o acesso.";
-    button.disabled = false;
-  }
+document.querySelector("#logout").addEventListener("click", async () => {
+  await fetch("/api/admin/logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
+  window.location.replace("/");
 });
 updateReviewControls();
-loadAdminUsers();
 loadActiveView();

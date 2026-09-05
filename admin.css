@@ -11,3 +11,5 @@ html .review-controls .status-filters button[aria-pressed="true"] { border-color
 @media (max-width:600px) { .access-management { grid-template-columns:1fr; }.access-management>div,.admin-users { grid-column:auto; }.add-admin-user>div { align-items:stretch; flex-direction:column; }.add-admin-user button { min-height:40px; } }
 .admin-security-note { display:inline-block; margin-top:7px; color:#50734c; font:600 9px "DM Mono",monospace; letter-spacing:.035em; text-transform:uppercase; }
 .skip-link { position:fixed; z-index:100; top:10px; left:10px; padding:10px 13px; transform:translateY(-160%); border-radius:7px; color:#fff; background:#183125; font-weight:700; text-decoration:none; transition:transform .16s ease; }.skip-link:focus { transform:translateY(0); outline:3px solid #b9ff4d; outline-offset:3px; } *:focus-visible { outline:3px solid #7d9d52; outline-offset:3px; }
+
+.admin-header-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
