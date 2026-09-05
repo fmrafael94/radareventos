@@ -32,7 +32,7 @@ The custom domain can be connected later from the same Cloudflare project.
 O endereço público é `https://odesvio.pt`. A versão `www` redireciona permanentemente para esta versão canónica.
 
 - `robots.txt` e `sitemap.xml` são rotas dinâmicas do Worker; o sitemap inclui a agenda publicada e é atualizado com cada alteração em `events.js`.
-- Falta criar e validar a propriedade `odesvio.pt` no Google Search Console e submeter `https://odesvio.pt/sitemap.xml`. Isto exige acesso à conta Google que ficará responsável pelo Desvio.
+- A propriedade `odesvio.pt` está validada no Google Search Console e `https://odesvio.pt/sitemap.xml` foi submetido com sucesso. O sitemap só inclui eventos principais ainda ativos ou futuros; o Google pode demorar alguns dias a refletir a nova contagem.
 - Falta configurar o Resend com o domínio verificado e os secrets `RESEND_API_KEY` e `OUTBOUND_EMAIL_FROM`, para enviar notificações de aprovação ou recusa de pedidos a partir de `ola@odesvio.pt`.
 - O contacto público nos Termos e na Política de Privacidade usa `ola@odesvio.pt`.
 - Alertas opcionais por cidade e artista continuam previstos, enviados apenas a quem os subscrever.
@@ -56,7 +56,7 @@ As duas GitHub Actions produzem uma fila de trabalho privada, sem publicar ou al
 - de 2 em 2 horas, `Verificação de links oficiais` verifica páginas oficiais, bilheteiras e cartazes; alterações técnicas ou links indisponíveis entram na fila;
 - diariamente, `Ronda diária de fontes` percorre todas as fontes e só cria um sinal quando uma página muda ou deixa de responder.
 
-Para fazer os resultados aparecerem em `admin.html`:
+Para fazer os resultados aparecerem no painel privado (`/painel`):
 
 1. No Worker do Cloudflare, cria o secret `AUDIT_INGEST_TOKEN` com uma palavra-passe longa e aleatória.
 2. No repositório GitHub, abre **Settings → Secrets and variables → Actions** e cria estes dois secrets:

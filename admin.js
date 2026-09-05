@@ -11,15 +11,11 @@ let activeAutomationStatus = "new";
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 const dateTime = value => value ? new Intl.DateTimeFormat("pt-PT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(`${value.replace(" ", "T")}Z`)) : "—";
 const displayUrl = value => value ? `<a href="${escapeHtml(value)}" target="_blank" rel="noopener">Abrir fonte ↗</a>` : "<span>Sem link enviado</span>";
-
-function userRow(user) {
-  const owner = user.role === "owner";
-  const active = user.status === "active";
-  return `<div class="admin-user" data-email="${escapeHtml(user.email)}">
-    <div><b>${escapeHtml(user.email)}</b><small>${owner ? "Proprietário" : active ? "Autorizado" : "Acesso suspenso"}</small></div>
-    ${owner ? "" : `<button type="button" class="secondary" data-user-status="${active ? "disabled" : "active"}">${active ? "Suspender" : "Reativar"}</button>`}
-  </div>`;
-}
+const requireCurrentSession = response => {
+  if (response.status !== 401) return response;
+  window.location.replace("/painel");
+  throw new Error("A sessão terminou. A voltar ao início de sessão…");
+};
 
 function reportCard(item) {
   const title = item.event_name || "Evento sem nome";
@@ -80,6 +76,7 @@ async function loadReports() {
   reports.innerHTML = "";
   try {
     const response = await fetch(`/api/admin/feedback?status=${encodeURIComponent(activeCommunityStatus)}`, { headers: { Accept: "application/json" }, credentials: "same-origin" });
+    requireCurrentSession(response);
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar os pedidos.");
     if (!Array.isArray(result.items)) {
@@ -97,6 +94,7 @@ async function loadAutomationReviews() {
   reports.innerHTML = "";
   try {
     const response = await fetch(`/api/admin/automation-reviews?status=${encodeURIComponent(activeAutomationStatus)}`, { headers: { Accept: "application/json" }, credentials: "same-origin" });
+    requireCurrentSession(response);
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar a revisão automática.");
     if (!Array.isArray(result.items)) throw new Error("A revisão automática ainda não está configurada.");
@@ -149,6 +147,7 @@ reports.addEventListener("click", async event => {
   const automationButton = event.target.closest("[data-automation-status]");
   if (automationButton) {
     const card = automationButton.closest(".report");
+    if (["resolved", "ignored"].includes(automationButton.dataset.automationStatus) && !window.confirm("Confirmar esta decisão?")) return;
     const buttons = card.querySelectorAll("button");
     buttons.forEach(item => { item.disabled = true; });
     try {
@@ -164,6 +163,7 @@ reports.addEventListener("click", async event => {
           editorNote: card.querySelector('[name="editorNote"]')?.value
         })
       });
+      requireCurrentSession(response);
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "Não foi possível atualizar o sinal.");
       adminStatus.textContent = "Sinal atualizado.";
@@ -177,6 +177,7 @@ reports.addEventListener("click", async event => {
   const button = event.target.closest("[data-next-status]");
   if (!button) return;
   const card = button.closest(".report");
+  if (["published", "rejected", "closed"].includes(button.dataset.nextStatus) && !window.confirm("Confirmar esta decisão?")) return;
   const buttons = card.querySelectorAll("button");
   buttons.forEach(item => { item.disabled = true; });
   try {
@@ -198,6 +199,7 @@ reports.addEventListener("click", async event => {
         officialUrl: card.querySelector('[name="officialUrl"]')?.value
       })
     });
+    requireCurrentSession(response);
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível atualizar o pedido.");
     adminStatus.textContent = result.notification === "sent"

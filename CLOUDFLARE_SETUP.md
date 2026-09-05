@@ -45,7 +45,7 @@ O Worker aplica um limite real antes de validar o Turnstile: quatro envios de fo
 4. Seleciona o bucket e usa exatamente este nome de variável: `EVENT_POSTERS`.
 5. Faz novo deploy.
 
-No formulário, uma pessoa pode deixar um link do cartaz e/ou enviar uma imagem JPG, PNG ou WebP até 5 MB. A imagem enviada não aparece automaticamente no site: fica guardada com a sugestão até ser revista.
+No formulário, uma pessoa pode deixar um link do cartaz e/ou enviar uma imagem JPG, PNG ou WebP até 2 MB. A imagem enviada não aparece automaticamente no site: fica guardada com a sugestão até ser revista.
 
 ## 5. Proteger o formulário contra spam
 
@@ -62,30 +62,23 @@ Depois disto, o formulário fica ativo. Sem estas duas chaves, mostra uma mensag
 
 ## 6. Criar a área privada de revisão
 
-O projeto inclui `admin.html`, uma área que mostra sugestões, correções, links oficiais e cartazes enviados. Ela não deve ficar acessível ao público.
+O painel privado vive em `https://odesvio.pt/painel`. Os antigos endereços `/admin` e `admin.odesvio.pt` são apenas atalhos temporários para esse URL; não os uses nem os partilhes.
 
-1. Depois do primeiro deploy, abre **Cloudflare Zero Trust** → **Access** → **Applications** → **Add an application**.
-2. Cria uma aplicação para `https://<a-tua-morada-pages>/admin.html` e outra para `https://<a-tua-morada-pages>/api/admin/*`.
-3. Cria uma aplicação que protege `https://<a-tua-morada-pages>/admin.html` e `https://<a-tua-morada-pages>/api/admin/*`, usando o método de login de código por email. A aplicação deverá encaminhar todos os pedidos protegidos para o Worker.
-4. Não partilhes a morada `admin.html` nem a transformes num link público do site.
-
-As funções do painel também exigem o comprovativo do Cloudflare Access; sem essa proteção, recusam listar ou alterar pedidos.
-
-### Login e utilizadores do painel
-
-O Worker valida a assinatura do token do Cloudflare Access e só autoriza os e-mails ativos na tabela `admin_users`. Define estes três valores antes do deploy (não os guardes no repositório):
+O acesso é protegido diretamente pelo Worker com uma palavra-passe guardada como secret e uma sessão HTTP-only. Define estes três secrets antes do deploy (nunca no repositório):
 
 ```sh
 npx wrangler secret put ADMIN_OWNER_EMAIL
-npx wrangler secret put TEAM_DOMAIN
-npx wrangler secret put POLICY_AUD
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put ADMIN_SESSION_SECRET
 ```
 
-- `ADMIN_OWNER_EMAIL` é o teu e-mail e cria o único proprietário inicial;
-- `TEAM_DOMAIN` é `https://<equipa>.cloudflareaccess.com`;
-- `POLICY_AUD` é a etiqueta AUD da aplicação Access. Como o painel protege duas rotas (`/admin.html` e `/api/admin/*`), coloca as duas etiquetas separadas por vírgula.
+- `ADMIN_OWNER_EMAIL` identifica o proprietário inicial;
+- `ADMIN_PASSWORD` deve ser uma palavra-passe longa e exclusiva;
+- `ADMIN_SESSION_SECRET` deve ser um valor aleatório com, pelo menos, 32 caracteres.
 
-Para o painel poder gerir mais e-mails sem voltar ao Cloudflare, configura a política Access para permitir o método de login escolhido e deixa o Worker aplicar a lista estrita de `admin_users`. A validação de assinatura e de AUD continua a impedir que um token de outra aplicação seja usado aqui. O proprietário pode então autorizar, suspender e reativar e-mails no topo do painel.
+Executa também uma vez a migração `database/migrations/0007_admin_login_attempts.sql`. O Worker limita tentativas repetidas, guarda apenas um identificador técnico com hash e elimina esses registos após 24 horas.
+
+Se precisares de mudar a palavra-passe, atualiza `ADMIN_PASSWORD` **e** roda `ADMIN_SESSION_SECRET`; assim todas as sessões anteriores deixam de ser válidas de imediato. O painel atual é de proprietário único: não adiciones “editores” até existir um método de login individual para eles.
 
 ## 7. Rever contribuições
 
@@ -114,13 +107,9 @@ npx wrangler secret put OUTBOUND_EMAIL_FROM
 
 O segredo nunca entra no GitHub. Sem estes dois valores, o pedido continua a ser atualizado normalmente, mas o admin avisa que o e-mail ainda não está configurado.
 
-## 9. Email e domínio (fazemos depois)
+## 9. Email e domínio
 
-Quando comprares o domínio, criaremos pelo menos:
-
-- `ola@odesvio.pt` — contacto geral, correções e direitos de privacidade.
-
-Esses endereços podem encaminhar para a tua caixa de email atual. Antes de ativar os formulários para o público, atualiza `privacidade.html` com o nome legal do responsável e esse contacto de privacidade.
+O domínio público é `odesvio.pt` e o contacto público é `ola@odesvio.pt`. Antes de ativar o envio de notificações, confirma que esse endereço recebe email e termina a configuração do Resend descrita acima.
 
 ## 10. Ligar o domínio
 

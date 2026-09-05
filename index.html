@@ -67,7 +67,7 @@
       </section>
 
       <section id="agenda" class="browse-panel" aria-labelledby="browse-title">
-        <div class="browse-heading"><div><h2 id="browse-title">Encontra algo teu.</h2></div></div>
+        <div class="browse-heading"><div><h2 id="browse-title">Encontra algo teu.</h2><p id="result-count" class="result-count" aria-live="polite"></p></div></div>
         <nav class="agenda-shortcuts" aria-label="Atalhos rápidos da agenda">
           <button type="button" data-quick-pick="today">Hoje</button>
           <button type="button" data-quick-pick="weekend">Este fim de semana</button>
@@ -96,7 +96,7 @@
             </div>
           </div>
           <div class="location-bar" aria-label="Filtros de localização">
-            <div class="location-bar-heading"><span>Onde</span><button id="nearby-button" class="nearby-button" type="button">Usar a minha localização</button><small id="nearby-hint" aria-live="polite"></small></div>
+            <div class="location-bar-heading"><span>Onde</span><button id="nearby-button" class="nearby-button" type="button">Ver na minha região</button><small id="nearby-hint" aria-live="polite"></small></div>
             <div class="multi-filter-wrap">
               <button id="district-filter" class="multi-filter" type="button" aria-expanded="false"><span>Distrito</span><strong>Todos os distritos</strong><i>⌄</i></button>
               <div id="district-menu" class="multi-select-menu" role="group" aria-label="Selecionar distritos"></div>
@@ -125,7 +125,8 @@
       <section class="agenda" aria-label="Eventos encontrados">
         <div class="agenda-view-switch" role="group" aria-label="Modo de visualização"><button type="button" data-agenda-view="list" aria-pressed="true">Lista</button><button type="button" data-agenda-view="calendar" aria-pressed="false">Calendário</button></div>
         <div class="event-list-heading" aria-hidden="true"><span>Data</span><span>Evento</span><span>Formato</span><span>Bilhetes</span><span>Detalhes</span></div>
-        <div id="event-list" class="event-list" aria-live="polite"></div>
+        <div id="event-list" class="event-list"></div>
+        <div id="agenda-empty" class="empty-state" hidden><p>Não encontrámos eventos com esta combinação.</p><button type="button">Limpar filtros</button></div>
         <section id="calendar-view" class="calendar-view" aria-label="Calendário de eventos" hidden><header class="calendar-heading"><button id="calendar-previous" type="button" aria-label="Mês anterior">←</button><h3 id="calendar-label"></h3><button id="calendar-next" type="button" aria-label="Mês seguinte">→</button></header><div id="calendar-grid" class="calendar-grid"></div></section>
         <nav id="pagination" class="pagination" aria-label="Paginação de eventos" hidden>
           <button id="previous-page" type="button">← Anterior</button>

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import worker from "../src/worker.js";
+import worker, { sitemapEventIds } from "../src/worker.js";
+import { readFile } from "node:fs/promises";
 
 class Statement {
   constructor(sql) {
@@ -41,6 +42,17 @@ const env = {
 };
 const executionCtx = { waitUntil() {} };
 const fetchRoute = (url, init) => worker.fetch(new Request(url, init), env, executionCtx);
+
+const eventSource = await readFile(new URL("../events.js", import.meta.url), "utf8");
+const publicEventIds = sitemapEventIds(eventSource);
+assert.equal(publicEventIds.length, 263);
+assert.ok(publicEventIds.includes("kalorama-2026"));
+assert.ok(!publicEventIds.includes("kalorama-2026-28"));
+assert.ok(!publicEventIds.includes("under-doom-2026-09-25"));
+const currentSitemapIds = sitemapEventIds(eventSource, "2026-09-05");
+assert.equal(currentSitemapIds.length, 250);
+assert.ok(!currentSitemapIds.includes("kalorama-2026"));
+assert.ok(!currentSitemapIds.includes("iminente-2026-09-17"));
 
 for (const path of ["/", "/admin", "/admin/", "/admin.html"]) {
   const response = await fetchRoute(`https://admin.odesvio.pt${path}`, { redirect: "manual" });

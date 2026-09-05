@@ -78,6 +78,9 @@ export async function onRequestPost(context) {
   if (!hasContribution) {
     return json({ message: "Escreve uma nota, deixa um link ou envia um cartaz para revisão." }, 400);
   }
+  if (kind === "correction" && !submittedMessage) {
+    return json({ message: "Explica o que está errado ou o que devemos corrigir." }, 400);
+  }
   if (value("privacyAcknowledged") !== "on") {
     return json({ message: "Confirma que leste a Política de Privacidade." }, 400);
   }

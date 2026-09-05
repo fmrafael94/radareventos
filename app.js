@@ -2,6 +2,7 @@ const state = { search: "", date: "", price: "", ticketPrice: [], genre: [], are
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
+const agendaEmpty = document.querySelector("#agenda-empty");
 const pagination = document.querySelector("#pagination");
 const pageLabel = document.querySelector("#page-label");
 const previousPage = document.querySelector("#previous-page");
@@ -64,6 +65,16 @@ const maxPosterDimension = 2400;
 let turnstileConfigured = false;
 
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
+const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
+const safePublicUrl = value => {
+  try {
+    const url = new URL(String(value || ""), location.origin);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+};
+const searchableText = value => String(value || "").toLocaleLowerCase("pt-PT").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 const eventType = event => event.type || "Concerto";
 const eventDate = iso => new Date(`${iso}T12:00:00`);
 const dateParts = iso => {
@@ -270,7 +281,7 @@ const officialPosters = {
   ,"leiria-valter-lobo": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/68281920a2ffb5a337f30111b468bed6/copia_de_copia_de_20221202_valterlobo_0055_9327_sp_gabriela_mo.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/valter-lobo"]
   ,"leiria-juntos-musica": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/e915756fd241c0b63c02e925191f1670/imagem_002.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/juntos-pela-musica"]
   ,"leiria-mendelssohn": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/6232a78307be29f6f81cd2dd437cb0e6/zukerman_1600-992x558.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/ciclo-mendelssohn--integral-das-sinfonias-e-dos-concertos"]
-  ,"leiria-em-casa-amalia": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/c80de5605d5ae093c34710d994df6f39/em_casa_damalia_o_concerto_ao_vivo_358x329.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/em-casa-damalia--o-concerto-ao-vivo"]
+  ,"leiria-em-casa-amalia": ["https://teatrojlsilva.pt/storage/events/57gQygdyplUMj5Q3qqphf0J3JcPHYhlw54xoQXXd.png", "https://www.teatrojlsilva.pt/evento/em-casa-damalia-o-concerto-ao-vivo"]
   ,"leiria-diz-concerto": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/4182733be7371d2eb2ac35c685e1baf9/diz_concerto.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/diz--concerto"]
   ,"leiria-orquestra-jazz": ["https://leiriagenda.cm-leiria.pt/uploads/agenda/a6157e37db04afb5aa34f96b9830c870/rquestra_de_jazz.jpg", "https://leiriagenda.cm-leiria.pt/pt/agenda/orquestra-jazz-de-leiria-christian-mcbride"]
   ,"ccb-sul": ["https://www.ccb.pt/wp-content/uploads/2025/09/2000x940_SUL-1.jpg", "https://www.ccb.pt/evento/sul/"]
@@ -292,7 +303,9 @@ const officialPosters = {
   ,"transvision-lisboa": ["https://www.clap-box.com/images/TransvisionVamp.jpg", "https://www.clap-box.com/"]
   ,"transvision-porto": ["https://www.clap-box.com/images/TransvisionVamp.jpg", "https://www.clap-box.com/"]
   ,"evanescence": ["https://blueticketcdn.pt/imagesserver/E15722_36_PT.jpg", "https://www.wook.pt/bilheteira/eventos/evanescence-2026-world-tour/32884851"]
-  ,"moonspell-sintra-2026": ["https://www.moonspell.com/galeria/tours/b9e0a2e983aa6f22debdf7e90f0d0e79.png", "https://www.moonspell.com/tours/"]
+  ,"moonspell-sintra-2026": ["https://moonspell.com/galeria/images/Moonspell-Sintra-socialmedia-1920x1005.jpg", "https://moonspell.com/tours/-/live-in-sintra-81/"]
+  ,"portalegre-core-fest-set": ["https://static.wixstatic.com/media/10c2c4_9fcf0e3c7ab8469fb1b675d3ac36c439~mv2.jpg", "https://www.portalegrecore.com/portalegre-core-fest"]
+  ,"portalegre-core-fest-nov": ["https://static.wixstatic.com/media/10c2c4_9fcf0e3c7ab8469fb1b675d3ac36c439~mv2.jpg", "https://www.portalegrecore.com/portalegre-core-fest"]
   ,"semibreve-2026": ["https://www.gnration.pt/wp-content/uploads/2026/07/semibreve.jpg", "https://www.gnration.pt/event/2026/semibreve-4/"]
   ,"casa-capitao-abertura": ["https://casa-capitao.com/wp-content/uploads/2025/07/Untitled-1-5.jpg", "https://casa-capitao.com/evento/festa-de-abertura/"]
   ,"guimaraes-jazz-2026": ["https://img.bndlyr.com/nf1zldbhad/_assets/artemis_cjohn-abbott_2.jpeg?fit=cover&w=800&h=600", "https://www.ccvf.pt/en/detail-eventos/20261112-guimaraes-jazz-2026-geral/"]
@@ -449,7 +462,7 @@ const officialEventPages = {
   "leiria-valter-lobo": ["https://leiriagenda.cm-leiria.pt/pt/agenda/valter-lobo", null, "Leiriagenda — página do evento"],
   "leiria-juntos-musica": ["https://leiriagenda.cm-leiria.pt/pt/agenda/juntos-pela-musica", null, "Leiriagenda — página do evento"],
   "leiria-mendelssohn": ["https://leiriagenda.cm-leiria.pt/pt/agenda/ciclo-mendelssohn--integral-das-sinfonias-e-dos-concertos", null, "Leiriagenda — página do evento"],
-  "leiria-em-casa-amalia": ["https://leiriagenda.cm-leiria.pt/pt/agenda/em-casa-damalia--o-concerto-ao-vivo", null, "Leiriagenda — página do evento"],
+  "leiria-em-casa-amalia": ["https://www.teatrojlsilva.pt/evento/em-casa-damalia-o-concerto-ao-vivo", null, "Teatro José Lúcio da Silva — página oficial"],
   "leiria-diz-concerto": ["https://leiriagenda.cm-leiria.pt/pt/agenda/diz--concerto", null, "Leiriagenda — página do evento"],
   "leiria-orquestra-jazz": ["https://leiriagenda.cm-leiria.pt/pt/agenda/orquestra-jazz-de-leiria-christian-mcbride", null, "Leiriagenda — página do evento"],
   "ccb-sul": ["https://www.ccb.pt/evento/sul/", "https://ccb.bol.pt/Comprar/Bilhetes/162118/1741094/Sectores"],
@@ -463,7 +476,7 @@ const officialEventPages = {
   "ccb-cabaret-songs": ["https://www.ccb.pt/evento/cabaret-songs/", "https://www.bol.pt/Comprar/Bilhetes/180217/1956220/Sectores"],
   "ccb-bach-natal": ["https://www.ccb.pt/evento/concerto-de-natal-missa-em-si-menor-de-bach/", "https://www.bol.pt/Comprar/Bilhetes/180224/1956226/Sectores"],
   "evanescence": ["https://www.wook.pt/bilheteira/eventos/evanescence-2026-world-tour/32884851", "https://www.wook.pt/bilheteira/eventos/evanescence-2026-world-tour/32884851", "WOOK — página oficial do evento"],
-  "moonspell-sintra-2026": ["https://www.moonspell.com/tours/", "https://reservas-worten.byblueticket.pt/Eventos/15946", "Moonspell — página oficial / MEO Blueticket"],
+  "moonspell-sintra-2026": ["https://moonspell.com/tours/-/live-in-sintra-81/", "https://regaleira.byblueticket.pt/pt/event/15946/moonspell", "Moonspell — página oficial / Blueticket"],
   "theatrocirco-noite-branca-opera": ["https://theatrocirco.com/event/papa-est-mort/", "https://theatrocirco.com/event/papa-est-mort/", "Theatro Circo — página do evento"],
   "figuras-rui-massena": ["https://teatrodasfiguras.pt/agenda/parents-house-piano-solo", "https://teatrodasfiguras.pt/agenda/parents-house-piano-solo", "Teatro das Figuras — página do evento"],
   "figuras-pedro-abrunhosa": ["https://teatrodasfiguras.pt/agenda/pedro-abrunhosa", "https://teatrodasfiguras.pt/agenda/pedro-abrunhosa", "Teatro das Figuras — página do evento"],
@@ -567,7 +580,7 @@ const auditedEventDetails = {
   "leiria-valter-lobo": { tickets: "Bilheteira oficial ainda não localizada" },
   "leiria-juntos-musica": { tickets: "Bilheteira oficial ainda não localizada" },
   "leiria-mendelssohn": { tickets: "Bilheteira oficial ainda não localizada" },
-  "leiria-em-casa-amalia": { tickets: "Bilheteira oficial ainda não localizada" },
+  "leiria-em-casa-amalia": { tickets: "Bilheteira oficial ainda não localizada", availability: "Por confirmar", verifiedAt: "2026-09-05" },
   "leiria-diz-concerto": { tickets: "Bilheteira oficial ainda não localizada" },
   "leiria-orquestra-jazz": { tickets: "Bilheteira oficial ainda não localizada" }
   ,"faro-alternativo-2026": { tickets: "Informação e bilhetes para a edição 2026 por confirmar", availability: "Por confirmar" }
@@ -578,6 +591,7 @@ const auditedEventDetails = {
   ,"heavy-duty-fest-2026": { tickets: "35 € pré-venda · 40 € no dia", availability: "Disponível", lineup: "Medieval Steel · Elixir · Tarantula · Venator · Wicked Leather · Toxik Attack" }
   ,"portalegre-core-fest-set": { time: "Portas 21:00 · concertos 21:30", tickets: "5 € por dia · sócios: entrada gratuita", availability: "Disponível", lineup: "Henriette B · Destroyers of All · Incordian · António Freitas DJ" }
   ,"portalegre-core-fest-nov": { time: "Portas 21:00 · concertos 21:30", tickets: "5 € por dia · sócios: entrada gratuita", availability: "Disponível", lineup: "Alchemists · Empire of Disease · Vaneno · Black Flamingo DJ" }
+  ,"moonspell-sintra-2026": { tickets: "Esgotado", availability: "Esgotado", capacity: "Esgotado", salesCheckedAt: "2026-09-05", verifiedAt: "2026-09-05" }
 };
 EVENTS.forEach(event => {
   const poster = officialPosters[event.id];
@@ -801,14 +815,21 @@ const dateFilterRange = value => {
   const today = shiftedIso(0);
   if (value === "today") return [today, today];
   if (value === "week") return [today, shiftedIso(6)];
-  if (value === "month") return [today, shiftedIso(30)];
+  if (value === "month") {
+    const start = new Date();
+    start.setHours(12, 0, 0, 0);
+    start.setMonth(start.getMonth() + 1, 1);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 12);
+    return [localIso(start), localIso(end)];
+  }
   const date = new Date();
   date.setHours(12, 0, 0, 0);
   const weekday = date.getDay();
-  const untilFriday = weekday === 0 ? 5 : weekday <= 5 ? 5 - weekday : 0;
+  if (weekday === 0) return [today, today];
+  const untilFriday = weekday <= 5 ? 5 - weekday : 0;
   date.setDate(date.getDate() + untilFriday);
   const start = localIso(date);
-  date.setDate(date.getDate() + 2);
+  date.setDate(date.getDate() + (weekday === 6 ? 1 : 2));
   return [start, localIso(date)];
 };
 const overlapsRange = (event, range) => !range || (event.date <= range[1] && (event.endDate || event.date) >= range[0]);
@@ -838,8 +859,11 @@ const matchesHighlight = event => !state.highlight ||
   (state.highlight === "underground" && isUnderground(event)) ||
   (state.highlight === "sold" && availabilityLabel(event) === "Esgotado");
 const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl);
-const posterStyle = image => `style="--poster-image:url(&quot;${encodeURI(image)}&quot;)"`;
-const feedbackAction = event => `<button class="report-link feedback-open" type="button" data-feedback-kind="correction" data-feedback-event-id="${event.id}" data-feedback-event-title="${encodeURIComponent(event.title)}">Informação errada?</button>`;
+const posterStyle = image => {
+  const url = safePublicUrl(image);
+  return url ? `style="--poster-image:url(&quot;${escapeHtml(encodeURI(url))}&quot;)"` : "";
+};
+const feedbackAction = event => `<button class="report-link feedback-open" type="button" data-feedback-kind="correction" data-feedback-event-id="${escapeHtml(event.id)}" data-feedback-event-title="${escapeHtml(encodeURIComponent(event.title))}">Informação errada?</button>`;
 const eventUrl = event => `/evento/${encodeURIComponent(event.id)}`;
 const compactNearbyDate = event => {
   const [startDay, startMonth] = dateParts(event.date);
@@ -865,15 +889,14 @@ function renderNearby(latitude, longitude, area) {
     return;
   }
   nearbyRail.innerHTML = matches.map(({ event }) => `<article class="nearby-card">
-    <a href="${eventUrl(event)}" target="_blank" rel="noopener" aria-label="Abrir ${event.title}">
-      <span class="nearby-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy" decoding="async" /></span>
-      <span class="nearby-copy"><time datetime="${event.date}">${compactNearbyDate(event)}</time><h3>${event.title}</h3></span>
+    <a href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
+      <span class="nearby-poster" ${posterStyle(event.image)}><img src="${escapeHtml(safePublicUrl(event.image))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="lazy" decoding="async" /></span>
+      <span class="nearby-copy"><time datetime="${escapeHtml(event.date)}">${escapeHtml(compactNearbyDate(event))}</time><h3>${escapeHtml(event.title)}</h3></span>
     </a>
   </article>`).join("");
   nearbyRail.querySelectorAll("img").forEach(image => image.addEventListener("error", () => image.closest(".nearby-card")?.remove(), { once: true }));
   nearbyRail.scrollLeft = 0;
   syncNearbyControls();
-  nearbyEvents.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 }
 
 function syncNearbyControls() {
@@ -902,9 +925,9 @@ function renderFeatured() {
     .slice(0, 5);
   featuredRail.innerHTML = featured.length ? featured.map(event => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
-    return `<article class="featured-card" data-event-id="${event.id}">
-      <span class="featured-poster" ${posterStyle(event.image)}><img src="${event.image}" alt="Cartaz oficial de ${event.title}" loading="lazy" decoding="async"></span>
-      <div class="featured-copy"><p>${eventType(event)} · ${event.city}</p><h3>${event.title}</h3><time datetime="${event.date}">${date}</time><a href="${eventUrl(event)}" target="_blank" rel="noopener">Abrir evento <svg class="link-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></a></div>
+    return `<article class="featured-card" data-event-id="${escapeHtml(event.id)}">
+      <span class="featured-poster" ${posterStyle(event.image)}><img src="${escapeHtml(safePublicUrl(event.image))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="lazy" decoding="async"></span>
+      <div class="featured-copy"><p>${escapeHtml(eventType(event))} · ${escapeHtml(event.city)}</p><h3>${escapeHtml(event.title)}</h3><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><a href="${eventUrl(event)}">Abrir evento <svg class="link-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></a></div>
     </article>`;
   }).join("") : '<p class="featured-empty">Ainda estamos a confirmar os próximos eventos.</p>';
   featuredRail.querySelectorAll("img").forEach(image => image.addEventListener("error", () => {
@@ -946,24 +969,24 @@ function eventCard(event) {
   const endDay = event.endDate ? eventDate(event.endDate).getDate() : null;
   const availability = availabilityLabel(event);
   const statusClass = availability === "Esgotado" ? "sold" : availability === "Cancelado" ? "cancelled" : availability === "Bilhetes a confirmar" ? "pending" : "";
-  return `<article class="event-card" data-event-id="${event.id}">
-    <a class="event-card-link" href="${eventUrl(event)}" target="_blank" rel="noopener" aria-label="Abrir ${event.title} numa nova aba">
-      <time class="date-box" datetime="${event.date}"><b>${endDay ? `${day}–${endDay}` : day}</b><span>${month}</span></time>
-      <span class="event-main"><span class="event-title">${event.title}</span><span class="event-venue">${event.venue} · ${event.city}</span></span>
-      <span class="format">${eventType(event)}</span>
-      <span class="status ${statusClass}">${availability}</span>
+  return `<article class="event-card" data-event-id="${escapeHtml(event.id)}">
+    <a class="event-card-link" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
+      <time class="date-box" datetime="${escapeHtml(event.date)}"><b>${escapeHtml(endDay ? `${day}–${endDay}` : day)}</b><span>${escapeHtml(month)}</span></time>
+      <span class="event-main"><span class="event-title">${escapeHtml(event.title)}</span><span class="event-venue">${escapeHtml(event.venue)} · ${escapeHtml(event.city)}</span></span>
+      <span class="format">${escapeHtml(eventType(event))}</span>
+      <span class="status ${statusClass}">${escapeHtml(availability)}</span>
       <span class="chevron" aria-hidden="true"><svg viewBox="0 0 20 20" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></span>
     </a>
   </article>`;
 }
 
 function filteredEvents() {
-  const query = state.search.trim().toLocaleLowerCase("pt-PT");
+  const query = searchableText(state.search.trim());
   const selectedRange = dateFilterRange(state.date);
   const today = shiftedIso(0);
   return EVENTS.filter(event => !event.seriesId && isCurrentOrUpcoming(event, today)).filter(event => {
     const group = [event, ...festivalChildren(event)];
-    const text = group.flatMap(item => [item.title, item.venue, item.city, item.district, item.area, eventType(item), ...item.genres]).join(" ").toLocaleLowerCase("pt-PT");
+    const text = searchableText(group.flatMap(item => [item.title, item.venue, item.city, item.district, item.area, eventType(item), ...item.genres]).join(" "));
     return (!query || text.includes(query)) &&
       group.some(item => overlapsRange(item, selectedRange)) &&
       (!state.genre.length || group.some(item => item.genres.some(genre => state.genre.includes(genre)))) &&
@@ -1000,7 +1023,7 @@ function renderCalendar(matches) {
   const days = Array.from({ length: daysInMonth }, (_, index) => {
     const day = index + 1;
     const events = eventByDay.get(day) || [];
-    return `<article class="calendar-day"><time datetime="${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}">${day}</time>${events.slice(0, 3).map(event => `<a href="${eventUrl(event)}" target="_blank" rel="noopener">${event.title}</a>`).join("")}${events.length > 3 ? `<small>+${events.length - 3} eventos</small>` : ""}</article>`;
+    return `<article class="calendar-day"><time datetime="${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}">${day}</time>${events.slice(0, 3).map(event => `<a href="${eventUrl(event)}">${escapeHtml(event.title)}</a>`).join("")}${events.length > 3 ? `<small>+${events.length - 3} eventos</small>` : ""}</article>`;
   });
   calendarGrid.innerHTML = weekdayLabels.map(day => `<span class="calendar-weekday">${day}</span>`).join("") + blanks.join("") + days.join("");
   calendarGrid.setAttribute("aria-busy", "false");
@@ -1019,6 +1042,7 @@ function render() {
   document.querySelector(".event-list-heading").hidden = calendarMode;
   list.classList.remove("is-updating");
   list.innerHTML = visible.map(eventCard).join("");
+  agendaEmpty.hidden = calendarMode || matches.length > 0;
   window.requestAnimationFrame(() => list.classList.add("is-updating"));
   list.setAttribute("aria-busy", "false");
   if (calendarMode) renderCalendar(matches);
@@ -1051,10 +1075,10 @@ function resetAgendaSelection() {
 }
 function openFeaturedEvent(id) {
   const eventPage = `/evento/${encodeURIComponent(id)}`;
-  window.open(eventPage, "_blank", "noopener,noreferrer") || location.assign(eventPage);
+  location.assign(eventPage);
 }
 function renderSources() {
-  document.querySelector("#source-groups").innerHTML = SOURCE_GROUPS.map(group => `<article class="source-group"><h3>${group.title}</h3>${group.sources.map(([name, type, url]) => url ? `<a href="${url}" target="_blank" rel="noopener">${name}<span>${type}</span></a>` : `<p class="source-pending"><b>${name}</b><span>${type}</span></p>`).join("")}</article>`).join("");
+  document.querySelector("#source-groups").innerHTML = SOURCE_GROUPS.map(group => `<article class="source-group"><h3>${escapeHtml(group.title)}</h3>${group.sources.map(([name, type, url]) => url ? `<a href="${escapeHtml(safePublicUrl(url))}" target="_blank" rel="noopener">${escapeHtml(name)}<span>${escapeHtml(type)}</span></a>` : `<p class="source-pending"><b>${escapeHtml(name)}</b><span>${escapeHtml(type)}</span></p>`).join("")}</article>`).join("");
 }
 
 document.querySelector("#search").addEventListener("input", event => updateFilter("search", event.target.value));
@@ -1111,15 +1135,10 @@ function requestNearby() {
       const kilometres = distanceTo(coords.latitude, coords.longitude, latitude, longitude);
       return kilometres < closest[1] ? [name, kilometres] : closest;
     }, ["", Infinity]);
-    state.area = [area];
-    state.page = 1;
     nearbyPosition = { latitude: coords.latitude, longitude: coords.longitude, area };
-    refreshLocationOptions();
-    areaMultiFilter.sync();
-    nearbyHint.textContent = `A mostrar eventos perto de ${area}.`;
+    nearbyHint.textContent = `A mostrar os eventos mais próximos da região de ${area}.`;
     renderNearby(coords.latitude, coords.longitude, area);
     nearbyButton.disabled = false;
-    render();
   }, error => {
     nearbyHint.textContent = error?.code === 1
       ? "Autoriza a localização no browser para ver eventos perto de ti."
@@ -1132,6 +1151,10 @@ function requestNearby() {
 nearbyButton.addEventListener("click", requestNearby);
 previousPage.addEventListener("click", () => { state.page -= 1; render(); });
 nextPage.addEventListener("click", () => { state.page += 1; render(); });
+agendaEmpty.querySelector("button").addEventListener("click", () => {
+  resetAgendaSelection();
+  render();
+});
 document.addEventListener("click", event => {
   const dayTab = event.target.closest("[data-festival-day]");
   if (dayTab) {
@@ -1325,7 +1348,7 @@ feedbackForm.addEventListener("submit", async event => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
-    feedbackStatus.textContent = "Recebido. Avisamos-te por e-mail quando o pedido for analisado.";
+    feedbackStatus.textContent = "Recebido para revisão. Se deixaste um email, usamos esse contacto apenas para responder ao pedido.";
     feedbackForm.reset();
     feedbackSubmit.textContent = "Enviado ✓";
   } catch (error) {
@@ -1366,23 +1389,48 @@ async function loadApprovedCloudflareEvents() {
     if (!Array.isArray(result.items)) return;
     const overrides = Array.isArray(result.overrides) ? result.overrides : [];
     let changed = false;
+    const safePatchFields = new Set(["title", "tickets", "ticketUrl", "availability", "sourceUrl"]);
     overrides.forEach(override => {
       const existing = EVENTS.find(event => event.id === override.id);
       if (!existing || !override.patch || typeof override.patch !== "object") return;
-      Object.assign(existing, override.patch);
+      for (const [key, value] of Object.entries(override.patch)) {
+        if (!safePatchFields.has(key) || typeof value !== "string") continue;
+        existing[key] = key.endsWith("Url") ? safePublicUrl(value) : value.slice(0, key === "title" ? 180 : 1000);
+      }
       changed = true;
     });
     const known = new Set(EVENTS.map(event => event.id));
-    const additions = result.items.filter(event => event && event.id && event.title && event.date && event.sourceUrl && !known.has(event.id));
-    if (!additions.length && !changed) return;
-    additions.forEach(event => {
-      event.type = event.type || "Concerto";
-      event.genres = Array.isArray(event.genres) && event.genres.length ? event.genres : ["Outro"];
-      event.area = event.area || "A confirmar";
-      event.district = event.district || "A confirmar";
-      event.city = event.city || "A confirmar";
-      EVENTS.push(event);
+    const additions = result.items.flatMap(raw => {
+      if (!raw || typeof raw !== "object" || !/^[a-z0-9-]{1,180}$/i.test(raw.id || "") || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date || "") || known.has(raw.id)) return [];
+      const sourceUrl = safePublicUrl(raw.sourceUrl);
+      if (!sourceUrl || !String(raw.title || "").trim()) return [];
+      const string = (key, fallback = "") => typeof raw[key] === "string" ? raw[key].trim().slice(0, 1000) : fallback;
+      return [{
+        id: raw.id,
+        title: string("title").slice(0, 180),
+        date: raw.date,
+        endDate: /^\d{4}-\d{2}-\d{2}$/.test(raw.endDate || "") ? raw.endDate : undefined,
+        time: string("time", "Consultar organização"),
+        venue: string("venue", "Local a confirmar"),
+        city: string("city", "A confirmar"),
+        district: string("district", "A confirmar"),
+        area: string("area", "A confirmar"),
+        type: string("type", "Concerto"),
+        genres: Array.isArray(raw.genres) ? raw.genres.filter(value => typeof value === "string").map(value => value.slice(0, 80)).slice(0, 12) : ["Outro"],
+        age: string("age", "Consultar organização"),
+        tickets: string("tickets", "Bilheteira por confirmar"),
+        ticketUrl: safePublicUrl(raw.ticketUrl),
+        availability: string("availability", "Por confirmar"),
+        capacity: string("capacity", "Não divulgado"),
+        source: string("source", "Fonte oficial confirmada pelo Desvio"),
+        sourceUrl,
+        image: safePublicUrl(raw.image),
+        posterSourceUrl: safePublicUrl(raw.posterSourceUrl),
+        verifiedAt: /^\d{4}-\d{2}-\d{2}$/.test(raw.verifiedAt || "") ? raw.verifiedAt : ""
+      }];
     });
+    if (!additions.length && !changed) return;
+    additions.forEach(event => EVENTS.push(event));
     genreMultiFilter.refresh(EVENTS.flatMap(event => event.genres));
     typeMultiFilter.refresh(EVENTS.map(eventType));
     refreshLocationOptions();

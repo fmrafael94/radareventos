@@ -70,8 +70,12 @@ const programmeTitle = (event, title) => String(title || "")
   .replace(/^\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+de\s+\d{4})?\s*:\s*/i, "");
 const icsText = value => String(value || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 const icsDate = iso => String(iso || "").replaceAll("-", "");
+const todayIso = () => {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+};
 const similarEvents = event => (window.EVENTS || [])
-  .filter(item => item.id !== event.id && isMainAgendaEvent(item))
+  .filter(item => item.id !== event.id && isMainAgendaEvent(item) && (item.endDate || item.date) >= todayIso() && item.availability !== "Cancelado")
   .map(item => ({
     item,
     score: (item.city === event.city ? 8 : 0)
@@ -85,9 +89,23 @@ const similarEvents = event => (window.EVENTS || [])
 
 function calendarFile(event, shareUrl) {
   const endDate = event.endDate || event.date;
-  const dayAfterEnd = eventDate(endDate);
-  dayAfterEnd.setDate(dayAfterEnd.getDate() + 1);
-  const dtEnd = `${dayAfterEnd.getFullYear()}${String(dayAfterEnd.getMonth() + 1).padStart(2, "0")}${String(dayAfterEnd.getDate()).padStart(2, "0")}`;
+  const reliableTime = !event.endDate && String(event.time || "").match(/^([01]\d|2[0-3]):([0-5]\d)(?:\s*[–-]\s*([01]\d|2[0-3]):([0-5]\d))?/);
+  let dateLines;
+  if (reliableTime) {
+    const startMinutes = Number(reliableTime[1]) * 60 + Number(reliableTime[2]);
+    let endMinutes = reliableTime[3] ? Number(reliableTime[3]) * 60 + Number(reliableTime[4]) : startMinutes + 120;
+    if (endMinutes <= startMinutes) endMinutes += 24 * 60;
+    const startDate = eventDate(event.date);
+    const finishDate = eventDate(event.date);
+    finishDate.setDate(finishDate.getDate() + Math.floor(endMinutes / (24 * 60)));
+    const stamp = (date, minutes) => `${icsDate(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`)}T${String(Math.floor(minutes % (24 * 60) / 60)).padStart(2, "0")}${String(minutes % 60).padStart(2, "0")}00`;
+    dateLines = [`DTSTART;TZID=Europe/Lisbon:${stamp(startDate, startMinutes)}`, `DTEND;TZID=Europe/Lisbon:${stamp(finishDate, endMinutes)}`];
+  } else {
+    const dayAfterEnd = eventDate(endDate);
+    dayAfterEnd.setDate(dayAfterEnd.getDate() + 1);
+    const dtEnd = `${dayAfterEnd.getFullYear()}${String(dayAfterEnd.getMonth() + 1).padStart(2, "0")}${String(dayAfterEnd.getDate()).padStart(2, "0")}`;
+    dateLines = [`DTSTART;VALUE=DATE:${icsDate(event.date)}`, `DTEND;VALUE=DATE:${dtEnd}`];
+  }
   const calendar = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -95,8 +113,7 @@ function calendarFile(event, shareUrl) {
     "BEGIN:VEVENT",
     `UID:${icsText(`${event.id}@desvio.pt`)}`,
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`,
-    `DTSTART;VALUE=DATE:${icsDate(event.date)}`,
-    `DTEND;VALUE=DATE:${dtEnd}`,
+    ...dateLines,
     `SUMMARY:${icsText(event.title)}`,
     `LOCATION:${icsText(`${event.venue}, ${event.city}`)}`,
     `DESCRIPTION:${icsText(`Informação e fonte oficial: ${shareUrl}`)}`,
@@ -128,7 +145,7 @@ function render(event, poster) {
         ${programmeDates.length ? `<section class="festival-programme"><p class="event-eyebrow">Programação</p><div class="festival-tabs" role="tablist" aria-label="Dias do festival">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" id="programme-tab-${index}" data-programme-date="${itemDate}" aria-controls="programme-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? "0" : "-1"}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" role="tabpanel" id="programme-panel-${index}" aria-labelledby="programme-tab-${index}" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(programmeTitle(event, item.title))}</strong><small>${escapeHtml(item.venue)}</small></div></article>`).join("")}</div>`).join("")}</section>` : ""}
         <div class="event-actions">${ticketButton(event)}<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ${arrowIcon}</span><span class="event-action-short">Percurso ${arrowIcon}</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ${arrowIcon}</span><span class="event-action-short">Fonte ${arrowIcon}</span></a><button class="event-calendar" type="button" data-calendar><span class="event-action-full">Adicionar ao Calendário ${calendarIcon}</span><span class="event-action-short">Adicionar ao Calendário ${calendarIcon}</span></button></div>
       </div>
-      ${related.length ? `<section class="similar-events" aria-labelledby="similar-title"><p class="event-eyebrow">Pelo caminho</p><h2 id="similar-title">Também pode interessar.</h2><div>${related.map(item => `<a href="${eventUrl(item.id)}" target="_blank" rel="noopener"><time datetime="${escapeHtml(item.date)}">${escapeHtml(compactEventDate(item))}</time><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(`${item.venue} · ${item.city}`)}</span></a>`).join("")}</div></section>` : ""}
+      ${related.length ? `<section class="similar-events" aria-labelledby="similar-title"><p class="event-eyebrow">Pelo caminho</p><h2 id="similar-title">Também pode interessar.</h2><div>${related.map(item => `<a href="${eventUrl(item.id)}"><time datetime="${escapeHtml(item.date)}">${escapeHtml(compactEventDate(item))}</time><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(`${item.venue} · ${item.city}`)}</span></a>`).join("")}</div></section>` : ""}
       <p class="event-disclaimer">Confirma sempre horários e disponibilidade na fonte oficial.</p>
     </div>
     <aside class="event-sidebar">
