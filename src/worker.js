@@ -10,6 +10,9 @@ import { onRequestPost as postAuditReport } from "../functions/api/internal/audi
 
 const contextFor = (request, env) => ({ request, env });
 const canonicalHost = "odesvio.pt";
+// Keeping the Access session on its own hostname prevents the private-login
+// return from colliding with the public site's cookies (notably in Safari).
+const adminHost = "admin.odesvio.pt";
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
 const escapeXml = value => escapeHtml(value).replace(/\"/g, "&quot;");
 
@@ -174,6 +177,17 @@ export default {
       return secureResponse(new Response(null, { status: 308, headers: { Location: url.toString() } }));
     }
     const { pathname } = url;
+    const isAdminHost = url.hostname === adminHost;
+    const legacyAdminPath = ["/admin", "/admin/", "/admin.html"].includes(pathname);
+    // The public shortcut remains stable, but the protected session lives on a
+    // dedicated hostname. It is deliberately a redirect before any app logic.
+    if (!isAdminHost && legacyAdminPath && ["GET", "HEAD"].includes(request.method)) {
+      const destination = new URL(request.url);
+      destination.hostname = adminHost;
+      destination.pathname = "/";
+      destination.search = "";
+      return secureResponse(new Response(null, { status: 308, headers: { Location: destination.toString() } }));
+    }
     const context = contextFor(request, env);
     const origin = request.headers.get("Origin");
     if (origin && origin !== url.origin && request.method !== "GET" && request.method !== "HEAD") {
@@ -199,7 +213,9 @@ export default {
     if (pathname === "/api/admin/users" && request.method === "GET") return secureResponse(await getAdminUsers(context));
     if (pathname === "/api/admin/users" && request.method === "POST") return secureResponse(await postAdminUser(context));
     if (pathname === "/api/admin/users" && request.method === "PATCH") return secureResponse(await patchAdminUser(context));
-    const adminPage = ["/admin", "/admin/", "/admin.html"].includes(pathname);
+    const adminPage = isAdminHost
+      ? ["/", "/admin", "/admin/", "/admin.html"].includes(pathname)
+      : legacyAdminPath;
     if (adminPage && request.method === "GET") {
       const session = await requireAdmin(context);
       if (session.response) return secureResponse(new Response("Acesso privado necessário.", { status: session.response.status, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } }));
