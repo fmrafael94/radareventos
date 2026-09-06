@@ -16,7 +16,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Pin the current LTS line: scheduled jobs should not change runtime
+          # behaviour merely because GitHub updates ubuntu-latest.
+          node-version: 20
       - name: Fazer ronda das fontes conhecidas
         run: node scripts/watch-sources.mjs
       - name: Enviar fontes a explorar para o admin

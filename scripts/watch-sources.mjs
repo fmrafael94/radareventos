@@ -21,21 +21,50 @@ const requestedLimit = Number(process.argv.find(value => value.startsWith("--lim
 const selected = requestedLimit ? allSources.slice(0, requestedLimit) : allSources;
 
 const fingerprint = text => createHash("sha256")
-  .update(text.replace(/\s+/g, " ").replace(/https?:\/\/[^\s"']+/g, "URL").slice(0, 65536))
+  .update(text.replace(/\s+/g, " ").slice(0, 65_536))
   .digest("hex");
+
+const responseFingerprint = response => fingerprint([
+  response.url,
+  response.status,
+  response.headers.get("etag") || "",
+  response.headers.get("last-modified") || "",
+  response.headers.get("content-length") || ""
+].join("|"));
 
 async function check(sourceRecord) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
-    const response = await fetch(sourceRecord.url, {
+    // This health-check only needs HTTP metadata. Reading whole pages with a
+    // byte-range request caused an undici stream assertion on some origins in
+    // GitHub-hosted runners. HEAD also avoids downloading third-party content
+    // every day. A small GET fallback covers servers that do not implement it.
+    let response = await fetch(sourceRecord.url, {
+      method: "HEAD",
       redirect: "follow",
       signal: controller.signal,
-      headers: { "user-agent": "Desvio-Source-Watch/1.0 (+https://odesvio.pt)", range: "bytes=0-4096" }
+      headers: { "user-agent": "Desvio-Source-Watch/1.0 (+https://odesvio.pt)", accept: "text/html,application/xhtml+xml" }
     });
-    const body = response.ok ? await response.text() : "";
-    const title = body.match(/<title[^>]*>([\s\S]{0,240}?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() || "";
-    return { ...sourceRecord, status: response.status, ok: response.ok, finalUrl: response.url, fingerprint: response.ok ? fingerprint(body) : "", pageTitle: title };
+    if (response.status === 405 || response.status === 501) {
+      response = await fetch(sourceRecord.url, {
+        method: "GET",
+        redirect: "follow",
+        signal: controller.signal,
+        headers: { "user-agent": "Desvio-Source-Watch/1.0 (+https://odesvio.pt)", accept: "text/html,application/xhtml+xml" }
+      });
+      // Do not parse a body here: this is a metadata check, and sources can
+      // serve malformed/compressed bodies that should never crash the round.
+      await response.body?.cancel().catch(() => {});
+    }
+    return {
+      ...sourceRecord,
+      status: response.status,
+      ok: response.ok,
+      finalUrl: response.url,
+      fingerprint: response.ok ? responseFingerprint(response) : "",
+      pageTitle: ""
+    };
   } catch (error) {
     return { ...sourceRecord, status: null, ok: false, error: error.name === "AbortError" ? "timeout" : error.message };
   } finally {
