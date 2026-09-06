@@ -94,7 +94,10 @@ async function eventPage(request, env, id) {
     const description = [dateLabel, venue, city].filter(Boolean).join(" · ") || "Agenda de concertos, festivais e música ao vivo em Portugal.";
     // Serve the official artwork from our own origin. That makes social previews
     // and the native share sheet independent from a third-party image host.
-    const image = poster ? `${url.origin}/api/event-poster/${encodeURIComponent(id)}` : `${url.origin}/share-card.svg`;
+    // Bump this query version when proxy handling changes. Social crawlers and
+    // browsers must not keep an earlier generic fallback after an official
+    // poster becomes reachable.
+    const image = poster ? `${url.origin}/api/event-poster/${encodeURIComponent(id)}?v=2` : `${url.origin}/share-card.svg`;
     const eventSchema = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "MusicEvent",
@@ -192,7 +195,16 @@ async function eventPoster(request, env, id, executionCtx) {
     if (!/^https?:$/.test(posterUrl.protocol)) return shareFallback(request, env);
     const response = await fetch(posterUrl.toString());
     const type = response.headers.get("Content-Type") || "";
-    if (!response.ok || !type.startsWith("image/")) return shareFallback(request, env);
+    if (!response.ok || !type.startsWith("image/")) {
+      // Some official sites allow their public artwork in a browser but reject
+      // a server-to-server image fetch. Do not pretend that there is no
+      // poster: send the visitor or crawler to the same official file. This
+      // preserves the source's access policy instead of trying to bypass it.
+      return new Response(null, {
+        status: 302,
+        headers: { Location: posterUrl.toString(), "Cache-Control": "no-store" }
+      });
+    }
     const result = new Response(response.body, {
       headers: {
         "Content-Type": type,

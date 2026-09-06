@@ -130,7 +130,9 @@ function render(event, poster) {
   const compactDate = compactEventDate(event);
   const shareUrl = eventUrl(event.id);
   const shareText = `${event.title}\n${compactDate} · ${event.venue}, ${event.city}`;
-  const posterDownloadUrl = `${location.origin}/api/event-poster/${encodeURIComponent(event.id)}`;
+  // Keep the proxy cache separate from the earlier generic fallback used for
+  // official hosts that decline server-to-server image requests.
+  const posterDownloadUrl = `${location.origin}/api/event-poster/${encodeURIComponent(event.id)}?v=2`;
   const programme = festivalProgramme(event);
   const programmeDates = [...new Set(programme.map(item => item.date))];
   const related = similarEvents(event);
