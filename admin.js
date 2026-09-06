@@ -96,11 +96,13 @@ function reportCard(item) {
 function automationCard(item) {
   const isLink = item.category === "link";
   const result = item.result ? `<span class="automation-result">Resultado automático: ${escapeHtml(item.result)}</span>` : "";
+  const snapshot = item.event_snapshot ? `<p class="automation-event-context">Evento na agenda: <b>${escapeHtml(item.event_snapshot.title)}</b> · ${escapeHtml(item.event_snapshot.date)} · ${escapeHtml(item.event_snapshot.venue || item.event_snapshot.city || "local a confirmar")}</p>` : "";
+  const checklist = item.publication ? checklistMarkup(item.publication) : "";
   return `<article class="report automation-report" data-id="${escapeHtml(item.id)}">
     <div class="report-meta"><span class="kind">${isLink ? "Link para confirmar" : "Fonte a explorar"}</span><time>Visto: ${dateTime(item.last_seen_at)}</time></div>
     <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.detail || "Requer confirmação manual.")}</p></div></div>
     <dl><div><dt>${isLink ? "Página ou bilheteira" : "Fonte"}</dt><dd><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Abrir e confirmar ↗</a></dd></div><div><dt>Sinal</dt><dd>${result || "Sem resultado"}</dd></div></dl>
-    <p class="automation-note">Este sinal foi criado por uma ronda automática. Confirma a página diretamente antes de alterar ou publicar qualquer evento.</p>
+    ${snapshot}${checklist}<p class="automation-note">Este sinal foi criado por uma ronda automática. A checklist mostra o estado atual do evento; confirma a página diretamente antes de alterar a agenda.</p>
     <details class="automation-editor"><summary>Editar proposta</summary>
       <p>Esta proposta fica guardada aqui até decidires. Só deves aceitar depois de confirmares uma fonte oficial.</p>
       <label><span>${isLink ? "Evento" : "Nome da fonte"}</span><input name="proposalTitle" maxlength="240" value="${escapeHtml(item.proposal_title || item.title)}" /></label>
@@ -144,7 +146,13 @@ async function loadAutomationReviews() {
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar a revisão automática.");
     if (!Array.isArray(result.items)) throw new Error("A revisão automática ainda não está configurada.");
     reports.innerHTML = result.items.length ? result.items.map(automationCard).join("") : "<p class=\"empty-state\">Não há sinais neste estado.</p>";
-    adminStatus.textContent = result.items.length ? `${result.items.length} sinal${result.items.length === 1 ? "" : "s"} para rever.` : "";
+    const count = result.items.length;
+    const statusLabel = activeAutomationStatus === "resolved"
+      ? count === 1 ? "aceite" : "aceites"
+      : activeAutomationStatus === "ignored"
+        ? count === 1 ? "ignorado" : "ignorados"
+        : "para rever";
+    adminStatus.textContent = count ? `${count} sinal${count === 1 ? "" : "s"} ${statusLabel}.` : "";
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar a revisão automática.";
   }
@@ -158,7 +166,10 @@ function updateReviewControls() {
   const automated = activeView === "automation";
   communityFilters.hidden = automated;
   automationFilters.hidden = !automated;
-  automationBulkActions.hidden = !automated || !["new", "reviewing"].includes(activeAutomationStatus);
+  const acceptedAutomation = activeAutomationStatus === "resolved";
+  automationBulkActions.hidden = !automated || !["new", "reviewing", "resolved"].includes(activeAutomationStatus);
+  bulkResolve.hidden = acceptedAutomation;
+  bulkApply.textContent = acceptedAutomation ? "Aplicar todos os aceites à agenda" : "Aceitar e aplicar confirmados";
   communityBulkActions.hidden = automated || !["new", "reviewing"].includes(activeCommunityStatus);
   filterContext.textContent = automated
     ? "Resultados das rondas — confirma sempre na fonte oficial"

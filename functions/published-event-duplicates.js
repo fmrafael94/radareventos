@@ -18,24 +18,41 @@ export function staticCatalogueIdentities(source = "") {
       date: field(body, "date"),
       city: field(body, "city"),
       venue: field(body, "venue"),
-      sourceUrl: field(body, "sourceUrl")
+      sourceUrl: field(body, "sourceUrl"),
+      tickets: field(body, "tickets"),
+      image: field(body, "image")
     };
     if (candidate.title && candidate.date) records.push(candidate);
   }
   return records;
 }
 
-async function staticCatalogue(env, request) {
+export function posterFromAppSource(source = "", id = "") {
+  const escaped = String(id).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return source.match(new RegExp(`["']${escaped}["']\\s*:\\s*\\[\\s*["']([^"']+)`, "i"))?.[1] || "";
+}
+
+export async function staticCatalogueWithPosters(env, request) {
   if (!env.ASSETS) return [];
   try {
     const url = new URL(request.url);
-    url.pathname = "/events.js";
-    url.search = "";
-    const response = await env.ASSETS.fetch(new Request(url.toString()));
-    return response.ok ? staticCatalogueIdentities(await response.text()) : [];
+    const asset = path => {
+      const next = new URL(url);
+      next.pathname = path;
+      next.search = "";
+      return env.ASSETS.fetch(new Request(next.toString()));
+    };
+    const [eventsResponse, appResponse] = await Promise.all([asset("/events.js"), asset("/app.js")]);
+    if (!eventsResponse.ok) return [];
+    const [eventsSource, appSource] = await Promise.all([eventsResponse.text(), appResponse.ok ? appResponse.text() : ""]);
+    return staticCatalogueIdentities(eventsSource).map(event => ({ ...event, image: event.image || posterFromAppSource(appSource, event.id) }));
   } catch {
     return [];
   }
+}
+
+async function staticCatalogue(env, request) {
+  return staticCatalogueWithPosters(env, request);
 }
 
 async function registryCatalogue(db) {

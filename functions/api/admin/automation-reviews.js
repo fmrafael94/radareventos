@@ -1,6 +1,8 @@
 import { ensureAutomationReviewStore } from "../../automation-review-store.js";
 import { ensureEventStore } from "../../event-store.js";
 import { requireAdmin } from "../../admin-auth.js";
+import { publicationChecklist, samePublishedEvent } from "../../publication-readiness.js";
+import { staticCatalogueWithPosters } from "../../published-event-duplicates.js";
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 const statuses = new Set(["new", "reviewing", "resolved", "ignored"]);
@@ -30,6 +32,45 @@ async function applyAgendaPatch(db, item, proposalUrl, proposalTitle = "") {
   `).bind(item.event_id, JSON.stringify(patch), proposalUrl).run();
 }
 
+async function publicationSnapshots(context, items) {
+  const staticEvents = await staticCatalogueWithPosters(context.env, context.request);
+  let published = [];
+  try {
+    await ensureEventStore(context.env.EVENT_RADAR_DB);
+    const { results = [] } = await context.env.EVENT_RADAR_DB.prepare(`
+      SELECT id, payload_json FROM event_registry
+      WHERE publication_status = 'published' AND origin_kind = 'official_source' LIMIT 500
+    `).all();
+    published = results.flatMap(row => {
+      try { const event = JSON.parse(row.payload_json); return event?.id ? [event] : []; } catch { return []; }
+    });
+  } catch { /* Static catalogue remains a useful complete fallback. */ }
+  const catalogue = [...staticEvents, ...published];
+  const byId = new Map(catalogue.map(event => [event.id, event]));
+  return items.map(item => {
+    const event = byId.get(item.event_id);
+    if (!event) return item;
+    const values = {
+      title: event.title,
+      date: event.date,
+      city: event.city,
+      venue: event.venue,
+      image: event.image,
+      tickets: event.tickets,
+      sourceUrl: event.sourceUrl
+    };
+    const duplicates = catalogue
+      .filter(candidate => candidate.id !== event.id && samePublishedEvent(values, candidate))
+      .slice(0, 3)
+      .map(candidate => ({ id: candidate.id, title: candidate.title, date: candidate.date, city: candidate.city, venue: candidate.venue }));
+    return {
+      ...item,
+      event_snapshot: { id: event.id, title: event.title, date: event.date, city: event.city, venue: event.venue },
+      publication: { items: publicationChecklist(values), duplicate: duplicates, ready: !duplicates.length && publicationChecklist(values).every(check => check.present) }
+    };
+  });
+}
+
 export async function onRequestGet(context) {
   const session = await requireAdmin(context);
   if (session.response) return session.response;
@@ -44,7 +85,7 @@ export async function onRequestGet(context) {
     FROM automation_reviews WHERE status = ?
     ORDER BY last_seen_at DESC LIMIT 250
   `).bind(status).all();
-  return json({ items: results || [] });
+  return json({ items: await publicationSnapshots(context, results || []) });
 }
 
 export async function onRequestPatch(context) {
@@ -100,7 +141,7 @@ export async function onRequestPost(context) {
   try { payload = await context.request.json(); } catch { return json({ message: "Pedido inválido." }, 400); }
   const status = text(payload.status, 20);
   const action = text(payload.action, 32);
-  if (!new Set(["new", "reviewing"]).has(status) || !new Set(["resolve", "apply-confirmed"]).has(action)) {
+  if (!new Set(["new", "reviewing", "resolved"]).has(status) || !new Set(["resolve", "apply-confirmed"]).has(action) || (status === "resolved" && action !== "apply-confirmed")) {
     return json({ message: "Pedido inválido." }, 400);
   }
   await ensureAutomationReviewStore(context.env.EVENT_RADAR_DB);
