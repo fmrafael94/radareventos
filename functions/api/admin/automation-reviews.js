@@ -16,6 +16,26 @@ const validUrl = value => {
   }
 };
 
+function groupAutomationItems(items) {
+  const groups = new Map();
+  for (const item of items) {
+    // One event can legitimately produce separate checks for its official
+    // page, ticketing and poster. In the review UI those are one editorial
+    // subject, not three repeated events.
+    const key = item.event_id ? `event:${item.event_id}` : `source:${item.url}`;
+    const current = groups.get(key);
+    if (!current) {
+      groups.set(key, { ...item, group_ids: [item.id], signal_count: 1, target_kinds: item.target_kind ? [item.target_kind] : [] });
+      continue;
+    }
+    current.group_ids.push(item.id);
+    current.signal_count += 1;
+    if (item.target_kind && !current.target_kinds.includes(item.target_kind)) current.target_kinds.push(item.target_kind);
+    if (item.result && !String(current.result || "").includes(item.result)) current.result = [current.result, item.result].filter(Boolean).join(" · ");
+  }
+  return [...groups.values()];
+}
+
 async function applyAgendaPatch(db, item, proposalUrl, proposalTitle = "") {
   const patch = item.target_kind === "Bilheteira"
     ? { ticketUrl: proposalUrl, tickets: "Consultar bilheteira oficial", availability: "Bilhetes a confirmar" }
@@ -83,9 +103,11 @@ export async function onRequestGet(context) {
       proposal_url, editor_note, status,
       first_seen_at, last_seen_at, resolved_at
     FROM automation_reviews WHERE status = ?
-    ORDER BY last_seen_at DESC LIMIT 250
+    ORDER BY last_seen_at DESC LIMIT 1000
   `).bind(status).all();
-  return json({ items: await publicationSnapshots(context, results || []) });
+  const rawItems = results || [];
+  const items = groupAutomationItems(rawItems);
+  return json({ items: await publicationSnapshots(context, items), meta: { signals: rawItems.length, events: items.length } });
 }
 
 export async function onRequestPatch(context) {
@@ -147,7 +169,7 @@ export async function onRequestPost(context) {
   await ensureAutomationReviewStore(context.env.EVENT_RADAR_DB);
   const { results = [] } = await context.env.EVENT_RADAR_DB.prepare(`
     SELECT id, category, event_id, target_kind, title, proposal_title, proposal_url
-    FROM automation_reviews WHERE status = ? ORDER BY last_seen_at DESC LIMIT 250
+    FROM automation_reviews WHERE status = ? ORDER BY last_seen_at DESC LIMIT 1000
   `).bind(status).all();
   if (!results.length) return json({ ok: true, resolved: 0, applied: 0, skipped: 0 });
 

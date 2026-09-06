@@ -98,10 +98,12 @@ function automationCard(item) {
   const result = item.result ? `<span class="automation-result">Resultado automático: ${escapeHtml(item.result)}</span>` : "";
   const snapshot = item.event_snapshot ? `<p class="automation-event-context">Evento na agenda: <b>${escapeHtml(item.event_snapshot.title)}</b> · ${escapeHtml(item.event_snapshot.date)} · ${escapeHtml(item.event_snapshot.venue || item.event_snapshot.city || "local a confirmar")}</p>` : "";
   const checklist = item.publication ? checklistMarkup(item.publication) : "";
+  const grouped = Number(item.signal_count || 1) > 1;
+  const checks = grouped ? `<p class="automation-grouping"><b>${item.signal_count} verificações agrupadas</b><span>${escapeHtml((item.target_kinds || []).join(" · "))}</span></p>` : "";
   return `<article class="report automation-report" data-id="${escapeHtml(item.id)}">
-    <div class="report-meta"><span class="kind">${isLink ? "Link para confirmar" : "Fonte a explorar"}</span><time>Visto: ${dateTime(item.last_seen_at)}</time></div>
+    <div class="report-meta"><span class="kind">${grouped ? "Evento agrupado" : isLink ? "Link para confirmar" : "Fonte a explorar"}</span><time>Visto: ${dateTime(item.last_seen_at)}</time></div>
     <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.detail || "Requer confirmação manual.")}</p></div></div>
-    <dl><div><dt>${isLink ? "Página ou bilheteira" : "Fonte"}</dt><dd><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Abrir e confirmar ↗</a></dd></div><div><dt>Sinal</dt><dd>${result || "Sem resultado"}</dd></div></dl>
+    ${checks}<dl><div><dt>${isLink ? "Página ou bilheteira" : "Fonte"}</dt><dd><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Abrir e confirmar ↗</a></dd></div><div><dt>Sinal</dt><dd>${result || "Sem resultado"}</dd></div></dl>
     ${snapshot}${checklist}<p class="automation-note">Este sinal foi criado por uma ronda automática. A checklist mostra o estado atual do evento; confirma a página diretamente antes de alterar a agenda.</p>
     <details class="automation-editor"><summary>Editar proposta</summary>
       <p>Esta proposta fica guardada aqui até decidires. Só deves aceitar depois de confirmares uma fonte oficial.</p>
@@ -146,13 +148,14 @@ async function loadAutomationReviews() {
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar a revisão automática.");
     if (!Array.isArray(result.items)) throw new Error("A revisão automática ainda não está configurada.");
     reports.innerHTML = result.items.length ? result.items.map(automationCard).join("") : "<p class=\"empty-state\">Não há sinais neste estado.</p>";
-    const count = result.items.length;
+    const count = Number(result.meta?.signals || result.items.length);
+    const eventCount = Number(result.meta?.events || result.items.length);
     const statusLabel = activeAutomationStatus === "resolved"
       ? count === 1 ? "aceite" : "aceites"
       : activeAutomationStatus === "ignored"
         ? count === 1 ? "ignorado" : "ignorados"
         : "para rever";
-    adminStatus.textContent = count ? `${count} sinal${count === 1 ? "" : "s"} ${statusLabel}.` : "";
+    adminStatus.textContent = count ? `${eventCount} evento${eventCount === 1 ? "" : "s"} · ${count} sinal${count === 1 ? "" : "s"} ${statusLabel}.` : "";
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar a revisão automática.";
   }
