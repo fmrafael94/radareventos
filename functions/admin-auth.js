@@ -75,7 +75,10 @@ async function sendAdminCode(env, email, code) {
         html: `<!doctype html><html lang="pt-PT"><body style="margin:0;padding:28px;background:#f5f5ee;color:#17241c;font-family:Arial,sans-serif"><main style="max-width:560px;margin:0 auto;padding:30px;border-radius:16px;background:#fffdf8"><p style="margin:0 0 20px;color:#4d7149;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Desvio · área privada</p><h1 style="margin:0 0 16px;font-size:28px;line-height:1.05">O teu código de acesso</h1><p style="margin:0 0 20px;font-size:16px;line-height:1.55">Usa este código único para entrar no painel. Expira em 10 minutos.</p><p style="margin:0;padding:18px;border-radius:12px;background:#e8f0dc;color:#193f2d;font-size:30px;font-weight:700;letter-spacing:.18em;text-align:center">${code}</p><p style="margin:24px 0 0;color:#617064;font-size:14px;line-height:1.5">Se não pediste este código, podes ignorar este email.</p></main></body></html>`
       })
     });
-    return response.ok;
+    if (response.ok) return true;
+    const detail = (await response.text().catch(() => "")).replace(/\s+/g, " ").slice(0, 500);
+    console.error("Resend rejected admin login email", { status: response.status, detail });
+    return false;
   } catch {
     return false;
   }
