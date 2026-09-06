@@ -50,12 +50,13 @@
             <button type="button" data-status="new" aria-pressed="true">Por rever</button>
             <button type="button" data-status="reviewing" aria-pressed="false">Em análise</button>
             <button type="button" data-status="resolved" aria-pressed="false">Aceites</button>
+            <button type="button" data-status="applied" aria-pressed="false">Aplicados</button>
             <button type="button" data-status="ignored" aria-pressed="false">Ignorados</button>
           </nav>
         </div>
       </section>
       <section id="automation-bulk-actions" class="automation-bulk-actions" aria-label="Ações em lote para a ronda" hidden>
-        <p>Aplica ações apenas aos sinais visíveis neste estado.</p>
+        <p>Aplica apenas eventos completos e sem duplicados. Os restantes mantêm-se para revisão.</p>
         <div><button id="bulk-resolve" class="secondary" type="button">Marcar todos como revistos</button><button id="bulk-apply" type="button">Aceitar e aplicar confirmados</button></div>
       </section>
       <section id="community-bulk-actions" class="automation-bulk-actions" aria-label="Publicação em lote" hidden>

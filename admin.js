@@ -95,6 +95,8 @@ function reportCard(item) {
 
 function automationCard(item) {
   const isLink = item.category === "link";
+  const isApplied = Boolean(item.applied_at);
+  const readyToApply = item.publication?.ready === true;
   const result = item.result ? `<span class="automation-result">Resultado automático: ${escapeHtml(item.result)}</span>` : "";
   const snapshot = item.event_snapshot ? `<p class="automation-event-context">Evento na agenda: <b>${escapeHtml(item.event_snapshot.title)}</b> · ${escapeHtml(item.event_snapshot.date)} · ${escapeHtml(item.event_snapshot.venue || item.event_snapshot.city || "local a confirmar")}</p>` : "";
   const checklist = item.publication ? checklistMarkup(item.publication) : "";
@@ -111,11 +113,13 @@ function automationCard(item) {
       <label><span>${isLink ? "Link confirmado / substituto" : "Página a consultar"}</span><input name="proposalUrl" type="url" maxlength="1600" value="${escapeHtml(item.proposal_url || item.url)}" /></label>
       <label><span>Nota da revisão</span><textarea name="editorNote" maxlength="1500" placeholder="O que confirmaste? Que alteração deve ser feita?">${escapeHtml(item.editor_note || "")}</textarea></label>
     </details>
-    <div class="report-actions">
-      <button type="button" data-automation-status="reviewing">Guardar / em análise</button>
-      <button type="button" data-automation-status="resolved"${isLink ? " data-apply-to-agenda=\"true\"" : ""}>${isLink ? "Aceitar e aplicar à agenda" : "Aceitar após confirmar"}</button>
-      <button type="button" data-automation-status="ignored" class="secondary">Recusar</button>
-    </div>
+    ${isApplied
+      ? `<p class="automation-note"><b>Aplicado à agenda.</b> Esta verificação fica guardada como histórico; uma nova alteração na fonte volta a abrir a revisão.</p>`
+      : `<div class="report-actions">
+          <button type="button" data-automation-status="reviewing">Guardar / em análise</button>
+          <button type="button" data-automation-status="resolved"${isLink ? " data-apply-to-agenda=\"true\"" : ""}${isLink && !readyToApply ? " disabled title=\"Completa primeiro todos os pontos do checklist\"" : ""}>${isLink ? "Aceitar e aplicar à agenda" : "Aceitar após confirmar"}</button>
+          <button type="button" data-automation-status="ignored" class="secondary">Recusar</button>
+        </div>`}
   </article>`;
 }
 
@@ -152,6 +156,8 @@ async function loadAutomationReviews() {
     const eventCount = Number(result.meta?.events || result.items.length);
     const statusLabel = activeAutomationStatus === "resolved"
       ? count === 1 ? "aceite" : "aceites"
+      : activeAutomationStatus === "applied"
+        ? count === 1 ? "aplicado" : "aplicados"
       : activeAutomationStatus === "ignored"
         ? count === 1 ? "ignorado" : "ignorados"
         : "para rever";
@@ -172,7 +178,7 @@ function updateReviewControls() {
   const acceptedAutomation = activeAutomationStatus === "resolved";
   automationBulkActions.hidden = !automated || !["new", "reviewing", "resolved"].includes(activeAutomationStatus);
   bulkResolve.hidden = acceptedAutomation;
-  bulkApply.textContent = acceptedAutomation ? "Aplicar todos os aceites à agenda" : "Aceitar e aplicar confirmados";
+  bulkApply.textContent = acceptedAutomation ? "Aplicar todos os completos à agenda" : "Aceitar e aplicar completos";
   communityBulkActions.hidden = automated || !["new", "reviewing"].includes(activeCommunityStatus);
   filterContext.textContent = automated
     ? "Resultados das rondas — confirma sempre na fonte oficial"
@@ -287,7 +293,7 @@ document.querySelector("#refresh").addEventListener("click", loadActiveView);
 async function bulkReview(action) {
   const applying = action === "apply-confirmed";
   const confirmation = applying
-    ? "Aplicar todas as ligações já confirmadas à agenda? Só entram as que têm URL confirmado guardado; as restantes mantêm-se na fila."
+    ? "Aplicar todos os eventos completos à agenda? Só entram os que têm cartaz, data, local, cidade, bilheteira, fonte oficial e não são duplicados. Os restantes mantêm-se para revisão."
     : "Marcar todos os sinais visíveis como revistos? Isto não altera a agenda.";
   if (!window.confirm(confirmation)) return;
   [bulkResolve, bulkApply].forEach(button => { button.disabled = true; });
@@ -304,8 +310,13 @@ async function bulkReview(action) {
     if (!response.ok) throw new Error(result.message || "Não foi possível atualizar a ronda.");
     const appliedLabel = result.applied === 1 ? "ligação aplicada" : "ligações aplicadas";
     const resolvedLabel = result.resolved === 1 ? "sinal marcado como revisto" : "sinais marcados como revistos";
+    const blocked = [
+      result.incomplete ? `${result.incomplete} incompleto${result.incomplete === 1 ? "" : "s"}` : "",
+      result.duplicates ? `${result.duplicates} duplicado${result.duplicates === 1 ? "" : "s"}` : "",
+      result.skipped ? `${result.skipped} sem ligação confirmada` : ""
+    ].filter(Boolean);
     adminStatus.textContent = applying
-      ? `${result.applied || 0} ${appliedLabel}${result.skipped ? ` · ${result.skipped} mantida${result.skipped === 1 ? "" : "s"} para revisão` : ""}.`
+      ? `${result.applied || 0} ${appliedLabel}${blocked.length ? ` · ${blocked.join(" · ")} mantido${blocked.length === 1 && (result.incomplete || result.duplicates) === 1 ? "" : "s"} para revisão` : ""}.`
       : `${result.resolved || 0} ${resolvedLabel}.`;
     loadAutomationReviews();
   } catch (error) {

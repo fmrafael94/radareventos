@@ -22,7 +22,8 @@ export function ensureAutomationReviewStore(db) {
         status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'resolved', 'ignored')),
         first_seen_at TEXT NOT NULL,
         last_seen_at TEXT NOT NULL,
-        resolved_at TEXT
+        resolved_at TEXT,
+        applied_at TEXT
       )`),
       db.prepare("CREATE INDEX IF NOT EXISTS automation_reviews_status_seen ON automation_reviews(status, last_seen_at DESC)"),
       db.prepare(`CREATE TABLE IF NOT EXISTS source_watch_snapshots (
@@ -79,7 +80,8 @@ function upsertStatement(db, item) {
         WHEN automation_reviews.status = 'resolved' THEN 'new'
         ELSE automation_reviews.status
       END,
-      resolved_at = NULL
+      resolved_at = NULL,
+      applied_at = CASE WHEN automation_reviews.status = 'resolved' THEN NULL ELSE automation_reviews.applied_at END
   `).bind(
     id, item.key, item.category, item.eventId || null, item.targetKind || null, item.title,
     item.detail || null, item.url, item.result || null, item.title, item.url
