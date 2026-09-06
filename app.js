@@ -170,6 +170,8 @@ function isMainAgendaEvent(event) { return !event.seriesId && !programmeParent(e
 // so plainly.
 const officialPosters = {
   "festa-avante-2026": ["https://www.festadoavante.pcp.pt/images/imagecache/1800_850/7560.jpeg", "https://www.festadoavante.pcp.pt/2026/musica"],
+  "faro-alternativo-2026": ["https://www.theblackplanet.org/wp-content/uploads/2026/08/faro-alternativo-2026-473x620.jpg", "https://www.theblackplanet.org/faro-alternativo-2026/"],
+  "rockalhau-2026": ["https://www.theblackplanet.org/wp-content/uploads/2026/07/rockalhau.jpg", "https://www.theblackplanet.org/rockalhau-fest-2026/"],
   "festival-moscatel-douro-2026": ["https://cdn.visitportugal.com/sites/default/files/styles/large/public/mediateca/principal-8995.jpg?itok=Wh6jMhYM", "https://www.visitportugal.com/pt-pt/content/festival-do-moscatel-do-douro-4"],
   "festival-jovens-musicos-2026": ["https://antena2.rtp.pt/wp-content/uploads/2026/08/Concerto-Laureados-2025-PJM-Gulbenkian-18-09-2025.jpg", "https://antena2.rtp.pt/pjm/festival-jovens-musicos/em-contagem-decrescente-para-o-festival-jovens-musicos-2026/"],
   "festival-colombo-2026": ["https://www.madeira.gov.pt/Portals/55/Imagens/Eventos/FC%202026%20mupi-696x864-EN.png", "https://eventsmadeira.com/en/event/columbus-festival-2/"],

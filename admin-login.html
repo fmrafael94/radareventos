@@ -28,6 +28,9 @@
       button { border: 0; background: #193f2d; color: #fff; font-weight: 700; cursor: pointer; }
       button:disabled { opacity: .65; cursor: wait; }
       #message { min-height: 1.5em; margin: 4px 0 0; color: #a0392b; font-size: .92rem; }
+      .recovery { margin-top: 22px; color: #526058; font-size: .92rem; }
+      .recovery summary { cursor: pointer; font-weight: 700; }
+      .recovery form { margin-top: 14px; }
       footer { margin-top: 35px; font-size: .8rem; color: #6d796f; }
     </style>
   </head>
@@ -36,13 +39,16 @@
       <a class="brand" href="https://odesvio.pt/"><img src="https://odesvio.pt/brand/logo-icon.png" alt="" />Desvio</a>
       <p class="eyebrow">Área privada</p>
       <h1>Rever a agenda.</h1>
-      <p>Entra com a password da administração para gerir pedidos e correções.</p>
-      <form id="login-form">
-        <label for="password">Password<input id="password" name="password" type="password" autocomplete="current-password" required autofocus /></label>
-        <button type="submit">Entrar</button>
+      <p>Indica o email de administração e recebe um código único. Não tens de memorizar nem reutilizar uma password.</p>
+      <form id="code-form">
+        <label for="email">Email de administração<input id="email" name="email" type="email" autocomplete="email" required autofocus /></label>
+        <button id="request-code" type="button">Enviar código para o meu email</button>
+        <label id="code-field" for="code" hidden>Código de seis dígitos<input id="code" name="code" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" maxlength="6" /></label>
+        <button id="verify-code" type="submit" hidden>Entrar no painel</button>
         <p id="message" role="alert" aria-live="polite"></p>
       </form>
-      <footer>O acesso é registado e limitado contra tentativas repetidas.</footer>
+      <details class="recovery"><summary>Usar password de recuperação</summary><form id="password-form"><label for="password">Password<input id="password" name="password" type="password" autocomplete="current-password" /></label><button type="submit">Entrar com password</button></form></details>
+      <footer>O código expira em 10 minutos. A sessão deste dispositivo dura até 30 dias e pode ser terminada em “Sair”.</footer>
     </main>
     <script src="/admin-login.js"></script>
   </body>

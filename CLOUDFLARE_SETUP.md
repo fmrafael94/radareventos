@@ -64,7 +64,7 @@ Depois disto, o formulário fica ativo. Sem estas duas chaves, mostra uma mensag
 
 O painel privado vive em `https://odesvio.pt/painel`. Os antigos endereços `/admin` e `admin.odesvio.pt` são apenas atalhos temporários para esse URL; não os uses nem os partilhes.
 
-O acesso é protegido diretamente pelo Worker com uma palavra-passe guardada como secret e uma sessão HTTP-only. Define estes três secrets antes do deploy (nunca no repositório):
+O acesso normal é protegido diretamente pelo Worker com um código único enviado ao email do proprietário e uma sessão HTTP-only. Define estes três secrets antes do deploy (nunca no repositório):
 
 ```sh
 npx wrangler secret put ADMIN_OWNER_EMAIL
@@ -73,12 +73,12 @@ npx wrangler secret put ADMIN_SESSION_SECRET
 ```
 
 - `ADMIN_OWNER_EMAIL` identifica o proprietário inicial;
-- `ADMIN_PASSWORD` deve ser uma palavra-passe longa e exclusiva;
+- `ADMIN_PASSWORD` é uma palavra-passe longa e exclusiva de recuperação;
 - `ADMIN_SESSION_SECRET` deve ser um valor aleatório com, pelo menos, 32 caracteres.
 
-Executa também uma vez a migração `database/migrations/0007_admin_login_attempts.sql`. O Worker limita tentativas repetidas, guarda apenas um identificador técnico com hash e elimina esses registos após 24 horas.
+Executa também uma vez as migrações `database/migrations/0007_admin_login_attempts.sql` e `database/migrations/0010_admin_email_codes.sql`. O Worker limita tentativas repetidas, guarda apenas um identificador técnico com hash e elimina esses registos após 24 horas.
 
-Se precisares de mudar a palavra-passe, atualiza `ADMIN_PASSWORD` **e** roda `ADMIN_SESSION_SECRET`; assim todas as sessões anteriores deixam de ser válidas de imediato. O painel atual é de proprietário único: não adiciones “editores” até existir um método de login individual para eles.
+Com `RESEND_API_KEY` e `OUTBOUND_EMAIL_FROM` configurados, o painel pede o email de administração e envia um código válido por 10 minutos apenas se esse email corresponder a `ADMIN_OWNER_EMAIL`; a sessão segura do dispositivo dura até 30 dias. Se precisares de invalidar todas as sessões ou códigos pendentes, roda `ADMIN_SESSION_SECRET`. `ADMIN_PASSWORD` fica apenas como recuperação. O painel atual é de proprietário único: não adiciones “editores” até existir um método de login individual para eles.
 
 ## 7. Rever contribuições
 

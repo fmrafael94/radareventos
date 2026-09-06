@@ -81,6 +81,14 @@ assert.equal(head.status, 200);
 assert.equal(await head.text(), "");
 assert.equal(head.headers.get("Cache-Control"), "no-store");
 
+const unavailableEmailCode = await fetchRoute("https://odesvio.pt/api/admin/request-code", {
+  method: "POST",
+  headers: { "CF-Connecting-IP": "192.0.2.1", "Content-Type": "application/json" },
+  body: JSON.stringify({ email: env.ADMIN_OWNER_EMAIL })
+});
+assert.equal(unavailableEmailCode.status, 503);
+assert.match((await unavailableEmailCode.json()).message, /email/i);
+
 const login = await fetchRoute("https://odesvio.pt/api/admin/login", {
   method: "POST",
   headers: { "Content-Type": "application/json", "CF-Connecting-IP": "192.0.2.1" },

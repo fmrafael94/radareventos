@@ -4,7 +4,7 @@ import { onRequestPost as postFeedback } from "../functions/api/feedback.js";
 import { onRequestGet as getAdminFeedback, onRequestPatch as patchAdminFeedback, onRequestPostBulk as postAdminFeedbackBulk } from "../functions/api/admin/feedback.js";
 import { onRequestGet as getAutomationReviews, onRequestPatch as patchAutomationReview, onRequestPost as postAutomationReviewBulk } from "../functions/api/admin/automation-reviews.js";
 import { onRequestGet as getAdminPoster } from "../functions/api/admin/poster.js";
-import { clearAdminSession, loginWithAdminPassword, requireAdmin } from "../functions/admin-auth.js";
+import { clearAdminSession, loginWithAdminEmailCode, loginWithAdminPassword, requestAdminEmailCode, requireAdmin } from "../functions/admin-auth.js";
 import { onRequestPost as postAuditReport } from "../functions/api/internal/audit-report.js";
 import { ensureEventStore } from "../functions/event-store.js";
 
@@ -316,6 +316,24 @@ export default {
       if (login.response) return secureResponse(login.response);
       const response = Response.json({ ok: true }, { headers: { "Cache-Control": "no-store", "Set-Cookie": login.cookie } });
       return secureResponse(response);
+    }
+    if (pathname === "/api/admin/request-code" && request.method === "POST") {
+      const rawBody = await request.text();
+      if (rawBody.length > 4_096) return secureResponse(Response.json({ message: "Pedido demasiado grande." }, { status: 413, headers: { "Cache-Control": "no-store" } }));
+      let body = {};
+      try { body = JSON.parse(rawBody); } catch { /* handled as an empty email */ }
+      const result = await requestAdminEmailCode(context, typeof body.email === "string" ? body.email : "");
+      if (result.response) return secureResponse(result.response);
+      return secureResponse(Response.json({ ok: true, expiresIn: result.expiresIn }, { headers: { "Cache-Control": "no-store" } }));
+    }
+    if (pathname === "/api/admin/verify-code" && request.method === "POST") {
+      const rawBody = await request.text();
+      if (rawBody.length > 4_096) return secureResponse(Response.json({ message: "Pedido demasiado grande." }, { status: 413, headers: { "Cache-Control": "no-store" } }));
+      let body = {};
+      try { body = JSON.parse(rawBody); } catch { /* handled as an empty code */ }
+      const login = await loginWithAdminEmailCode(context, typeof body.email === "string" ? body.email : "", typeof body.code === "string" ? body.code : "");
+      if (login.response) return secureResponse(login.response);
+      return secureResponse(Response.json({ ok: true }, { headers: { "Cache-Control": "no-store", "Set-Cookie": login.cookie } }));
     }
     if (pathname === "/api/admin/logout" && request.method === "POST") {
       return secureResponse(new Response(null, { status: 204, headers: { "Cache-Control": "no-store", "Set-Cookie": clearAdminSession() } }));
