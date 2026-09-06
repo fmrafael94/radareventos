@@ -15,8 +15,14 @@
     }
   },
   "vars": {
-    "TURNSTILE_SITEKEY": "0x4AAAAAAEb5SRCl-A_PcNBx"
+    "TURNSTILE_SITEKEY": "0x4AAAAAAEb5SRCl-A_PcNBx",
+    "OUTBOUND_EMAIL_FROM": "Desvio <ola@odesvio.pt>"
   },
+  "routes": [
+    { "pattern": "odesvio.pt", "custom_domain": true },
+    { "pattern": "www.odesvio.pt", "custom_domain": true },
+    { "pattern": "admin.odesvio.pt", "custom_domain": true }
+  ],
   "d1_databases": [
     {
       "binding": "EVENT_RADAR_DB",
