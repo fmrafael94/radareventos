@@ -1,7 +1,7 @@
 import { ensureAutomationReviewStore } from "../../automation-review-store.js";
 import { ensureEventStore } from "../../event-store.js";
 import { requireAdmin } from "../../admin-auth.js";
-import { publicationChecklist, samePublishedEvent } from "../../publication-readiness.js";
+import { publicationChecklist, reviewValuesFrom, samePublishedEvent } from "../../publication-readiness.js";
 import { staticCatalogueWithPosters } from "../../published-event-duplicates.js";
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
@@ -39,11 +39,46 @@ function groupAutomationItems(items) {
   return [...groups.values()];
 }
 
-async function applyAgendaPatch(db, item, proposalUrl, proposalTitle = "") {
-  const patch = item.target_kind === "Bilheteira"
-    ? { ticketUrl: proposalUrl, tickets: "Consultar bilheteira oficial", availability: "Bilhetes a confirmar" }
-    : { sourceUrl: proposalUrl };
-  if (proposalTitle && proposalTitle !== item.title) patch.title = proposalTitle;
+function eventFallback(event = {}) {
+  return {
+    event_name: event.title,
+    event_date: event.date,
+    end_date: event.endDate,
+    city: event.city,
+    venue: event.venue,
+    tickets: event.tickets,
+    ticket_url: event.ticketUrl,
+    poster_url: event.image,
+    official_url: event.sourceUrl
+  };
+}
+
+function editorialValues(event, reviewData = {}) {
+  return reviewValuesFrom(reviewData, eventFallback(event));
+}
+
+function availabilityFromTickets(tickets) {
+  if (/entrada\s+(?:livre|gratuita)/i.test(tickets)) return "Entrada livre";
+  if (/confirmar|anunciar/i.test(tickets)) return "Por confirmar";
+  return "Disponível";
+}
+
+async function applyAgendaPatch(db, item, values, proposalUrl = "") {
+  const ticketUrl = values.ticketUrl || (item.target_kind === "Bilheteira" ? proposalUrl : "");
+  const sourceUrl = values.officialUrl || (item.target_kind !== "Bilheteira" ? proposalUrl : "");
+  const patch = {
+    title: values.eventName,
+    date: values.eventDate,
+    city: values.city,
+    venue: values.venue,
+    tickets: values.tickets,
+    image: values.posterUrl,
+    sourceUrl,
+    posterSourceUrl: sourceUrl,
+    availability: availabilityFromTickets(values.tickets)
+  };
+  if (values.eventEndDate) patch.endDate = values.eventEndDate;
+  if (ticketUrl) patch.ticketUrl = ticketUrl;
   await db.prepare(`
     INSERT INTO event_overrides (event_id, patch_json, source_url, verified_at, updated_at)
     VALUES (?, ?, ?, date('now'), datetime('now'))
@@ -52,12 +87,13 @@ async function applyAgendaPatch(db, item, proposalUrl, proposalTitle = "") {
       source_url = excluded.source_url,
       verified_at = date('now'),
       updated_at = datetime('now')
-  `).bind(item.event_id, JSON.stringify(patch), proposalUrl).run();
+  `).bind(item.event_id, JSON.stringify(patch), sourceUrl || proposalUrl || null).run();
 }
 
 async function eventCatalogue(context) {
   const staticEvents = await staticCatalogueWithPosters(context.env, context.request);
   let published = [];
+  let overrides = new Map();
   try {
     await ensureEventStore(context.env.EVENT_RADAR_DB);
     const { results = [] } = await context.env.EVENT_RADAR_DB.prepare(`
@@ -67,21 +103,31 @@ async function eventCatalogue(context) {
     published = results.flatMap(row => {
       try { const event = JSON.parse(row.payload_json); return event?.id ? [event] : []; } catch { return []; }
     });
+    const { results: overrideRows = [] } = await context.env.EVENT_RADAR_DB.prepare(`
+      SELECT event_id, patch_json FROM event_overrides LIMIT 500
+    `).all();
+    overrides = new Map(overrideRows.flatMap(row => {
+      try {
+        const patch = JSON.parse(row.patch_json);
+        return row.event_id && patch && typeof patch === "object" ? [[row.event_id, patch]] : [];
+      } catch { return []; }
+    }));
   } catch { /* Static catalogue remains a useful complete fallback. */ }
-  return [...staticEvents, ...published];
+  return [...staticEvents, ...published].map(event => ({ ...event, ...(overrides.get(event.id) || {}) }));
 }
 
 function publicationForItem(catalogue, item) {
   const event = catalogue.find(candidate => candidate.id === item.event_id);
   if (!event) return null;
+  const review = editorialValues(event, item.review_data);
   const values = {
-    title: event.title,
-    date: event.date,
-    city: event.city,
-    venue: event.venue,
-    image: event.image,
-    tickets: event.tickets,
-    sourceUrl: event.sourceUrl
+    title: review.eventName,
+    date: review.eventDate,
+    city: review.city,
+    venue: review.venue,
+    image: review.posterUrl,
+    tickets: review.tickets,
+    sourceUrl: review.officialUrl
   };
   const duplicates = catalogue
     .filter(candidate => candidate.id !== event.id && samePublishedEvent(values, candidate))
@@ -89,7 +135,8 @@ function publicationForItem(catalogue, item) {
     .map(candidate => ({ id: candidate.id, title: candidate.title, date: candidate.date, city: candidate.city, venue: candidate.venue }));
   const items = publicationChecklist(values);
   return {
-    event_snapshot: { id: event.id, title: event.title, date: event.date, city: event.city, venue: event.venue },
+    event_snapshot: { id: event.id, title: review.eventName, date: review.eventDate, city: review.city, venue: review.venue },
+    review_data: review,
     publication: { items, duplicate: duplicates, ready: !duplicates.length && items.every(check => check.present) }
   };
 }
@@ -105,6 +152,37 @@ async function publicationSnapshots(context, items) {
     };
     return values;
   });
+}
+
+async function reviewDataByEvent(db, eventIds) {
+  const ids = [...new Set(eventIds.filter(Boolean))];
+  if (!ids.length) return new Map();
+  const placeholders = ids.map(() => "?").join(", ");
+  const { results = [] } = await db.prepare(`
+    SELECT event_id, review_data_json FROM automation_event_edits
+    WHERE event_id IN (${placeholders})
+  `).bind(...ids).all();
+  return new Map(results.flatMap(row => {
+    try {
+      const values = JSON.parse(row.review_data_json);
+      return row.event_id && values && typeof values === "object" ? [[row.event_id, values]] : [];
+    } catch { return []; }
+  }));
+}
+
+async function saveReviewData(db, eventId, values) {
+  if (!eventId) return;
+  await db.prepare(`
+    INSERT INTO automation_event_edits (event_id, review_data_json, updated_at)
+    VALUES (?, ?, datetime('now'))
+    ON CONFLICT(event_id) DO UPDATE SET
+      review_data_json = excluded.review_data_json,
+      updated_at = datetime('now')
+  `).bind(eventId, JSON.stringify(values)).run();
+}
+
+function itemWithReviewData(item, edits) {
+  return { ...item, review_data: edits.get(item.event_id) || {} };
 }
 
 function agendaEligibility(catalogue, item) {
@@ -146,7 +224,8 @@ export async function onRequestGet(context) {
   `);
   const { results } = await (where === "status = ?" ? statement.bind(status) : statement).all();
   const rawItems = results || [];
-  const items = groupAutomationItems(rawItems);
+  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, rawItems.map(item => item.event_id));
+  const items = groupAutomationItems(rawItems).map(item => itemWithReviewData(item, edits));
   return json({ items: await publicationSnapshots(context, items), meta: { signals: rawItems.length, events: items.length } });
 }
 
@@ -163,19 +242,32 @@ export async function onRequestPatch(context) {
   const proposalUrl = validUrl(text(payload.proposalUrl, 1600));
   if (payload.proposalUrl && !proposalUrl) return json({ message: "Indica uma ligação válida, começada por https://." }, 400);
   const applyToAgenda = payload.applyToAgenda === true;
+  const hasEditorialPayload = ["eventName", "eventDate", "eventEndDate", "city", "venue", "tickets", "ticketUrl", "posterUrl", "officialUrl"]
+    .some(key => Object.hasOwn(payload, key));
   await ensureAutomationReviewStore(context.env.EVENT_RADAR_DB);
   const item = await context.env.EVENT_RADAR_DB.prepare(`
     SELECT category, event_id, target_kind, title, proposal_url FROM automation_reviews WHERE id = ?
   `).bind(id).first();
   if (!item) return json({ message: "Item não encontrado." }, 404);
+  const catalogue = await eventCatalogue(context);
+  const event = catalogue.find(candidate => candidate.id === item.event_id);
+  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, [item.event_id]);
+  const savedReview = edits.get(item.event_id) || {};
+  const reviewInput = hasEditorialPayload
+    ? { ...savedReview, eventName: payload.eventName, eventDate: payload.eventDate, eventEndDate: payload.eventEndDate, city: payload.city, venue: payload.venue, tickets: payload.tickets, ticketUrl: payload.ticketUrl, posterUrl: payload.posterUrl, officialUrl: payload.officialUrl }
+    : savedReview;
+  const values = event ? editorialValues(event, reviewInput) : null;
+  if (hasEditorialPayload && !event) return json({ message: "Só é possível completar dados num sinal associado a um evento existente." }, 400);
+  if (hasEditorialPayload && values) await saveReviewData(context.env.EVENT_RADAR_DB, item.event_id, values);
   if (applyToAgenda) {
-    if (item.category !== "link" || !item.event_id || !proposalUrl) {
-      return json({ message: "Para aplicar à agenda, confirma primeiro um link direto e válido para este evento." }, 400);
+    const confirmedUrl = proposalUrl || values?.officialUrl || "";
+    if (item.category !== "link" || !item.event_id || !confirmedUrl || !values) {
+      return json({ message: "Para aplicar à agenda, confirma primeiro os dados do evento e uma página oficial válida." }, 400);
     }
-    const eligibility = agendaEligibility(await eventCatalogue(context), item);
+    const eligibility = agendaEligibility(catalogue, { ...item, review_data: values });
     if (!eligibility.eligible) return json({ message: `Este evento não pode entrar ainda na agenda. ${eligibility.reason}` }, 400);
     await ensureEventStore(context.env.EVENT_RADAR_DB);
-    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, proposalUrl, proposalTitle);
+    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, values, confirmedUrl);
   }
   const result = await context.env.EVENT_RADAR_DB.prepare(`
     UPDATE automation_reviews
@@ -232,28 +324,31 @@ export async function onRequestPost(context) {
   }
 
   const catalogue = await eventCatalogue(context);
+  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, results.map(item => item.event_id));
   let incomplete = 0;
   let duplicates = 0;
   let skipped = 0;
   const eligible = results.flatMap(item => {
-    const proposalUrl = validUrl(item.proposal_url || "");
+    const event = catalogue.find(candidate => candidate.id === item.event_id);
+    const values = event ? editorialValues(event, edits.get(item.event_id) || {}) : null;
+    const proposalUrl = validUrl(item.proposal_url || "") || values?.officialUrl || "";
     if (!proposalUrl) {
       skipped += 1;
       return [];
     }
-    const eligibility = agendaEligibility(catalogue, item);
+    const eligibility = agendaEligibility(catalogue, { ...item, review_data: values || {} });
     if (!eligibility.eligible) {
       if (eligibility.duplicate) duplicates += 1;
       else if (eligibility.incomplete) incomplete += 1;
       else skipped += 1;
       return [];
     }
-    return [{ item, proposalUrl }];
+    return [{ item, proposalUrl, values }];
   });
   if (!eligible.length) return json({ ok: true, resolved: 0, applied: 0, incomplete, duplicates, skipped });
   await ensureEventStore(context.env.EVENT_RADAR_DB);
-  for (const { item, proposalUrl } of eligible) {
-    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, proposalUrl, text(item.proposal_title, 240));
+  for (const { item, proposalUrl, values } of eligible) {
+    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, values, proposalUrl);
   }
   await context.env.EVENT_RADAR_DB.batch(eligible.map(({ item }) => context.env.EVENT_RADAR_DB.prepare(`
     UPDATE automation_reviews

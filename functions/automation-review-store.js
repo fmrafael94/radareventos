@@ -26,6 +26,15 @@ export function ensureAutomationReviewStore(db) {
         applied_at TEXT
       )`),
       db.prepare("CREATE INDEX IF NOT EXISTS automation_reviews_status_seen ON automation_reviews(status, last_seen_at DESC)"),
+      // Editorial additions belong to the event, rather than to an individual
+      // automated signal. A single event can have one failed ticket check and
+      // one failed poster check; the fields completed by an editor must be
+      // shared by both cards.
+      db.prepare(`CREATE TABLE IF NOT EXISTS automation_event_edits (
+        event_id TEXT PRIMARY KEY,
+        review_data_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`),
       db.prepare(`CREATE TABLE IF NOT EXISTS source_watch_snapshots (
         source_url TEXT PRIMARY KEY,
         fingerprint TEXT NOT NULL,

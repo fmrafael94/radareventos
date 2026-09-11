@@ -50,11 +50,14 @@ function syncPublicationChecklist(card) {
     row.querySelector("b").textContent = value ? "Existe" : "Em falta";
   });
   if (checklist.dataset.knownDuplicate === "true") complete = false;
-  const publish = card.querySelector('[data-next-status="published"]');
-  if (publish) {
-    publish.disabled = !complete;
-    publish.title = complete ? "" : "Completa todos os pontos obrigatórios antes de publicar.";
-  }
+  const gatedActions = [
+    card.querySelector('[data-next-status="published"]'),
+    card.querySelector('[data-apply-to-agenda="true"]')
+  ].filter(Boolean);
+  gatedActions.forEach(action => {
+    action.disabled = !complete;
+    action.title = complete ? "" : "Completa todos os pontos obrigatórios antes de publicar.";
+  });
   return complete;
 }
 
@@ -97,6 +100,9 @@ function automationCard(item) {
   const isLink = item.category === "link";
   const isApplied = Boolean(item.applied_at);
   const readyToApply = item.publication?.ready === true;
+  const editableEvent = Boolean(item.event_snapshot);
+  const review = item.review_data || {};
+  const values = key => escapeHtml(review[key] || "");
   const result = item.result ? `<span class="automation-result">Resultado automático: ${escapeHtml(item.result)}</span>` : "";
   const snapshot = item.event_snapshot ? `<p class="automation-event-context">Evento na agenda: <b>${escapeHtml(item.event_snapshot.title)}</b> · ${escapeHtml(item.event_snapshot.date)} · ${escapeHtml(item.event_snapshot.venue || item.event_snapshot.city || "local a confirmar")}</p>` : "";
   const checklist = item.publication ? checklistMarkup(item.publication) : "";
@@ -107,6 +113,20 @@ function automationCard(item) {
     <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.detail || "Requer confirmação manual.")}</p></div></div>
     ${checks}<dl><div><dt>${isLink ? "Página ou bilheteira" : "Fonte"}</dt><dd><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Abrir e confirmar ↗</a></dd></div><div><dt>Sinal</dt><dd>${result || "Sem resultado"}</dd></div></dl>
     ${snapshot}${checklist}<p class="automation-note">Este sinal foi criado por uma ronda automática. A checklist mostra o estado atual do evento; confirma a página diretamente antes de alterar a agenda.</p>
+    ${editableEvent ? `<details class="automation-editor event-editor"><summary>Completar dados do evento</summary>
+      <p>Preenche o que falta. Os dados ficam guardados para este evento e só entram na agenda pública quando a checklist estiver completa e o aceitares.</p>
+      <fieldset class="event-review-fields"><legend>Dados para publicação</legend>
+        <label><span>Título</span><input name="eventName" maxlength="180" value="${values("eventName")}" /></label>
+        <label><span>Data</span><input name="eventDate" type="date" value="${values("eventDate")}" /></label>
+        <label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" value="${values("eventEndDate")}" /></label>
+        <label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${values("city")}" /></label>
+        <label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" value="${values("venue")}" /></label>
+        <label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 € · Bilheteira por confirmar" value="${values("tickets")}" /></label>
+        <label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1000" placeholder="https://" value="${values("ticketUrl")}" /></label>
+        <label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" value="${values("posterUrl")}" /></label>
+        <label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${values("officialUrl")}" /></label>
+      </fieldset>
+    </details>` : ""}
     <details class="automation-editor"><summary>Editar proposta</summary>
       <p>Esta proposta fica guardada aqui até decidires. Só deves aceitar depois de confirmares uma fonte oficial.</p>
       <label><span>${isLink ? "Evento" : "Nome da fonte"}</span><input name="proposalTitle" maxlength="240" value="${escapeHtml(item.proposal_title || item.title)}" /></label>
@@ -116,7 +136,7 @@ function automationCard(item) {
     ${isApplied
       ? `<p class="automation-note"><b>Aplicado à agenda.</b> Esta verificação fica guardada como histórico; uma nova alteração na fonte volta a abrir a revisão.</p>`
       : `<div class="report-actions">
-          <button type="button" data-automation-status="reviewing">Guardar / em análise</button>
+          <button type="button" data-automation-status="reviewing">${editableEvent ? "Guardar dados / em análise" : "Guardar / em análise"}</button>
           <button type="button" data-automation-status="resolved"${isLink ? " data-apply-to-agenda=\"true\"" : ""}${isLink && !readyToApply ? " disabled title=\"Completa primeiro todos os pontos do checklist\"" : ""}>${isLink ? "Aceitar e aplicar à agenda" : "Aceitar após confirmar"}</button>
           <button type="button" data-automation-status="ignored" class="secondary">Recusar</button>
         </div>`}
@@ -229,7 +249,16 @@ reports.addEventListener("click", async event => {
           applyToAgenda: automationButton.dataset.applyToAgenda === "true",
           proposalTitle: card.querySelector('[name="proposalTitle"]')?.value,
           proposalUrl: card.querySelector('[name="proposalUrl"]')?.value,
-          editorNote: card.querySelector('[name="editorNote"]')?.value
+          editorNote: card.querySelector('[name="editorNote"]')?.value,
+          eventName: card.querySelector('[name="eventName"]')?.value,
+          eventDate: card.querySelector('[name="eventDate"]')?.value,
+          eventEndDate: card.querySelector('[name="eventEndDate"]')?.value,
+          city: card.querySelector('[name="city"]')?.value,
+          venue: card.querySelector('[name="venue"]')?.value,
+          tickets: card.querySelector('[name="tickets"]')?.value,
+          ticketUrl: card.querySelector('[name="ticketUrl"]')?.value,
+          posterUrl: card.querySelector('[name="posterUrl"]')?.value,
+          officialUrl: card.querySelector('[name="officialUrl"]')?.value
         })
       });
       requireCurrentSession(response);

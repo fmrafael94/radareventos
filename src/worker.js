@@ -29,6 +29,14 @@ function secureResponse(response) {
 }
 
 const eventField = (source, name) => source.match(new RegExp(`${name}:\\s*"((?:\\\\.|[^"\\\\])*)"`))?.[1]?.replace(/\\"/g, '"') || "";
+const cacheVersion = value => {
+  let hash = 2166136261;
+  for (const character of String(value || "")) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+};
 const lisbonToday = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 const humanDate = iso => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return "";
@@ -48,6 +56,18 @@ async function publishedEvent(env, id) {
     return event?.id === id && event.title && event.date && event.sourceUrl ? event : null;
   } catch {
     return null;
+  }
+}
+
+async function publicEventPatch(env, id) {
+  if (!env.EVENT_RADAR_DB) return {};
+  try {
+    await ensureEventStore(env.EVENT_RADAR_DB);
+    const row = await env.EVENT_RADAR_DB.prepare("SELECT patch_json FROM event_overrides WHERE event_id = ?").bind(id).first();
+    const patch = row?.patch_json ? JSON.parse(row.patch_json) : {};
+    return patch && typeof patch === "object" ? patch : {};
+  } catch {
+    return {};
   }
 }
 
@@ -81,13 +101,15 @@ async function eventPage(request, env, id) {
     const cloudEvent = match ? null : await publishedEvent(env, id);
     if (!match && !cloudEvent) return new Response("Evento não encontrado.", { status: 404 });
     const event = match?.[0] || "";
-    const title = cloudEvent?.title || eventField(event, "title") || "Evento";
-    const date = cloudEvent?.date || eventField(event, "date");
-    const endDate = cloudEvent?.endDate || eventField(event, "endDate");
-    const venue = cloudEvent?.venue || eventField(event, "venue");
-    const city = cloudEvent?.city || eventField(event, "city");
+    const patch = await publicEventPatch(env, id);
+    const stringPatch = (key, fallback = "") => typeof patch[key] === "string" && patch[key].trim() ? patch[key].trim() : fallback;
+    const title = stringPatch("title", cloudEvent?.title || eventField(event, "title") || "Evento");
+    const date = stringPatch("date", cloudEvent?.date || eventField(event, "date"));
+    const endDate = stringPatch("endDate", cloudEvent?.endDate || eventField(event, "endDate"));
+    const venue = stringPatch("venue", cloudEvent?.venue || eventField(event, "venue"));
+    const city = stringPatch("city", cloudEvent?.city || eventField(event, "city"));
     const app = await assetText(request, env, "/app.js");
-    const poster = app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(event, "image");
+    const poster = stringPatch("image", app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(event, "image"));
     const url = new URL(request.url);
     const canonical = `${url.origin}/evento/${encodeURIComponent(id)}`;
     const dateLabel = endDate && endDate !== date ? `${humanDate(date)}–${humanDate(endDate)}` : humanDate(date);
@@ -97,7 +119,7 @@ async function eventPage(request, env, id) {
     // Bump this query version when proxy handling changes. Social crawlers and
     // browsers must not keep an earlier generic fallback after an official
     // poster becomes reachable.
-    const image = poster ? `${url.origin}/api/event-poster/${encodeURIComponent(id)}?v=2` : `${url.origin}/share-card.svg`;
+    const image = poster ? `${url.origin}/api/event-poster/${encodeURIComponent(id)}?v=${cacheVersion(poster)}` : `${url.origin}/share-card.svg`;
     const eventSchema = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "MusicEvent",
@@ -105,7 +127,7 @@ async function eventPage(request, env, id) {
       startDate: date,
       ...(endDate ? { endDate } : {}),
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      eventStatus: cloudEvent?.availability === "Cancelado" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+      eventStatus: stringPatch("availability", cloudEvent?.availability) === "Cancelado" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
       location: { "@type": "Place", name: venue || "Local a confirmar", address: { "@type": "PostalAddress", addressLocality: city || "Portugal", addressCountry: "PT" } },
       image: [image],
       url: canonical
@@ -189,7 +211,8 @@ async function eventPoster(request, env, id, executionCtx) {
     const cloudEvent = match ? null : await publishedEvent(env, id);
     if (!match && !cloudEvent) return new Response("Cartaz não encontrado.", { status: 404 });
     const app = await assetText(request, env, "/app.js");
-    const poster = app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(match?.[0] || "", "image");
+    const patch = await publicEventPatch(env, id);
+    const poster = (typeof patch.image === "string" && patch.image.trim()) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(match?.[0] || "", "image");
     if (!poster) return shareFallback(request, env);
     const posterUrl = new URL(poster);
     if (!/^https?:$/.test(posterUrl.protocol)) return shareFallback(request, env);

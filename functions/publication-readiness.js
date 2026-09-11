@@ -72,11 +72,11 @@ export function reviewValuesFrom(value = {}, fallback = {}) {
   return {
     eventName: text(value.eventName || value.title || fallback.event_name, 180),
     eventDate: text(value.eventDate || value.date || fallback.event_date, 10),
-    eventEndDate: text(value.eventEndDate || value.endDate, 10),
+    eventEndDate: text(value.eventEndDate || value.endDate || fallback.end_date || fallback.endDate, 10),
     city: text(value.city || fallback.city, 100),
-    venue: text(value.venue, 180),
-    tickets: text(value.tickets, 220),
-    ticketUrl: validHttpUrl(value.ticketUrl),
+    venue: text(value.venue || fallback.venue, 180),
+    tickets: text(value.tickets || fallback.tickets, 220),
+    ticketUrl: validHttpUrl(value.ticketUrl || fallback.ticket_url || fallback.ticketUrl),
     posterUrl: validHttpUrl(value.posterUrl || fallback.poster_url),
     officialUrl: validHttpUrl(value.officialUrl || fallback.official_url)
   };

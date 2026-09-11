@@ -1414,13 +1414,22 @@ async function loadApprovedCloudflareEvents() {
     if (!Array.isArray(result.items)) return;
     const overrides = Array.isArray(result.overrides) ? result.overrides : [];
     let changed = false;
-    const safePatchFields = new Set(["title", "tickets", "ticketUrl", "availability", "sourceUrl"]);
+    const safePatchFields = new Set(["title", "date", "endDate", "city", "venue", "tickets", "ticketUrl", "availability", "sourceUrl", "image", "posterSourceUrl"]);
     overrides.forEach(override => {
       const existing = EVENTS.find(event => event.id === override.id);
       if (!existing || !override.patch || typeof override.patch !== "object") return;
       for (const [key, value] of Object.entries(override.patch)) {
         if (!safePatchFields.has(key) || typeof value !== "string") continue;
-        existing[key] = key.endsWith("Url") ? safePublicUrl(value) : value.slice(0, key === "title" ? 180 : 1000);
+        if (["date", "endDate"].includes(key)) {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(value)) existing[key] = value;
+          continue;
+        }
+        if (["ticketUrl", "sourceUrl", "image", "posterSourceUrl"].includes(key)) {
+          const safeUrl = safePublicUrl(value);
+          if (safeUrl) existing[key] = safeUrl;
+          continue;
+        }
+        existing[key] = value.slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
       }
       changed = true;
     });

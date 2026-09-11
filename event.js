@@ -4,6 +4,14 @@ const eventDate = iso => new Date(`${iso}T12:00:00`);
 const prettyDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
 const eventUrl = id => `${location.origin}/evento/${encodeURIComponent(id)}`;
+const posterCacheVersion = value => {
+  let hash = 2166136261;
+  for (const character of String(value || "")) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+};
 const arrowIcon = `<svg class="event-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg>`;
 const calendarIcon = `<svg class="event-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="3.4" y="4.6" width="13.2" height="11.5" rx="1.4" /><path d="M6.6 2.8v3.7M13.4 2.8v3.7M3.5 8.4h13" /></svg>`;
 
@@ -16,6 +24,41 @@ async function posterFor(id) {
     return source.match(new RegExp(`["']${escaped}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || "";
   } catch {
     return "";
+  }
+}
+
+const safePublicUrl = value => {
+  try {
+    const url = new URL(String(value || ""), location.origin);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+};
+
+async function applyStoredEventOverride(event) {
+  try {
+    const response = await fetch("/api/events", { headers: { Accept: "application/json" } });
+    if (!response.ok) return;
+    const result = await response.json();
+    const patch = Array.isArray(result.overrides)
+      ? result.overrides.find(item => item?.id === event.id)?.patch
+      : null;
+    if (!patch || typeof patch !== "object") return;
+    for (const key of ["title", "city", "venue", "tickets", "availability"]) {
+      if (typeof patch[key] === "string" && patch[key].trim()) event[key] = patch[key].trim().slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
+    }
+    for (const key of ["date", "endDate"]) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(patch[key] || "")) event[key] = patch[key];
+    }
+    for (const key of ["ticketUrl", "sourceUrl", "image", "posterSourceUrl"]) {
+      if (typeof patch[key] !== "string") continue;
+      const url = safePublicUrl(patch[key]);
+      if (url) event[key] = url;
+    }
+  } catch {
+    // The static event remains intentionally usable when the optional update
+    // channel is unavailable.
   }
 }
 
@@ -132,7 +175,7 @@ function render(event, poster) {
   const shareText = `${event.title}\n${compactDate} · ${event.venue}, ${event.city}`;
   // Keep the proxy cache separate from the earlier generic fallback used for
   // official hosts that decline server-to-server image requests.
-  const posterDownloadUrl = `${location.origin}/api/event-poster/${encodeURIComponent(event.id)}?v=2`;
+  const posterDownloadUrl = `${location.origin}/api/event-poster/${encodeURIComponent(event.id)}?v=${posterCacheVersion(event.image || event.id)}`;
   const programme = festivalProgramme(event);
   const programmeDates = [...new Set(programme.map(item => item.date))];
   const related = similarEvents(event);
@@ -247,4 +290,4 @@ if (!event) {
   page.innerHTML = `<section class="event-not-found"><p class="event-eyebrow">Evento não encontrado</p><h1>Este desvio já não está na agenda.</h1><a class="event-ticket" href="/">Voltar à agenda</a></section>`;
   page.setAttribute("aria-busy", "false");
 }
-else posterFor(event.id).then(poster => render(event, poster));
+else applyStoredEventOverride(event).finally(() => posterFor(event.id).then(poster => render(event, poster)));
