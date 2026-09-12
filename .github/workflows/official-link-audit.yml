@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Confirmar que não há eventos públicos sem cartaz
+        run: node scripts/audit-event-completeness.mjs
       - name: Verificar todas as páginas oficiais e bilheteiras diretas
         run: node scripts/audit-official-links.mjs --mode=two-hour
       - name: Enviar itens que precisam de revisão para o admin

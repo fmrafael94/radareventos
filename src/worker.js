@@ -29,6 +29,16 @@ function secureResponse(response) {
 }
 
 const eventField = (source, name) => source.match(new RegExp(`${name}:\\s*"((?:\\\\.|[^"\\\\])*)"`))?.[1]?.replace(/\\"/g, '"') || "";
+export function posterPublicationHoldIds(source) {
+  const literal = source.match(/window\.POSTER_PUBLICATION_HOLDS\s*=\s*(\[[\s\S]*?\]);/i)?.[1];
+  if (!literal) return new Set();
+  try {
+    const ids = JSON.parse(literal);
+    return new Set(Array.isArray(ids) ? ids.filter(id => typeof id === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
 const cacheVersion = value => {
   let hash = 2166136261;
   for (const character of String(value || "")) {
@@ -96,6 +106,7 @@ async function eventPage(request, env, id) {
   if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Evento não encontrado.", { status: 404 });
   try {
     const events = await assetText(request, env, "/events.js");
+    if (posterPublicationHoldIds(events).has(id)) return new Response("Evento não encontrado.", { status: 404 });
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
     const cloudEvent = match ? null : await publishedEvent(env, id);
@@ -148,10 +159,11 @@ async function eventPage(request, env, id) {
 }
 
 export function sitemapEventIds(source, today = "0000-00-00") {
+  const posterHolds = posterPublicationHoldIds(source);
   const records = [...source.matchAll(/\{\s*id:\s*"([a-z0-9-]{1,180})"([^\n]*)/gi)]
     .filter(match => !/\bseriesId:\s*"/i.test(match[2]))
     .map(match => ({ id: match[1], lastDate: eventField(match[0], "endDate") || eventField(match[0], "date") }))
-    .filter(record => !record.lastDate || record.lastDate >= today);
+    .filter(record => !posterHolds.has(record.id) && (!record.lastDate || record.lastDate >= today));
   const prefixBlock = source.match(/const festivalSeriesPrefixes = \{([\s\S]*?)\};/)?.[1] || "";
   const series = [...prefixBlock.matchAll(/"([a-z0-9-]+)"\s*:\s*"([a-z0-9-]+)"/gi)]
     .map(match => ({ parentId: match[1], prefix: match[2] }));
@@ -202,10 +214,13 @@ async function shareFallback(request, env) {
 async function eventPoster(request, env, id, executionCtx) {
   if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Cartaz não encontrado.", { status: 404 });
   try {
+    // Check publication status before the edge cache. Otherwise a formerly
+    // public poster can outlive a newly applied publication hold.
+    const events = await assetText(request, env, "/events.js");
+    if (posterPublicationHoldIds(events).has(id)) return new Response("Cartaz não encontrado.", { status: 404 });
     const cache = caches.default;
     const cached = await cache.match(request);
     if (cached) return cached;
-    const events = await assetText(request, env, "/events.js");
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
     const cloudEvent = match ? null : await publishedEvent(env, id);

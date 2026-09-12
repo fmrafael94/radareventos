@@ -286,7 +286,7 @@ function render(event, poster) {
 
 page.setAttribute("aria-busy", "true");
 const event = (window.EVENTS || []).find(item => item.id === eventId);
-if (!event) {
+if (!event || event.publicationStatus === "poster_pending") {
   page.innerHTML = `<section class="event-not-found"><p class="event-eyebrow">Evento não encontrado</p><h1>Este desvio já não está na agenda.</h1><a class="event-ticket" href="/">Voltar à agenda</a></section>`;
   page.setAttribute("aria-busy", "false");
 }

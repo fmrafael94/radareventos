@@ -161,7 +161,9 @@ function programmeParent(candidate) { return EVENTS.find(parent => {
 // A daily line-up belongs inside its festival page, never as a competing card
 // in the public agenda. Explicit children use seriesId; this also catches old
 // imported records that pre-date that field.
-function isMainAgendaEvent(event) { return !event.seriesId && !programmeParent(event); }
+function isMainAgendaEvent(event) {
+  return event.publicationStatus !== "poster_pending" && !event.seriesId && !programmeParent(event);
+}
 
 // Poster rule: always look in this order before publishing a visual:
 // 1) official event site, 2) that event's concrete Ticketline/BOL/FNAC/etc.
@@ -948,10 +950,15 @@ function renderFeatured() {
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 5);
-  featuredRail.innerHTML = featured.length ? featured.map(event => {
+  featuredRail.innerHTML = featured.length ? featured.map((event, index) => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
+    // On a phone the first two cards are already visible below the hero. Do
+    // not leave their poster frames blank while the browser waits for a lazy
+    // loading threshold; the remaining three stay lazy for page weight.
+    const loading = index < 2 ? "eager" : "lazy";
+    const priority = index === 0 ? ' fetchpriority="high"' : "";
     return `<article class="featured-card" data-event-id="${escapeHtml(event.id)}">
-      <span class="featured-poster" ${posterStyle(event.image)}><img src="${escapeHtml(safePublicUrl(event.image))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="lazy" decoding="async"></span>
+      <span class="featured-poster" ${posterStyle(event.image)}><img src="${escapeHtml(safePublicUrl(event.image))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="${loading}"${priority} decoding="async"></span>
       <div class="featured-copy"><p>${escapeHtml(eventType(event))} · ${escapeHtml(event.city)}</p><h3>${escapeHtml(event.title)}</h3><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><a href="${eventUrl(event)}">Abrir evento <svg class="link-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></a></div>
     </article>`;
   }).join("") : '<p class="featured-empty">Ainda estamos a confirmar os próximos eventos.</p>';

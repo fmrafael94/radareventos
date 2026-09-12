@@ -580,3 +580,31 @@ Object.entries(festivalSeriesPrefixes).forEach(([parentId, prefix]) => {
   });
 });
 window.EVENTS.forEach(event => { event.type = event.type || "Concerto"; });
+
+// Publicação é uma promessa editorial: um evento principal só pode estar
+// acessível quando temos o respetivo cartaz oficial. Estes registos ficam
+// guardados no catálogo para revisão, mas não entram na agenda, páginas de
+// evento, partilhas nem sitemap até que seja acrescentada uma imagem válida.
+// A lista inclui tanto os eventos sem cartaz como três URLs que deixaram de
+// responder com uma imagem na verificação integral de 2026-09-12.
+window.POSTER_PUBLICATION_HOLDS = [
+  "ferro-avoid-friends",
+  "lagos-jazzing-christmas",
+  "viseu-rock-fest-2026",
+  "klatter-throwness-santarem",
+  "grievance-injuria-orar",
+  "secret-chord-tavira",
+  "terapia-invicta-viii",
+  "secret-chord-famalicao",
+  "purgatory-fest-2026",
+  "black-box-fest-2026",
+  "web-pitch-black-equaleft",
+  "butchery-at-christmas-time",
+  "indie-music-fest",
+  "vul-afterglow",
+  "reign-fury-hardcore-fest-2026"
+];
+const posterPublicationHoldIds = new Set(window.POSTER_PUBLICATION_HOLDS);
+window.EVENTS.forEach(event => {
+  event.publicationStatus = posterPublicationHoldIds.has(event.id) ? "poster_pending" : "published";
+});

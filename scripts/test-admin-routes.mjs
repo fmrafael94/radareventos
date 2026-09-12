@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import worker, { sitemapEventIds } from "../src/worker.js";
+import worker, { posterPublicationHoldIds, sitemapEventIds } from "../src/worker.js";
 import { readFile } from "node:fs/promises";
 
 class Statement {
@@ -44,15 +44,32 @@ const executionCtx = { waitUntil() {} };
 const fetchRoute = (url, init) => worker.fetch(new Request(url, init), env, executionCtx);
 
 const eventSource = await readFile(new URL("../events.js", import.meta.url), "utf8");
+const posterHolds = posterPublicationHoldIds(eventSource);
+assert.equal(posterHolds.size, 15);
+assert.ok(posterHolds.has("ferro-avoid-friends"));
 const publicEventIds = sitemapEventIds(eventSource);
-assert.equal(publicEventIds.length, 263);
+assert.equal(publicEventIds.length, 263 - posterHolds.size);
 assert.ok(publicEventIds.includes("kalorama-2026"));
+assert.ok(!publicEventIds.includes("ferro-avoid-friends"));
 assert.ok(!publicEventIds.includes("kalorama-2026-28"));
 assert.ok(!publicEventIds.includes("under-doom-2026-09-25"));
 const currentSitemapIds = sitemapEventIds(eventSource, "2026-09-05");
-assert.equal(currentSitemapIds.length, 250);
+assert.equal(currentSitemapIds.length, 235);
 assert.ok(!currentSitemapIds.includes("kalorama-2026"));
 assert.ok(!currentSitemapIds.includes("iminente-2026-09-17"));
+
+const publicAssets = {
+  async fetch(request) {
+    return new URL(request.url).pathname === "/events.js"
+      ? new Response(eventSource, { headers: { "Content-Type": "application/javascript" } })
+      : new Response("ASSET", { headers: { "Content-Type": "text/plain" } });
+  }
+};
+const publicEnv = { ...env, ASSETS: publicAssets };
+const heldEvent = await worker.fetch(new Request("https://odesvio.pt/evento/ferro-avoid-friends"), publicEnv, executionCtx);
+assert.equal(heldEvent.status, 404);
+const heldPoster = await worker.fetch(new Request("https://odesvio.pt/api/event-poster/ferro-avoid-friends"), publicEnv, executionCtx);
+assert.equal(heldPoster.status, 404);
 
 for (const path of ["/", "/admin", "/admin/", "/admin.html"]) {
   const response = await fetchRoute(`https://admin.odesvio.pt${path}`, { redirect: "manual" });
