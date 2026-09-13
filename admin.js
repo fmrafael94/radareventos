@@ -52,7 +52,8 @@ function syncPublicationChecklist(card) {
   if (checklist.dataset.knownDuplicate === "true") complete = false;
   const gatedActions = [
     card.querySelector('[data-next-status="published"]'),
-    card.querySelector('[data-apply-to-agenda="true"]')
+    card.querySelector('[data-apply-to-agenda="true"]'),
+    card.querySelector('[data-save-poster-hold]')
   ].filter(Boolean);
   gatedActions.forEach(action => {
     action.disabled = !complete;
@@ -149,16 +150,26 @@ function automationCard(item) {
 
 function posterHoldCard(item) {
   const date = item.endDate && item.endDate !== item.date ? `${item.date} — ${item.endDate}` : item.date;
+  const values = item.values || {};
+  const missing = (item.publication?.items || []).filter(check => !check.present).map(check => check.label).join(" · ");
   return `<article class="report automation-report" data-poster-hold="${escapeHtml(item.id)}">
-    <div class="report-meta"><span class="kind">Retido por falta de cartaz</span><time>${escapeHtml(date || "Data por confirmar")}</time></div>
+    <div class="report-meta"><span class="kind">${item.held ? "Retido por cartaz não confirmado" : "Informação obrigatória em falta"}</span><time>${escapeHtml(date || "Data por confirmar")}</time></div>
     <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml([item.venue, item.city].filter(Boolean).join(" · ") || "Local por confirmar")}</p></div></div>
-    <p class="automation-note">Este evento não está público nem entra no sitemap até teres um cartaz oficial. Cola o endereço direto da imagem e a página oficial que o confirma.</p>
-    <dl><div><dt>Página oficial atual</dt><dd>${displayUrl(item.sourceUrl)}</dd></div><div><dt>Regra de publicação</dt><dd>Cartaz oficial obrigatório</dd></div></dl>
-    <fieldset class="event-review-fields"><legend>Completar cartaz</legend>
-      <label><span>Link direto do cartaz oficial</span><input name="posterUrl" type="url" maxlength="1600" placeholder="https://…/cartaz.jpg" /></label>
-      <label class="official-source"><span>Página oficial que confirma o cartaz</span><input name="sourceUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(item.sourceUrl || "")}" /></label>
+    <p class="automation-note">${missing ? `Falta confirmar: ${escapeHtml(missing)}.` : "Este evento está retido até confirmares novamente o cartaz oficial."} Preenche ou corrige os dados abaixo; só entra na agenda quando a checklist estiver completa.</p>
+    <dl><div><dt>Página oficial atual</dt><dd>${displayUrl(item.sourceUrl)}</dd></div><div><dt>Regra de publicação</dt><dd>Checklist completa obrigatória</dd></div></dl>
+    ${checklistMarkup(item.publication)}
+    <fieldset class="event-review-fields"><legend>Dados para publicação</legend>
+      <label><span>Título</span><input name="eventName" maxlength="180" value="${escapeHtml(values.eventName || item.title || "")}" /></label>
+      <label><span>Data</span><input name="eventDate" type="date" value="${escapeHtml(values.eventDate || item.date || "")}" /></label>
+      <label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" value="${escapeHtml(values.eventEndDate || item.endDate || "")}" /></label>
+      <label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${escapeHtml(values.city || item.city || "")}" /></label>
+      <label><span>Local</span><input name="venue" maxlength="180" value="${escapeHtml(values.venue || item.venue || "")}" /></label>
+      <label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 €" value="${escapeHtml(values.tickets || "")}" /></label>
+      <label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(values.ticketUrl || "")}" /></label>
+      <label><span>Link direto do cartaz oficial</span><input name="posterUrl" type="url" maxlength="1600" placeholder="https://…/cartaz.jpg" value="${escapeHtml(values.posterUrl || "")}" /></label>
+      <label class="official-source"><span>Página oficial que confirma a informação</span><input name="officialUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(values.officialUrl || item.sourceUrl || "")}" /></label>
     </fieldset>
-    <div class="report-actions"><button type="button" data-save-poster-hold="true">Guardar cartaz e publicar</button></div>
+    <div class="report-actions"><button type="button" data-save-poster-hold="true">Guardar e publicar</button></div>
   </article>`;
 }
 
@@ -207,18 +218,19 @@ async function loadAutomationReviews() {
 }
 
 async function loadPosterHolds() {
-  adminStatus.textContent = "A carregar eventos sem cartaz…";
+  adminStatus.textContent = "A carregar eventos com informação em falta…";
   reports.innerHTML = "";
   try {
     const response = await fetch("/api/admin/poster-holds", { headers: { Accept: "application/json" }, credentials: "same-origin" });
     requireCurrentSession(response);
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || "Não foi possível carregar os cartazes em falta.");
+    if (!response.ok) throw new Error(result.message || "Não foi possível carregar os eventos incompletos.");
     const items = Array.isArray(result.items) ? result.items : [];
-    reports.innerHTML = items.length ? items.map(posterHoldCard).join("") : "<p class=\"empty-state\">Não há eventos retidos por falta de cartaz.</p>";
-    adminStatus.textContent = items.length ? `${items.length} evento${items.length === 1 ? "" : "s"} retido${items.length === 1 ? "" : "s"}.` : "";
+    reports.innerHTML = items.length ? items.map(posterHoldCard).join("") : "<p class=\"empty-state\">Não há eventos com informação obrigatória em falta.</p>";
+    reports.querySelectorAll(".report").forEach(syncPublicationChecklist);
+    adminStatus.textContent = items.length ? `${items.length} evento${items.length === 1 ? "" : "s"} a completar.` : "";
   } catch (error) {
-    adminStatus.textContent = error.message || "Não foi possível carregar os cartazes em falta.";
+    adminStatus.textContent = error.message || "Não foi possível carregar os eventos incompletos.";
   }
 }
 
@@ -239,7 +251,7 @@ function updateReviewControls() {
   bulkApply.textContent = acceptedAutomation ? "Aplicar todos os completos à agenda" : "Aceitar e aplicar completos";
   communityBulkActions.hidden = automated || posterHolds || !["new", "reviewing"].includes(activeCommunityStatus);
   filterContext.textContent = posterHolds
-    ? "Eventos guardados fora da agenda até terem cartaz oficial"
+    ? "Eventos guardados fora da agenda até terem toda a informação obrigatória"
     : automated
     ? "Resultados das rondas — confirma sempre na fonte oficial"
     : "Pedidos enviados por utilizadores";
@@ -276,20 +288,29 @@ reports.addEventListener("click", async event => {
   const posterHoldButton = event.target.closest("[data-save-poster-hold]");
   if (posterHoldButton) {
     const card = posterHoldButton.closest("[data-poster-hold]");
-    const posterUrl = card.querySelector('[name="posterUrl"]')?.value.trim();
-    const sourceUrl = card.querySelector('[name="sourceUrl"]')?.value.trim();
-    if (!posterUrl || !sourceUrl) {
-      adminStatus.textContent = "Indica o link direto do cartaz e a página oficial que o confirma.";
+    if (!syncPublicationChecklist(card)) {
+      adminStatus.textContent = "Completa primeiro todos os pontos obrigatórios da checklist.";
       return;
     }
-    if (!window.confirm("Guardar este cartaz oficial e publicar o evento na agenda?")) return;
+    if (!window.confirm("Guardar a informação e publicar este evento na agenda?")) return;
     posterHoldButton.disabled = true;
     try {
       const response = await fetch("/api/admin/poster-holds", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ id: card.dataset.posterHold, posterUrl, sourceUrl })
+        body: JSON.stringify({
+          id: card.dataset.posterHold,
+          eventName: card.querySelector('[name="eventName"]')?.value,
+          eventDate: card.querySelector('[name="eventDate"]')?.value,
+          eventEndDate: card.querySelector('[name="eventEndDate"]')?.value,
+          city: card.querySelector('[name="city"]')?.value,
+          venue: card.querySelector('[name="venue"]')?.value,
+          tickets: card.querySelector('[name="tickets"]')?.value,
+          ticketUrl: card.querySelector('[name="ticketUrl"]')?.value,
+          posterUrl: card.querySelector('[name="posterUrl"]')?.value,
+          officialUrl: card.querySelector('[name="officialUrl"]')?.value
+        })
       });
       requireCurrentSession(response);
       const result = await response.json().catch(() => ({}));

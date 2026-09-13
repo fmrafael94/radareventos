@@ -8,6 +8,7 @@ import { onRequestGet as getPosterHolds, onRequestPost as postPosterHold } from 
 import { clearAdminSession, loginWithAdminEmailCode, loginWithAdminPassword, requestAdminEmailCode, requireAdmin } from "../functions/admin-auth.js";
 import { onRequestPost as postAuditReport } from "../functions/api/internal/audit-report.js";
 import { ensureEventStore } from "../functions/event-store.js";
+import { publishingReady } from "../functions/publication-readiness.js";
 
 const contextFor = (request, env) => ({ request, env });
 const canonicalHost = "odesvio.pt";
@@ -30,14 +31,6 @@ function secureResponse(response) {
 }
 
 const eventField = (source, name) => source.match(new RegExp(`${name}:\\s*"((?:\\\\.|[^"\\\\])*)"`))?.[1]?.replace(/\\"/g, '"') || "";
-const validRemoteUrl = value => {
-  try {
-    const url = new URL(String(value || "").trim());
-    return /^https?:$/.test(url.protocol) ? url.href : "";
-  } catch {
-    return "";
-  }
-};
 export function posterPublicationHoldIds(source) {
   const literal = source.match(/window\.POSTER_PUBLICATION_HOLDS\s*=\s*(\[[\s\S]*?\]);/i)?.[1];
   if (!literal) return new Set();
@@ -108,7 +101,7 @@ async function releasedPosterHoldIds(env, source, today = "0000-00-00") {
         const patch = JSON.parse(row.patch_json || "{}");
         const literal = eventLiteral(source, row.event_id);
         const lastDate = eventField(literal, "endDate") || eventField(literal, "date");
-        return validRemoteUrl(patch?.image) && literal && lastDate >= today ? [row.event_id] : [];
+        return staticHoldIsReady(literal, patch) && lastDate >= today ? [row.event_id] : [];
       } catch {
         return [];
       }
@@ -116,6 +109,18 @@ async function releasedPosterHoldIds(env, source, today = "0000-00-00") {
   } catch {
     return [];
   }
+}
+
+function staticHoldIsReady(literal, patch = {}) {
+  return Boolean(literal) && publishingReady({
+    eventName: patch.title || eventField(literal, "title"),
+    eventDate: patch.date || eventField(literal, "date"),
+    city: patch.city || eventField(literal, "city"),
+    venue: patch.venue || eventField(literal, "venue"),
+    tickets: patch.tickets || eventField(literal, "tickets"),
+    posterUrl: patch.image,
+    officialUrl: patch.sourceUrl || eventField(literal, "sourceUrl")
+  });
 }
 
 async function assetText(request, env, path) {
@@ -144,7 +149,8 @@ async function eventPage(request, env, id) {
   try {
     const events = await assetText(request, env, "/events.js");
     const patch = await publicEventPatch(env, id);
-    if (posterPublicationHoldIds(events).has(id) && !validRemoteUrl(patch.image)) return new Response("Evento não encontrado.", { status: 404 });
+    const literal = eventLiteral(events, id);
+    if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return new Response("Evento não encontrado.", { status: 404 });
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
     const cloudEvent = match ? null : await publishedEvent(env, id);
@@ -307,7 +313,8 @@ async function eventPoster(request, env, id, executionCtx) {
     // public poster can outlive a newly applied publication hold.
     const events = await assetText(request, env, "/events.js");
     const patch = await publicEventPatch(env, id);
-    if (posterPublicationHoldIds(events).has(id) && !validRemoteUrl(patch.image)) return new Response("Cartaz não encontrado.", { status: 404 });
+    const literal = eventLiteral(events, id);
+    if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return new Response("Cartaz não encontrado.", { status: 404 });
     const cache = caches.default;
     const cached = await cache.match(request);
     if (cached) return cached;

@@ -74,6 +74,15 @@ const safePublicUrl = value => {
     return "";
   }
 };
+const publicationReady = event => Boolean(
+  String(event?.title || "").trim()
+  && /^\d{4}-\d{2}-\d{2}$/.test(String(event?.date || ""))
+  && String(event?.city || "").trim()
+  && String(event?.venue || "").trim()
+  && String(event?.tickets || "").trim()
+  && safePublicUrl(event?.image)
+  && safePublicUrl(event?.sourceUrl)
+);
 const searchableText = value => String(value || "").toLocaleLowerCase("pt-PT").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 const eventType = event => event.type || "Concerto";
 const eventDate = iso => new Date(`${iso}T12:00:00`);
@@ -1453,7 +1462,7 @@ async function loadApprovedCloudflareEvents() {
         }
         existing[key] = value.slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
       }
-      if (existing.publicationStatus === "poster_pending" && safePublicUrl(override.patch.image)) {
+      if (existing.publicationStatus === "poster_pending" && publicationReady(existing)) {
         existing.publicationStatus = "published";
       }
       changed = true;

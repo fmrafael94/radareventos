@@ -35,6 +35,15 @@ const safePublicUrl = value => {
     return "";
   }
 };
+const publicationReady = event => Boolean(
+  String(event?.title || "").trim()
+  && /^\d{4}-\d{2}-\d{2}$/.test(String(event?.date || ""))
+  && String(event?.city || "").trim()
+  && String(event?.venue || "").trim()
+  && String(event?.tickets || "").trim()
+  && safePublicUrl(event?.image)
+  && safePublicUrl(event?.sourceUrl)
+);
 
 async function applyStoredEventOverride(event) {
   try {
@@ -291,7 +300,7 @@ if (!event) {
   page.setAttribute("aria-busy", "false");
 }
 else applyStoredEventOverride(event).finally(() => {
-  if (event.publicationStatus === "poster_pending" && safePublicUrl(event.image)) event.publicationStatus = "published";
+  if (event.publicationStatus === "poster_pending" && publicationReady(event)) event.publicationStatus = "published";
   if (event.publicationStatus === "poster_pending") {
     page.innerHTML = `<section class="event-not-found"><p class="event-eyebrow">Evento não encontrado</p><h1>Este desvio já não está na agenda.</h1><a class="event-ticket" href="/">Voltar à agenda</a></section>`;
     page.setAttribute("aria-busy", "false");
