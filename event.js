@@ -6,7 +6,9 @@ const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character =>
 const eventUrl = id => `${location.origin}/evento/${encodeURIComponent(id)}`;
 const posterCacheVersion = value => {
   let hash = 2166136261;
-  for (const character of String(value || "")) {
+  // Keep in sync with the Worker cache version. This turns a repaired poster
+  // into a new URL instead of showing a cached generic fallback.
+  for (const character of `poster-proxy-v2:${String(value || "")}`) {
     hash ^= character.charCodeAt(0);
     hash = Math.imul(hash, 16777619);
   }

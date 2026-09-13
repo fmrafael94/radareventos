@@ -43,7 +43,10 @@ export function posterPublicationHoldIds(source) {
 }
 const cacheVersion = value => {
   let hash = 2166136261;
-  for (const character of String(value || "")) {
+  // Changes in proxy behaviour must receive a new public URL too. Otherwise a
+  // browser can retain yesterday's generic fallback for up to a day even when
+  // the official poster is available again.
+  for (const character of `poster-proxy-v2:${String(value || "")}`) {
     hash ^= character.charCodeAt(0);
     hash = Math.imul(hash, 16777619);
   }
