@@ -147,6 +147,21 @@ function automationCard(item) {
   </article>`;
 }
 
+function posterHoldCard(item) {
+  const date = item.endDate && item.endDate !== item.date ? `${item.date} — ${item.endDate}` : item.date;
+  return `<article class="report automation-report" data-poster-hold="${escapeHtml(item.id)}">
+    <div class="report-meta"><span class="kind">Retido por falta de cartaz</span><time>${escapeHtml(date || "Data por confirmar")}</time></div>
+    <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml([item.venue, item.city].filter(Boolean).join(" · ") || "Local por confirmar")}</p></div></div>
+    <p class="automation-note">Este evento não está público nem entra no sitemap até teres um cartaz oficial. Cola o endereço direto da imagem e a página oficial que o confirma.</p>
+    <dl><div><dt>Página oficial atual</dt><dd>${displayUrl(item.sourceUrl)}</dd></div><div><dt>Regra de publicação</dt><dd>Cartaz oficial obrigatório</dd></div></dl>
+    <fieldset class="event-review-fields"><legend>Completar cartaz</legend>
+      <label><span>Link direto do cartaz oficial</span><input name="posterUrl" type="url" maxlength="1600" placeholder="https://…/cartaz.jpg" /></label>
+      <label class="official-source"><span>Página oficial que confirma o cartaz</span><input name="sourceUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(item.sourceUrl || "")}" /></label>
+    </fieldset>
+    <div class="report-actions"><button type="button" data-save-poster-hold="true">Guardar cartaz e publicar</button></div>
+  </article>`;
+}
+
 async function loadReports() {
   adminStatus.textContent = "A carregar pedidos…";
   reports.innerHTML = "";
@@ -191,20 +206,41 @@ async function loadAutomationReviews() {
   }
 }
 
+async function loadPosterHolds() {
+  adminStatus.textContent = "A carregar eventos sem cartaz…";
+  reports.innerHTML = "";
+  try {
+    const response = await fetch("/api/admin/poster-holds", { headers: { Accept: "application/json" }, credentials: "same-origin" });
+    requireCurrentSession(response);
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível carregar os cartazes em falta.");
+    const items = Array.isArray(result.items) ? result.items : [];
+    reports.innerHTML = items.length ? items.map(posterHoldCard).join("") : "<p class=\"empty-state\">Não há eventos retidos por falta de cartaz.</p>";
+    adminStatus.textContent = items.length ? `${items.length} evento${items.length === 1 ? "" : "s"} retido${items.length === 1 ? "" : "s"}.` : "";
+  } catch (error) {
+    adminStatus.textContent = error.message || "Não foi possível carregar os cartazes em falta.";
+  }
+}
+
 function loadActiveView() {
-  return activeView === "automation" ? loadAutomationReviews() : loadReports();
+  if (activeView === "automation") return loadAutomationReviews();
+  if (activeView === "poster-holds") return loadPosterHolds();
+  return loadReports();
 }
 
 function updateReviewControls() {
   const automated = activeView === "automation";
-  communityFilters.hidden = automated;
+  const posterHolds = activeView === "poster-holds";
+  communityFilters.hidden = automated || posterHolds;
   automationFilters.hidden = !automated;
   const acceptedAutomation = activeAutomationStatus === "resolved";
   automationBulkActions.hidden = !automated || !["new", "reviewing", "resolved"].includes(activeAutomationStatus);
   bulkResolve.hidden = acceptedAutomation;
   bulkApply.textContent = acceptedAutomation ? "Aplicar todos os completos à agenda" : "Aceitar e aplicar completos";
-  communityBulkActions.hidden = automated || !["new", "reviewing"].includes(activeCommunityStatus);
-  filterContext.textContent = automated
+  communityBulkActions.hidden = automated || posterHolds || !["new", "reviewing"].includes(activeCommunityStatus);
+  filterContext.textContent = posterHolds
+    ? "Eventos guardados fora da agenda até terem cartaz oficial"
+    : automated
     ? "Resultados das rondas — confirma sempre na fonte oficial"
     : "Pedidos enviados por utilizadores";
 }
@@ -237,6 +273,35 @@ viewFilters.addEventListener("click", event => {
 });
 
 reports.addEventListener("click", async event => {
+  const posterHoldButton = event.target.closest("[data-save-poster-hold]");
+  if (posterHoldButton) {
+    const card = posterHoldButton.closest("[data-poster-hold]");
+    const posterUrl = card.querySelector('[name="posterUrl"]')?.value.trim();
+    const sourceUrl = card.querySelector('[name="sourceUrl"]')?.value.trim();
+    if (!posterUrl || !sourceUrl) {
+      adminStatus.textContent = "Indica o link direto do cartaz e a página oficial que o confirma.";
+      return;
+    }
+    if (!window.confirm("Guardar este cartaz oficial e publicar o evento na agenda?")) return;
+    posterHoldButton.disabled = true;
+    try {
+      const response = await fetch("/api/admin/poster-holds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ id: card.dataset.posterHold, posterUrl, sourceUrl })
+      });
+      requireCurrentSession(response);
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "Não foi possível guardar o cartaz.");
+      adminStatus.textContent = result.message || "Cartaz guardado.";
+      loadPosterHolds();
+    } catch (error) {
+      adminStatus.textContent = error.message || "Não foi possível guardar o cartaz.";
+      posterHoldButton.disabled = false;
+    }
+    return;
+  }
   const automationButton = event.target.closest("[data-automation-status]");
   if (automationButton) {
     const card = automationButton.closest(".report");

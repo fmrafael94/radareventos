@@ -1453,6 +1453,9 @@ async function loadApprovedCloudflareEvents() {
         }
         existing[key] = value.slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
       }
+      if (existing.publicationStatus === "poster_pending" && safePublicUrl(override.patch.image)) {
+        existing.publicationStatus = "published";
+      }
       changed = true;
     });
     const known = new Set(EVENTS.map(event => event.id));

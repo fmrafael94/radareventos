@@ -600,8 +600,7 @@ window.POSTER_PUBLICATION_HOLDS = [
   "black-box-fest-2026",
   "web-pitch-black-equaleft",
   "butchery-at-christmas-time",
-  "vul-afterglow",
-  "reign-fury-hardcore-fest-2026"
+  "vul-afterglow"
 ];
 const posterPublicationHoldIds = new Set(window.POSTER_PUBLICATION_HOLDS);
 window.EVENTS.forEach(event => {

@@ -3,8 +3,9 @@ name: Verificação de links oficiais
 on:
   workflow_dispatch:
   schedule:
-    # De duas em duas horas, fora da hora cheia para não sobrecarregar fontes.
-    - cron: "17 */2 * * *"
+    # Duas vezes por dia, fora da hora cheia. Isto reduz carga nas fontes
+    # oficiais sem deixar a agenda ficar desatualizada durante dias.
+    - cron: "17 5,17 * * *"
 
 permissions:
   contents: read

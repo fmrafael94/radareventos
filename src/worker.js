@@ -4,6 +4,7 @@ import { onRequestPost as postFeedback } from "../functions/api/feedback.js";
 import { onRequestGet as getAdminFeedback, onRequestPatch as patchAdminFeedback, onRequestPostBulk as postAdminFeedbackBulk } from "../functions/api/admin/feedback.js";
 import { onRequestGet as getAutomationReviews, onRequestPatch as patchAutomationReview, onRequestPost as postAutomationReviewBulk } from "../functions/api/admin/automation-reviews.js";
 import { onRequestGet as getAdminPoster } from "../functions/api/admin/poster.js";
+import { onRequestGet as getPosterHolds, onRequestPost as postPosterHold } from "../functions/api/admin/poster-holds.js";
 import { clearAdminSession, loginWithAdminEmailCode, loginWithAdminPassword, requestAdminEmailCode, requireAdmin } from "../functions/admin-auth.js";
 import { onRequestPost as postAuditReport } from "../functions/api/internal/audit-report.js";
 import { ensureEventStore } from "../functions/event-store.js";
@@ -29,6 +30,14 @@ function secureResponse(response) {
 }
 
 const eventField = (source, name) => source.match(new RegExp(`${name}:\\s*"((?:\\\\.|[^"\\\\])*)"`))?.[1]?.replace(/\\"/g, '"') || "";
+const validRemoteUrl = value => {
+  try {
+    const url = new URL(String(value || "").trim());
+    return /^https?:$/.test(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+};
 export function posterPublicationHoldIds(source) {
   const literal = source.match(/window\.POSTER_PUBLICATION_HOLDS\s*=\s*(\[[\s\S]*?\]);/i)?.[1];
   if (!literal) return new Set();
@@ -86,6 +95,29 @@ async function publicEventPatch(env, id) {
   }
 }
 
+async function releasedPosterHoldIds(env, source, today = "0000-00-00") {
+  if (!env.EVENT_RADAR_DB) return [];
+  const holds = posterPublicationHoldIds(source);
+  if (!holds.size) return [];
+  try {
+    await ensureEventStore(env.EVENT_RADAR_DB);
+    const { results = [] } = await env.EVENT_RADAR_DB.prepare("SELECT event_id, patch_json FROM event_overrides").all();
+    return results.flatMap(row => {
+      if (!holds.has(row.event_id)) return [];
+      try {
+        const patch = JSON.parse(row.patch_json || "{}");
+        const literal = eventLiteral(source, row.event_id);
+        const lastDate = eventField(literal, "endDate") || eventField(literal, "date");
+        return validRemoteUrl(patch?.image) && literal && lastDate >= today ? [row.event_id] : [];
+      } catch {
+        return [];
+      }
+    });
+  } catch {
+    return [];
+  }
+}
+
 async function assetText(request, env, path) {
   const url = new URL(request.url);
   url.pathname = path;
@@ -111,13 +143,13 @@ async function eventPage(request, env, id) {
   if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Evento não encontrado.", { status: 404 });
   try {
     const events = await assetText(request, env, "/events.js");
-    if (posterPublicationHoldIds(events).has(id)) return new Response("Evento não encontrado.", { status: 404 });
+    const patch = await publicEventPatch(env, id);
+    if (posterPublicationHoldIds(events).has(id) && !validRemoteUrl(patch.image)) return new Response("Evento não encontrado.", { status: 404 });
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
     const cloudEvent = match ? null : await publishedEvent(env, id);
     if (!match && !cloudEvent) return new Response("Evento não encontrado.", { status: 404 });
     const event = match?.[0] || "";
-    const patch = await publicEventPatch(env, id);
     const stringPatch = (key, fallback = "") => typeof patch[key] === "string" && patch[key].trim() ? patch[key].trim() : fallback;
     const title = stringPatch("title", cloudEvent?.title || eventField(event, "title") || "Evento");
     const date = stringPatch("date", cloudEvent?.date || eventField(event, "date"));
@@ -231,6 +263,7 @@ async function sitemap(request, env) {
     const origin = new URL(request.url).origin;
     const today = lisbonToday();
     const ids = sitemapEventIds(source, today);
+    ids.push(...await releasedPosterHoldIds(env, source, today));
     if (env.EVENT_RADAR_DB) {
       try {
         await ensureEventStore(env.EVENT_RADAR_DB);
@@ -273,7 +306,8 @@ async function eventPoster(request, env, id, executionCtx) {
     // Check publication status before the edge cache. Otherwise a formerly
     // public poster can outlive a newly applied publication hold.
     const events = await assetText(request, env, "/events.js");
-    if (posterPublicationHoldIds(events).has(id)) return new Response("Cartaz não encontrado.", { status: 404 });
+    const patch = await publicEventPatch(env, id);
+    if (posterPublicationHoldIds(events).has(id) && !validRemoteUrl(patch.image)) return new Response("Cartaz não encontrado.", { status: 404 });
     const cache = caches.default;
     const cached = await cache.match(request);
     if (cached) return cached;
@@ -282,7 +316,6 @@ async function eventPoster(request, env, id, executionCtx) {
     const cloudEvent = match ? null : await publishedEvent(env, id);
     if (!match && !cloudEvent) return new Response("Cartaz não encontrado.", { status: 404 });
     const app = await assetText(request, env, "/app.js");
-    const patch = await publicEventPatch(env, id);
     const poster = (typeof patch.image === "string" && patch.image.trim()) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(match?.[0] || "", "image");
     if (!poster) return shareFallback(request, env);
     const posterUrl = new URL(poster);
@@ -459,6 +492,8 @@ export default {
     if (pathname === "/api/admin/automation-reviews" && request.method === "PATCH") return secureResponse(await patchAutomationReview(context));
     if (pathname === "/api/admin/automation-reviews/bulk" && request.method === "POST") return secureResponse(await postAutomationReviewBulk(context));
     if (pathname === "/api/admin/poster" && request.method === "GET") return secureResponse(await getAdminPoster(context));
+    if (pathname === "/api/admin/poster-holds" && request.method === "GET") return secureResponse(await getPosterHolds(context));
+    if (pathname === "/api/admin/poster-holds" && request.method === "POST") return secureResponse(await postPosterHold(context));
     if (canonicalAdminPage && ["GET", "HEAD"].includes(request.method)) {
       const session = await requireAdmin(context);
       const response = await privateAssetPage(request, env, session.response ? "/admin-login" : "/admin");
