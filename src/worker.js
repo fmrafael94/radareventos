@@ -53,6 +53,11 @@ const humanDate = iso => {
   return new Intl.DateTimeFormat("pt-PT", { timeZone: "UTC", day: "numeric", month: "long" }).format(new Date(`${iso}T12:00:00Z`));
 };
 
+const eventLiteral = (source, id) => {
+  const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return source.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`))?.[0] || "";
+};
+
 async function publishedEvent(env, id) {
   if (!env.EVENT_RADAR_DB) return null;
   try {
@@ -168,6 +173,56 @@ export function sitemapEventIds(source, today = "0000-00-00") {
   const series = [...prefixBlock.matchAll(/"([a-z0-9-]+)"\s*:\s*"([a-z0-9-]+)"/gi)]
     .map(match => ({ parentId: match[1], prefix: match[2] }));
   return [...new Set(records.filter(({ id }) => !series.some(({ parentId, prefix }) => id !== parentId && id.startsWith(prefix))).map(record => record.id))];
+}
+
+// The app renders its full, interactive agenda in the browser. This small
+// server-rendered collection gives crawlers and no-JavaScript visitors a
+// stable set of ordinary links into the same current, public agenda.
+export function homepageEventLinks(source, today = "0000-00-00", limit = 12) {
+  const publicIds = new Set(sitemapEventIds(source, today));
+  return [...publicIds]
+    .map(id => {
+      const literal = eventLiteral(source, id);
+      return {
+        id,
+        title: eventField(literal, "title"),
+        date: eventField(literal, "date"),
+        endDate: eventField(literal, "endDate"),
+        venue: eventField(literal, "venue"),
+        city: eventField(literal, "city")
+      };
+    })
+    .filter(event => event.title && event.date && event.date >= today)
+    .sort((left, right) => left.date.localeCompare(right.date) || left.title.localeCompare(right.title, "pt"))
+    .slice(0, limit);
+}
+
+function homepageEventLinksHtml(source, today) {
+  const events = homepageEventLinks(source, today);
+  if (!events.length) return "";
+  const links = events.map(event => {
+    const date = event.endDate && event.endDate !== event.date
+      ? `${humanDate(event.date)}–${humanDate(event.endDate)}`
+      : humanDate(event.date);
+    const place = [event.venue, event.city].filter(Boolean).join(" · ");
+    return `<li><a href="/evento/${encodeURIComponent(event.id)}"><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><span><strong>${escapeHtml(event.title)}</strong>${place ? `<small>${escapeHtml(place)}</small>` : ""}</span><b aria-hidden="true">→</b></a></li>`;
+  }).join("");
+  return `<section class="seo-event-links" aria-labelledby="seo-events-title"><div class="seo-event-links-heading"><div><p class="kicker">Explorar</p><h2 id="seo-events-title">Mais música na agenda.</h2></div><a href="#agenda">Ver todos os eventos <span aria-hidden="true">↑</span></a></div><p>Concertos e festivais em Portugal, atualizados por ordem de data.</p><ul>${links}</ul></section>`;
+}
+
+async function homepage(request, env) {
+  try {
+    const [template, events] = await Promise.all([
+      assetText(request, env, "/index.html"),
+      assetText(request, env, "/events.js")
+    ]);
+    const html = template.replace("<!-- SEO_UPCOMING_EVENTS -->", homepageEventLinksHtml(events, lisbonToday()));
+    return new Response(html, {
+      headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "public, max-age=300" }
+    });
+  } catch {
+    return new Response("Não foi possível abrir a agenda.", { status: 503, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } });
+  }
 }
 
 async function sitemap(request, env) {
@@ -346,6 +401,10 @@ export default {
     }
 
     if (pathname === "/robots.txt" && ["GET", "HEAD"].includes(request.method)) return secureResponse(new Response(request.method === "HEAD" ? null : `User-agent: *\nAllow: /\nSitemap: ${new URL(request.url).origin}/sitemap.xml\n`, { headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "public, max-age=3600" } }));
+    if (pathname === "/" && ["GET", "HEAD"].includes(request.method)) {
+      const response = await homepage(request, env);
+      return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);
+    }
     if (pathname === "/sitemap.xml" && ["GET", "HEAD"].includes(request.method)) {
       const response = await sitemap(request, env);
       return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);

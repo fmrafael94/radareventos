@@ -184,8 +184,30 @@ body { background:radial-gradient(circle at 86% 5%,rgba(108,128,160,.22),transpa
 .intro::before,.intro::after { display:none; }.intro .kicker { color:#637169; }.intro h1 { color:#1d211f; text-shadow:none; }.intro h1 em { color:#687e5b; }.intro>p:not(.kicker) { color:#4f5a54; }
 .signal-field { right:28px; width:318px; height:318px; opacity:.78; background:radial-gradient(circle,rgba(102,126,91,.13),transparent 65%); }.signal-ring { border-color:rgba(55,76,63,.40); }.signal-sweep { width:274px; height:274px; background:conic-gradient(from -18deg,rgba(101,132,78,.38) 0deg,rgba(101,132,78,.10) 32deg,transparent 33deg 360deg); box-shadow:0 0 26px rgba(88,111,76,.09); }.signal-core::before { background:linear-gradient(96deg,#26362c 0 58%,#70875c 58%); -webkit-background-clip:text; background-clip:text; }.signal-point { background:#7c9b60; box-shadow:0 0 0 5px rgba(102,135,79,.10),0 0 17px rgba(102,135,79,.5); }.point-two { background:#c8755d; box-shadow:0 0 0 5px rgba(200,117,93,.11),0 0 17px rgba(200,117,93,.48); }
 .featured-events { margin-top:27px; }
+
+/* Server-rendered internal navigation: useful before the interactive agenda
+   has loaded, and deliberately kept as a compact, useful part of the page. */
+.seo-event-links { margin:42px 0 34px; padding:24px; border:1px solid #d5dcd0; border-radius:16px; background:rgba(255,253,248,.72); box-shadow:0 10px 26px rgba(45,70,52,.06); }
+.seo-event-links-heading { display:flex; align-items:end; justify-content:space-between; gap:18px; }
+.seo-event-links .kicker { margin:0; color:#587348; }
+.seo-event-links h2 { margin:4px 0 0; color:#193226; font-size:25px; letter-spacing:-.055em; }
+.seo-event-links-heading > a { color:#385742; font:500 10px "DM Mono",monospace; text-decoration:underline; text-underline-offset:4px; white-space:nowrap; }
+.seo-event-links > p { margin:9px 0 16px; color:#647067; font-size:13px; }
+.seo-event-links ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; margin:0; padding:0; list-style:none; }
+.seo-event-links li { border-top:1px solid #d8ddd4; }
+.seo-event-links li:nth-last-child(-n+2) { border-bottom:1px solid #d8ddd4; }
+.seo-event-links a { display:grid; grid-template-columns:86px minmax(0,1fr) auto; align-items:center; gap:12px; padding:12px 0; color:#1b2a22; text-decoration:none; }
+.seo-event-links time { color:#587348; font:500 10px "DM Mono",monospace; text-transform:uppercase; }
+.seo-event-links span { min-width:0; }
+.seo-event-links strong,.seo-event-links small { display:block; }
+.seo-event-links strong { font-size:14px; line-height:1.2; }
+.seo-event-links small { margin-top:3px; color:#647067; font-size:11px; line-height:1.25; }
+.seo-event-links b { color:#385742; font-size:16px; font-weight:500; transition:transform .2s ease; }
+.seo-event-links a:hover b,.seo-event-links a:focus-visible b { transform:translateX(3px); }
 @media (min-width:761px) and (max-width:960px) { .intro { min-height:324px; }.signal-field { right:15px; width:238px; height:238px; }.signal-sweep { width:205px; height:205px; } }
 @media (max-width:760px) { .intro { min-height:365px; padding:29px 23px 24px; }.intro h1 { color:#1d211f; }.intro>p:not(.kicker) { color:#4f5a54; }.signal-field { right:8px; bottom:9px; width:166px; height:166px; opacity:.55; }.signal-sweep { width:150px; height:150px; }.featured-events { margin-top:23px; } }
+
+@media (max-width:700px) { .seo-event-links { margin:30px 0 26px; padding:19px 16px; border-radius:14px; }.seo-event-links h2 { font-size:22px; }.seo-event-links > p { font-size:12px; }.seo-event-links ul { grid-template-columns:1fr; }.seo-event-links li:nth-last-child(2) { border-bottom:0; }.seo-event-links li:last-child { border-bottom:1px solid #d8ddd4; }.seo-event-links a { grid-template-columns:76px minmax(0,1fr) auto; gap:8px; padding:11px 0; }.seo-event-links strong { font-size:13px; }.seo-event-links small { font-size:10px; } }
 
 /* The masthead is a dark stage again. Light, rather than a literal sonar,
    supplies the movement and depth. */
