@@ -60,6 +60,16 @@ const eventLiteral = (source, id) => {
   return source.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`))?.[0] || "";
 };
 
+// The catalogue starts with compact event records and completes some of them
+// later through Object.assign. Browsers evaluate that JavaScript, while this
+// Worker reads it as text for event and share pages. Include the explicit
+// image update so those two views never fall back to the generic share card.
+const imageFromCatalogueUpdate = (source, id) => {
+  const start = source.indexOf(`"${id}": {`);
+  if (start < 0) return "";
+  return source.slice(start, start + 4_000).match(/\bimage:\s*"((?:\\.|[^"\\])*)"/)?.[1]?.replace(/\\"/g, '"') || "";
+};
+
 async function publishedEvent(env, id) {
   if (!env.EVENT_RADAR_DB) return null;
   try {
@@ -163,7 +173,7 @@ async function eventPage(request, env, id) {
     const venue = stringPatch("venue", cloudEvent?.venue || eventField(event, "venue"));
     const city = stringPatch("city", cloudEvent?.city || eventField(event, "city"));
     const app = await assetText(request, env, "/app.js");
-    const poster = stringPatch("image", app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(event, "image"));
+    const poster = stringPatch("image", app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || imageFromCatalogueUpdate(events, id) || cloudEvent?.image || eventField(event, "image"));
     const url = new URL(request.url);
     const canonical = `${url.origin}/evento/${encodeURIComponent(id)}`;
     const dateLabel = endDate && endDate !== date ? `${humanDate(date)}–${humanDate(endDate)}` : humanDate(date);
@@ -323,7 +333,7 @@ async function eventPoster(request, env, id, executionCtx) {
     const cloudEvent = match ? null : await publishedEvent(env, id);
     if (!match && !cloudEvent) return new Response("Cartaz não encontrado.", { status: 404 });
     const app = await assetText(request, env, "/app.js");
-    const poster = (typeof patch.image === "string" && patch.image.trim()) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(match?.[0] || "", "image");
+    const poster = (typeof patch.image === "string" && patch.image.trim()) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || imageFromCatalogueUpdate(events, id) || cloudEvent?.image || eventField(match?.[0] || "", "image");
     if (!poster) return shareFallback(request, env);
     const posterUrl = new URL(poster);
     if (!/^https?:$/.test(posterUrl.protocol)) return shareFallback(request, env);
