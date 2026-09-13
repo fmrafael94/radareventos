@@ -1,6 +1,6 @@
 import { requireAdmin } from "../../admin-auth.js";
 import { ensureEventStore } from "../../event-store.js";
-import { publicationChecklist, publishingReady, validHttpUrl, validIsoDate } from "../../publication-readiness.js";
+import { publicationChecklist, publishingReady, validHttpUrl, validIsoDate, validPosterUrl } from "../../publication-readiness.js";
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 const idPattern = /^[a-z0-9-]{1,180}$/i;
@@ -91,7 +91,9 @@ const valuesFor = (event, patch = {}, appSource = "", catalogueSource = "", held
   venue: text(patch.venue || event.venue, 180),
   tickets: text(patch.tickets || event.tickets, 220),
   ticketUrl: validHttpUrl(patch.ticketUrl || event.ticketUrl),
-  posterUrl: held ? "" : validHttpUrl(patch.image || event.image || imageFromCatalogueUpdate(catalogueSource, event.id) || imageFromApp(appSource, event.id) || sharedImageFromApp(appSource, event.id)),
+  // A held event deliberately ignores its old catalogue poster, but must use
+  // the replacement saved by the editor once one has been supplied.
+  posterUrl: validPosterUrl(patch.image || (!held && (event.image || imageFromCatalogueUpdate(catalogueSource, event.id) || imageFromApp(appSource, event.id) || sharedImageFromApp(appSource, event.id)))),
   officialUrl: validHttpUrl(patch.sourceUrl || event.sourceUrl)
 });
 
@@ -114,7 +116,9 @@ async function publicationIssues(context) {
     const override = overrides.get(event.id);
     const held = holds.has(event.id);
     const values = valuesFor(event, override?.patch, appSource, source, held);
-    const publication = { items: publicationChecklist(values), ready: publishingReady(values) && !held };
+    // The static hold is a safety net, not a permanent ban. Once the complete
+    // override is saved it must leave this list and become public.
+    const publication = { items: publicationChecklist(values), ready: publishingReady(values) };
     return held || !publication.ready ? [{ ...event, values, publication, held }] : [];
   });
 }
@@ -158,10 +162,10 @@ export async function onRequestPost(context) {
       venue: text(payload?.venue, 180) || previous.venue,
       tickets: text(payload?.tickets, 220) || previous.tickets,
       ticketUrl: validHttpUrl(payload?.ticketUrl) || previous.ticketUrl,
-      image: validHttpUrl(payload?.posterUrl) || previous.image,
+      image: validPosterUrl(payload?.posterUrl) || previous.image,
       sourceUrl: validHttpUrl(payload?.officialUrl) || previous.sourceUrl
     }, appSource, source, false);
-    if (!publishingReady(values)) return json({ message: "Completa título, data, cidade, local, bilheteira/entrada, cartaz oficial e página oficial antes de publicar." }, 400);
+    if (!publishingReady(values)) return json({ message: "Completa título, data, cidade, local, bilheteira/entrada, um link direto para o ficheiro do cartaz (JPG, PNG, WebP, etc.) e página oficial antes de publicar. Uma página de Instagram não é um cartaz direto." }, 400);
     const patch = {
       ...previous,
       title: values.eventName,

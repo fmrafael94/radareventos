@@ -166,7 +166,7 @@ function posterHoldCard(item) {
       <label><span>Local</span><input name="venue" maxlength="180" value="${escapeHtml(values.venue || item.venue || "")}" /></label>
       <label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 €" value="${escapeHtml(values.tickets || "")}" /></label>
       <label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(values.ticketUrl || "")}" /></label>
-      <label><span>Link direto do cartaz oficial</span><input name="posterUrl" type="url" maxlength="1600" placeholder="https://…/cartaz.jpg" value="${escapeHtml(values.posterUrl || "")}" /></label>
+      <label><span>Link direto do ficheiro do cartaz</span><input name="posterUrl" type="url" maxlength="1600" placeholder="https://…/cartaz.jpg" value="${escapeHtml(values.posterUrl || "")}" /><small>Usa o ficheiro JPG, PNG, WebP, etc. — não a página de Instagram, Facebook ou do evento.</small></label>
       <label class="official-source"><span>Página oficial que confirma a informação</span><input name="officialUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(values.officialUrl || item.sourceUrl || "")}" /></label>
     </fieldset>
     <div class="report-actions"><button type="button" data-save-poster-hold="true">Guardar e publicar</button></div>

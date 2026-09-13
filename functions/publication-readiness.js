@@ -9,6 +9,22 @@ export const validHttpUrl = value => {
   }
 };
 
+// A page that happens to contain a poster (for example an Instagram post) is
+// not an image URL. Browsers cannot render that page inside an <img>, which
+// used to let an event pass the checklist and then show a broken poster.
+// Keep this deliberately small and transparent: the editorial workflow asks
+// for a direct, public image file that the site and share crawlers can load.
+export const validPosterUrl = value => {
+  const safe = validHttpUrl(value);
+  if (!safe) return "";
+  try {
+    const url = new URL(safe);
+    return /\.(?:avif|gif|jpe?g|png|svg|webp)$/i.test(url.pathname) ? url.href : "";
+  } catch {
+    return "";
+  }
+};
+
 export const validIsoDate = value => /^\d{4}-\d{2}-\d{2}$/.test(text(value, 10));
 
 // This is the single editorial gate for anything that enters the public
@@ -22,7 +38,7 @@ export function publicationChecklist(values = {}) {
     { id: "date", label: "Data", present: validIsoDate(values.eventDate || values.date) },
     { id: "city", label: "Cidade / concelho", present: Boolean(text(values.city, 100)) },
     { id: "venue", label: "Local", present: Boolean(text(values.venue, 180)) },
-    { id: "poster", label: "Cartaz oficial", present: Boolean(validHttpUrl(values.posterUrl || values.image)) },
+    { id: "poster", label: "Cartaz oficial", present: Boolean(validPosterUrl(values.posterUrl || values.image)) },
     { id: "ticketing", label: "Bilheteira ou entrada", present: Boolean(ticketing) },
     { id: "source", label: "Página oficial direta", present: Boolean(validHttpUrl(values.officialUrl || values.sourceUrl)) }
   ];
