@@ -64,6 +64,7 @@ function syncPublicationChecklist(card) {
 function reportCard(item) {
   const title = item.event_name || "Evento sem nome";
   const promoterPage = item.event_id === "promoter-page";
+  const editableCommunityEvent = !promoterPage;
   const moderation = item.image_moderation_status && item.image_moderation_status !== "not_applicable"
     ? `<div><dt>Verificação da imagem</dt><dd>${escapeHtml(item.image_moderation_status === "approved" ? "Aprovada automaticamente" : item.image_moderation_status === "review" ? "Retida para revisão" : "Rejeitada automaticamente")}${item.image_moderation_reason ? ` · ${escapeHtml(item.image_moderation_reason)}` : ""}</dd></div>`
     : "";
@@ -74,7 +75,7 @@ function reportCard(item) {
       : "";
   const review = item.review_data || {};
   const values = (key, fallback = "") => escapeHtml(review[key] || fallback);
-  const checklist = item.kind === "suggestion" && !promoterPage ? checklistMarkup(item.publication) : "";
+  const checklist = editableCommunityEvent ? checklistMarkup(item.publication) : "";
   return `<article class="report" data-id="${escapeHtml(item.id)}">
     <div class="report-meta"><span class="kind">${promoterPage ? "Página de promotora" : item.kind === "correction" ? "Correção" : "Sugestão"}</span><time>${dateTime(item.created_at)}</time></div>
     <div class="report-heading"><div><h2>${escapeHtml(title)}</h2><p>${escapeHtml([item.event_date, item.city].filter(Boolean).join(" · ") || "Data ou local por confirmar")}</p></div>${poster}</div>
@@ -85,11 +86,11 @@ function reportCard(item) {
       ${item.poster_file_name ? `<div><dt>Ficheiro enviado</dt><dd>${escapeHtml(item.poster_file_name)}</dd></div>` : ""}
       ${moderation}
     </dl>
-    ${item.kind === "suggestion" && !promoterPage ? `${checklist}<fieldset class="event-review-fields"><legend>Dados para publicação</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${values("eventName", item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${values("eventDate", item.event_date || "")}" /></label><label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" value="${values("eventEndDate")}" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${values("city", item.city || "")}" /></label><label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" value="${values("venue")}" /></label><label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 € · Bilheteira por confirmar" value="${values("tickets")}" /></label><label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1000" placeholder="https://" value="${values("ticketUrl")}" /></label><label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" value="${values("posterUrl", item.poster_url || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${values("officialUrl", item.official_url || "")}" /></label></fieldset>` : ""}
+    ${editableCommunityEvent ? `${checklist}<fieldset class="event-review-fields"><legend>${item.kind === "correction" ? "Completar dados da correção" : "Dados para publicação"}</legend><label><span>Título</span><input name="eventName" maxlength="180" value="${values("eventName", item.event_name || "")}" /></label><label><span>Data</span><input name="eventDate" type="date" value="${values("eventDate", item.event_date || "")}" /></label><label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" value="${values("eventEndDate")}" /></label><label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${values("city", item.city || "")}" /></label><label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" value="${values("venue")}" /></label><label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 € · Bilheteira por confirmar" value="${values("tickets")}" /></label><label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1000" placeholder="https://" value="${values("ticketUrl")}" /></label><label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" value="${values("posterUrl", item.poster_url || "")}" /></label><label class="official-source"><span>Página oficial direta</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" value="${values("officialUrl", item.official_url || "")}" /></label></fieldset>` : ""}
     <label class="staff-note"><span>Nota privada</span><textarea maxlength="1500" placeholder="O que verificaste ou o que falta confirmar?">${escapeHtml(item.staff_note || "")}</textarea></label>
     <div class="report-actions">
       <button type="button" data-next-status="reviewing">Em análise</button>
-      <button type="button" data-next-status="published">${promoterPage ? "Aprovar página" : item.kind === "suggestion" ? "Publicar após confirmar" : "Concluir correção"}</button>
+      <button type="button" data-next-status="published">${promoterPage ? "Aprovar página" : item.kind === "suggestion" ? "Publicar após confirmar" : "Aplicar correção"}</button>
       <button type="button" data-next-status="rejected" class="reject">Rejeitar</button>
       <button type="button" data-next-status="closed" class="secondary">Fechar</button>
     </div>
@@ -100,9 +101,12 @@ function automationCard(item) {
   const isLink = item.category === "link";
   const isApplied = Boolean(item.applied_at);
   const readyToApply = item.publication?.ready === true;
-  const editableEvent = Boolean(item.event_snapshot);
+  // Every queue item can become a properly documented event. Existing agenda
+  // events receive an override; a source-watch item becomes a new private
+  // editorial draft until its full checklist can be applied.
+  const editableEvent = true;
   const review = item.review_data || {};
-  const values = key => escapeHtml(review[key] || "");
+  const values = (key, fallback = "") => escapeHtml(review[key] || fallback);
   const result = item.result ? `<span class="automation-result">Resultado automático: ${escapeHtml(item.result)}</span>` : "";
   const snapshot = item.event_snapshot ? `<p class="automation-event-context">Evento na agenda: <b>${escapeHtml(item.event_snapshot.title)}</b> · ${escapeHtml(item.event_snapshot.date)} · ${escapeHtml(item.event_snapshot.venue || item.event_snapshot.city || "local a confirmar")}</p>` : "";
   const checklist = item.publication ? checklistMarkup(item.publication) : "";
@@ -113,14 +117,14 @@ function automationCard(item) {
     <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.detail || "Requer confirmação manual.")}</p></div></div>
     ${checks}<dl><div><dt>${isLink ? "Página ou bilheteira" : "Fonte"}</dt><dd><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Abrir e confirmar ↗</a></dd></div><div><dt>Sinal</dt><dd>${result || "Sem resultado"}</dd></div></dl>
     ${snapshot}${checklist}<p class="automation-note">Este sinal foi criado por uma ronda automática. A checklist mostra o estado atual do evento; confirma a página diretamente antes de alterar a agenda.</p>
-    ${editableEvent ? `<details class="automation-editor event-editor"><summary>Completar dados do evento</summary>
-      <p>Preenche o que falta. Os dados ficam guardados para este evento e só entram na agenda pública quando a checklist estiver completa e o aceitares.</p>
+    ${editableEvent ? `<details class="automation-editor event-editor"><summary>${item.event_snapshot ? "Completar dados do evento" : "Criar evento a partir desta fonte"}</summary>
+      <p>${item.event_snapshot ? "Preenche o que falta. Os dados ficam guardados para este evento e só entram na agenda pública quando a checklist estiver completa e o aceitares." : "Se esta fonte tiver um evento novo, preenche os dados e o cartaz oficial. Só entra na agenda quando a checklist estiver completa e o aceitares."}</p>
       <fieldset class="event-review-fields"><legend>Dados para publicação</legend>
-        <label><span>Título</span><input name="eventName" maxlength="180" value="${values("eventName")}" /></label>
-        <label><span>Data</span><input name="eventDate" type="date" value="${values("eventDate")}" /></label>
+        <label><span>Título</span><input name="eventName" maxlength="180" value="${values("eventName", item.event_snapshot?.title || item.proposal_title || item.title)}" /></label>
+        <label><span>Data</span><input name="eventDate" type="date" value="${values("eventDate", item.event_snapshot?.date || "")}" /></label>
         <label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" value="${values("eventEndDate")}" /></label>
-        <label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${values("city")}" /></label>
-        <label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" value="${values("venue")}" /></label>
+        <label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${values("city", item.event_snapshot?.city || "")}" /></label>
+        <label><span>Local</span><input name="venue" maxlength="180" placeholder="Sala, recinto ou morada" value="${values("venue", item.event_snapshot?.venue || "")}" /></label>
         <label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" placeholder="Ex.: Entrada livre · 15 € · Bilheteira por confirmar" value="${values("tickets")}" /></label>
         <label><span>Link de bilheteira (se existir)</span><input name="ticketUrl" type="url" maxlength="1000" placeholder="https://" value="${values("ticketUrl")}" /></label>
         <label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" value="${values("posterUrl")}" /></label>
@@ -137,7 +141,7 @@ function automationCard(item) {
       ? `<p class="automation-note"><b>Aplicado à agenda.</b> Esta verificação fica guardada como histórico; uma nova alteração na fonte volta a abrir a revisão.</p>`
       : `<div class="report-actions">
           <button type="button" data-automation-status="reviewing">${editableEvent ? "Guardar dados / em análise" : "Guardar / em análise"}</button>
-          <button type="button" data-automation-status="resolved"${isLink ? " data-apply-to-agenda=\"true\"" : ""}${isLink && !readyToApply ? " disabled title=\"Completa primeiro todos os pontos do checklist\"" : ""}>${isLink ? "Aceitar e aplicar à agenda" : "Aceitar após confirmar"}</button>
+          <button type="button" data-automation-status="resolved" data-apply-to-agenda="true"${!readyToApply ? " disabled title=\"Completa primeiro todos os pontos do checklist\"" : ""}>${item.event_snapshot ? "Aceitar e aplicar à agenda" : "Criar e publicar evento"}</button>
           <button type="button" data-automation-status="ignored" class="secondary">Recusar</button>
         </div>`}
   </article>`;

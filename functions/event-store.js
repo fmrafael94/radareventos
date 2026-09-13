@@ -52,8 +52,7 @@ export function ensureEventStore(db) {
   return schemaReady;
 }
 
-export function canonicalEventFromReview(feedback, values) {
-  const id = `community-${feedback.id}`;
+export function canonicalEventFromEditorial(id, values) {
   const today = new Date().toISOString().slice(0, 10);
   return {
     id,
@@ -79,4 +78,8 @@ export function canonicalEventFromReview(feedback, values) {
     verifiedAt: today,
     salesCheckedAt: ""
   };
+}
+
+export function canonicalEventFromReview(feedback, values) {
+  return canonicalEventFromEditorial(`community-${feedback.id}`, values);
 }

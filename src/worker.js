@@ -213,6 +213,7 @@ async function shareFallback(request, env) {
 
 async function eventPoster(request, env, id, executionCtx) {
   if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Cartaz não encontrado.", { status: 404 });
+  let officialPosterUrl = "";
   try {
     // Check publication status before the edge cache. Otherwise a formerly
     // public poster can outlive a newly applied publication hold.
@@ -231,7 +232,19 @@ async function eventPoster(request, env, id, executionCtx) {
     if (!poster) return shareFallback(request, env);
     const posterUrl = new URL(poster);
     if (!/^https?:$/.test(posterUrl.protocol)) return shareFallback(request, env);
-    const response = await fetch(posterUrl.toString());
+    officialPosterUrl = posterUrl.toString();
+    // A slow external host must not leave the mobile poster frame blank.
+    // After a short proxy attempt, hand the browser to the verified original
+    // image; it may have a browser-only access policy that the Worker cannot
+    // satisfy anyway.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4500);
+    let response;
+    try {
+      response = await fetch(officialPosterUrl, { signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
     const type = response.headers.get("Content-Type") || "";
     if (!response.ok || !type.startsWith("image/")) {
       // Some official sites allow their public artwork in a browser but reject
@@ -240,7 +253,7 @@ async function eventPoster(request, env, id, executionCtx) {
       // preserves the source's access policy instead of trying to bypass it.
       return new Response(null, {
         status: 302,
-        headers: { Location: posterUrl.toString(), "Cache-Control": "no-store" }
+        headers: { Location: officialPosterUrl, "Cache-Control": "no-store" }
       });
     }
     const result = new Response(response.body, {
@@ -253,6 +266,10 @@ async function eventPoster(request, env, id, executionCtx) {
     executionCtx?.waitUntil(cache.put(request, result.clone()));
     return result;
   } catch {
+    if (officialPosterUrl) return new Response(null, {
+      status: 302,
+      headers: { Location: officialPosterUrl, "Cache-Control": "no-store" }
+    });
     return shareFallback(request, env);
   }
 }

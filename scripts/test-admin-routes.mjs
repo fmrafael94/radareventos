@@ -45,7 +45,7 @@ const fetchRoute = (url, init) => worker.fetch(new Request(url, init), env, exec
 
 const eventSource = await readFile(new URL("../events.js", import.meta.url), "utf8");
 const posterHolds = posterPublicationHoldIds(eventSource);
-assert.equal(posterHolds.size, 15);
+assert.equal(posterHolds.size, 14);
 assert.ok(posterHolds.has("ferro-avoid-friends"));
 const publicEventIds = sitemapEventIds(eventSource);
 assert.equal(publicEventIds.length, 263 - posterHolds.size);
@@ -54,7 +54,7 @@ assert.ok(!publicEventIds.includes("ferro-avoid-friends"));
 assert.ok(!publicEventIds.includes("kalorama-2026-28"));
 assert.ok(!publicEventIds.includes("under-doom-2026-09-25"));
 const currentSitemapIds = sitemapEventIds(eventSource, "2026-09-05");
-assert.equal(currentSitemapIds.length, 235);
+assert.equal(currentSitemapIds.length, 236);
 assert.ok(!currentSitemapIds.includes("kalorama-2026"));
 assert.ok(!currentSitemapIds.includes("iminente-2026-09-17"));
 

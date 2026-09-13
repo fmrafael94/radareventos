@@ -1,7 +1,7 @@
 import { ensureAutomationReviewStore } from "../../automation-review-store.js";
-import { ensureEventStore } from "../../event-store.js";
+import { canonicalEventFromEditorial, ensureEventStore } from "../../event-store.js";
 import { requireAdmin } from "../../admin-auth.js";
-import { publicationChecklist, reviewValuesFrom, samePublishedEvent } from "../../publication-readiness.js";
+import { publicationChecklist, publishingReady, reviewValuesFrom, samePublishedEvent } from "../../publication-readiness.js";
 import { staticCatalogueWithPosters } from "../../published-event-duplicates.js";
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
@@ -57,6 +57,8 @@ function editorialValues(event, reviewData = {}) {
   return reviewValuesFrom(reviewData, eventFallback(event));
 }
 
+const reviewEditKey = item => item.event_id || `review:${item.id}`;
+
 function availabilityFromTickets(tickets) {
   if (/entrada\s+(?:livre|gratuita)/i.test(tickets)) return "Entrada livre";
   if (/confirmar|anunciar/i.test(tickets)) return "Por confirmar";
@@ -90,6 +92,24 @@ async function applyAgendaPatch(db, item, values, proposalUrl = "") {
   `).bind(item.event_id, JSON.stringify(patch), sourceUrl || proposalUrl || null).run();
 }
 
+async function createAgendaEvent(db, item, values) {
+  const event = canonicalEventFromEditorial(`automation-${item.id}`, values);
+  await db.prepare(`
+    INSERT INTO event_registry (
+      id, payload_json, origin_kind, source_url, ticket_url,
+      source_verified_at, publication_status, next_audit_at, created_at, updated_at
+    ) VALUES (?, ?, 'official_source', ?, ?, date('now'), 'published', datetime('now', '+2 hours'), datetime('now'), datetime('now'))
+    ON CONFLICT(id) DO UPDATE SET
+      payload_json = excluded.payload_json,
+      source_url = excluded.source_url,
+      ticket_url = excluded.ticket_url,
+      source_verified_at = excluded.source_verified_at,
+      publication_status = 'published',
+      next_audit_at = datetime('now', '+2 hours'),
+      updated_at = datetime('now')
+  `).bind(event.id, JSON.stringify(event), event.sourceUrl, event.ticketUrl).run();
+}
+
 async function eventCatalogue(context) {
   const staticEvents = await staticCatalogueWithPosters(context.env, context.request);
   let published = [];
@@ -118,8 +138,11 @@ async function eventCatalogue(context) {
 
 function publicationForItem(catalogue, item) {
   const event = catalogue.find(candidate => candidate.id === item.event_id);
-  if (!event) return null;
-  const review = editorialValues(event, item.review_data);
+  const fallback = event || {
+    title: item.proposal_title || item.title,
+    sourceUrl: item.proposal_url || item.url
+  };
+  const review = editorialValues(fallback, item.review_data);
   const values = {
     title: review.eventName,
     date: review.eventDate,
@@ -130,12 +153,12 @@ function publicationForItem(catalogue, item) {
     sourceUrl: review.officialUrl
   };
   const duplicates = catalogue
-    .filter(candidate => candidate.id !== event.id && samePublishedEvent(values, candidate))
+    .filter(candidate => candidate.id !== event?.id && samePublishedEvent(values, candidate))
     .slice(0, 3)
     .map(candidate => ({ id: candidate.id, title: candidate.title, date: candidate.date, city: candidate.city, venue: candidate.venue }));
   const items = publicationChecklist(values);
   return {
-    event_snapshot: { id: event.id, title: review.eventName, date: review.eventDate, city: review.city, venue: review.venue },
+    event_snapshot: event ? { id: event.id, title: review.eventName, date: review.eventDate, city: review.city, venue: review.venue } : null,
     review_data: review,
     publication: { items, duplicate: duplicates, ready: !duplicates.length && items.every(check => check.present) }
   };
@@ -182,23 +205,20 @@ async function saveReviewData(db, eventId, values) {
 }
 
 function itemWithReviewData(item, edits) {
-  return { ...item, review_data: edits.get(item.event_id) || {} };
+  return { ...item, review_data: edits.get(reviewEditKey(item)) || {} };
 }
 
 function agendaEligibility(catalogue, item) {
-  if (item.category !== "link" || !item.event_id) {
-    return { eligible: false, reason: "Este sinal não está associado a um evento da agenda." };
-  }
   const snapshot = publicationForItem(catalogue, item);
-  if (!snapshot) {
-    return { eligible: false, reason: "Não foi possível encontrar este evento na agenda." };
-  }
   if (snapshot.publication.duplicate.length) {
     return { eligible: false, reason: "Este evento parece duplicar uma entrada já publicada.", duplicate: true };
   }
   const missing = snapshot.publication.items.filter(check => !check.present).map(check => check.label);
   if (missing.length) {
     return { eligible: false, reason: `Falta: ${missing.join(", ")}.`, incomplete: true, missing };
+  }
+  if (!publishingReady(snapshot.review_data)) {
+    return { eligible: false, reason: "Faltam dados obrigatórios para publicar.", incomplete: true };
   }
   return { eligible: true, snapshot };
 }
@@ -224,7 +244,7 @@ export async function onRequestGet(context) {
   `);
   const { results } = await (where === "status = ?" ? statement.bind(status) : statement).all();
   const rawItems = results || [];
-  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, rawItems.map(item => item.event_id));
+  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, rawItems.map(reviewEditKey));
   const items = groupAutomationItems(rawItems).map(item => itemWithReviewData(item, edits));
   return json({ items: await publicationSnapshots(context, items), meta: { signals: rawItems.length, events: items.length } });
 }
@@ -251,23 +271,23 @@ export async function onRequestPatch(context) {
   if (!item) return json({ message: "Item não encontrado." }, 404);
   const catalogue = await eventCatalogue(context);
   const event = catalogue.find(candidate => candidate.id === item.event_id);
-  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, [item.event_id]);
-  const savedReview = edits.get(item.event_id) || {};
+  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, [reviewEditKey(item)]);
+  const savedReview = edits.get(reviewEditKey(item)) || {};
   const reviewInput = hasEditorialPayload
     ? { ...savedReview, eventName: payload.eventName, eventDate: payload.eventDate, eventEndDate: payload.eventEndDate, city: payload.city, venue: payload.venue, tickets: payload.tickets, ticketUrl: payload.ticketUrl, posterUrl: payload.posterUrl, officialUrl: payload.officialUrl }
     : savedReview;
-  const values = event ? editorialValues(event, reviewInput) : null;
-  if (hasEditorialPayload && !event) return json({ message: "Só é possível completar dados num sinal associado a um evento existente." }, 400);
-  if (hasEditorialPayload && values) await saveReviewData(context.env.EVENT_RADAR_DB, item.event_id, values);
+  const values = editorialValues(event || { title: proposalTitle || item.title, sourceUrl: proposalUrl || item.proposal_url || item.url }, reviewInput);
+  if (hasEditorialPayload) await saveReviewData(context.env.EVENT_RADAR_DB, reviewEditKey(item), values);
   if (applyToAgenda) {
-    const confirmedUrl = proposalUrl || values?.officialUrl || "";
-    if (item.category !== "link" || !item.event_id || !confirmedUrl || !values) {
+    const confirmedUrl = values.officialUrl || proposalUrl || "";
+    if (!confirmedUrl) {
       return json({ message: "Para aplicar à agenda, confirma primeiro os dados do evento e uma página oficial válida." }, 400);
     }
     const eligibility = agendaEligibility(catalogue, { ...item, review_data: values });
     if (!eligibility.eligible) return json({ message: `Este evento não pode entrar ainda na agenda. ${eligibility.reason}` }, 400);
     await ensureEventStore(context.env.EVENT_RADAR_DB);
-    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, values, confirmedUrl);
+    if (event) await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, values, confirmedUrl);
+    else await createAgendaEvent(context.env.EVENT_RADAR_DB, item, values);
   }
   const result = await context.env.EVENT_RADAR_DB.prepare(`
     UPDATE automation_reviews
@@ -324,14 +344,14 @@ export async function onRequestPost(context) {
   }
 
   const catalogue = await eventCatalogue(context);
-  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, results.map(item => item.event_id));
+  const edits = await reviewDataByEvent(context.env.EVENT_RADAR_DB, results.map(reviewEditKey));
   let incomplete = 0;
   let duplicates = 0;
   let skipped = 0;
   const eligible = results.flatMap(item => {
     const event = catalogue.find(candidate => candidate.id === item.event_id);
-    const values = event ? editorialValues(event, edits.get(item.event_id) || {}) : null;
-    const proposalUrl = validUrl(item.proposal_url || "") || values?.officialUrl || "";
+    const values = editorialValues(event || { title: item.proposal_title || item.title, sourceUrl: item.proposal_url || item.url }, edits.get(reviewEditKey(item)) || {});
+    const proposalUrl = values.officialUrl || validUrl(item.proposal_url || "") || "";
     if (!proposalUrl) {
       skipped += 1;
       return [];
@@ -343,12 +363,13 @@ export async function onRequestPost(context) {
       else skipped += 1;
       return [];
     }
-    return [{ item, proposalUrl, values }];
+    return [{ item, proposalUrl, values, event }];
   });
   if (!eligible.length) return json({ ok: true, resolved: 0, applied: 0, incomplete, duplicates, skipped });
   await ensureEventStore(context.env.EVENT_RADAR_DB);
-  for (const { item, proposalUrl, values } of eligible) {
-    await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, values, proposalUrl);
+  for (const { item, proposalUrl, values, event } of eligible) {
+    if (event) await applyAgendaPatch(context.env.EVENT_RADAR_DB, item, values, proposalUrl);
+    else await createAgendaEvent(context.env.EVENT_RADAR_DB, item, values);
   }
   await context.env.EVENT_RADAR_DB.batch(eligible.map(({ item }) => context.env.EVENT_RADAR_DB.prepare(`
     UPDATE automation_reviews

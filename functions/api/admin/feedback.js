@@ -55,6 +55,42 @@ async function publishReview(context, feedback, values) {
   return { event };
 }
 
+// Corrections are attached to an existing agenda entry, so publishing one
+// should update that entry rather than creating a second copy. It is still
+// held behind the exact same completeness gate as a new suggestion.
+async function applyCorrection(context, feedback, values) {
+  if (!feedback.event_id || feedback.event_id === "promoter-page") {
+    return { error: "Esta correção não está associada a um evento da agenda." };
+  }
+  if (!publishingReady(values)) {
+    return { error: "Para aplicar a correção, confirma título, data, cidade, local, cartaz, bilheteira/entrada e uma página oficial direta." };
+  }
+  const patch = {
+    title: values.eventName,
+    date: values.eventDate,
+    city: values.city,
+    venue: values.venue,
+    tickets: values.tickets,
+    ticketUrl: values.ticketUrl,
+    image: values.posterUrl,
+    sourceUrl: values.officialUrl,
+    posterSourceUrl: values.officialUrl,
+    availability: /entrada\s+(?:livre|gratuita)/i.test(values.tickets) ? "Entrada livre" : /confirmar|anunciar/i.test(values.tickets) ? "Por confirmar" : "Disponível"
+  };
+  if (values.eventEndDate) patch.endDate = values.eventEndDate;
+  await ensureEventStore(context.env.EVENT_RADAR_DB);
+  await context.env.EVENT_RADAR_DB.prepare(`
+    INSERT INTO event_overrides (event_id, patch_json, source_url, verified_at, updated_at)
+    VALUES (?, ?, ?, date('now'), datetime('now'))
+    ON CONFLICT(event_id) DO UPDATE SET
+      patch_json = json_patch(event_overrides.patch_json, excluded.patch_json),
+      source_url = excluded.source_url,
+      verified_at = date('now'),
+      updated_at = datetime('now')
+  `).bind(feedback.event_id, JSON.stringify(patch), values.officialUrl).run();
+  return { patch };
+}
+
 export async function onRequestGet(context) {
   const session = await requireAdmin(context);
   if (session.response) return session.response;
@@ -104,6 +140,10 @@ export async function onRequestPatch(context) {
   if (status === "published" && feedback.kind === "suggestion" && feedback.event_id !== "promoter-page") {
     const published = await publishReview(context, feedback, reviewValues);
     if (published.error) return json({ message: published.error, publication: checklistState(reviewValues, published.duplicate || []) }, published.duplicate ? 409 : 400);
+  }
+  if (status === "published" && feedback.kind === "correction") {
+    const corrected = await applyCorrection(context, feedback, reviewValues);
+    if (corrected.error) return json({ message: corrected.error, publication: checklistState(reviewValues) }, 400);
   }
 
   const result = await context.env.EVENT_RADAR_DB.prepare(`

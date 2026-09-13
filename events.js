@@ -600,7 +600,6 @@ window.POSTER_PUBLICATION_HOLDS = [
   "black-box-fest-2026",
   "web-pitch-black-equaleft",
   "butchery-at-christmas-time",
-  "indie-music-fest",
   "vul-afterglow",
   "reign-fury-hardcore-fest-2026"
 ];

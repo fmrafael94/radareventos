@@ -322,7 +322,7 @@ const officialPosters = {
   ,"ccb-bach-natal": ["https://www.ccb.pt/wp-content/uploads/2026/05/2000x940_ConcertoDeNatal.jpg", "https://www.ccb.pt/evento/concerto-de-natal-missa-em-si-menor-de-bach/"]
   ,"amon-amarth": ["https://www.primeartists.eu/wp-content/uploads/2026/04/AmonAmarth-Evento-Main-2026.jpg", "https://www.primeartists.eu/amonamarth-2026/"]
   ,"ezhel-lisboa-2026": ["https://www.primeartists.eu/wp-content/uploads/2026/01/Ezhel-Evento-Main-2026-1.jpg", "https://www.primeartists.eu/ezhel-2026/"]
-  ,"indie-music-fest": ["https://indiemusicfest.pt/wp-content/uploads/2026/04/Landing-Page-Indie-Music-Fest-2026.jpg", "https://indiemusicfest.pt/?page_id=882"]
+  ,"indie-music-fest": ["https://indiemusicfest.pt/wp-content/uploads/2026/04/Landing-Page-Indie-Music-Fest-2026-final.png", "https://indiemusicfest.pt/"]
   ,"ccb-christian-loffler": ["https://www.ccb.pt/wp-content/uploads/2026/03/Christian_banner_ticketline_1200x628.jpg", "https://www.ccb.pt/evento/until-we-meet-again-misty-fest/"]
   ,"sara-correia-porto-1": ["https://blueticketcdn.pt/imagesserver/E15763_36_PT.jpg?v=7156c1c69d889bc7401de39ab1df23fc", "https://www.wook.pt/en/bilheteira/eventos/sara-correia/32903842"]
   ,"sara-correia-porto-2": ["https://blueticketcdn.pt/imagesserver/E15763_36_PT.jpg?v=7156c1c69d889bc7401de39ab1df23fc", "https://www.wook.pt/en/bilheteira/eventos/sara-correia/32903842"]
