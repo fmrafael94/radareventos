@@ -176,7 +176,10 @@ async function eventPage(request, env, id) {
     const venue = stringPatch("venue", cloudEvent?.venue || eventField(event, "venue"));
     const city = stringPatch("city", cloudEvent?.city || eventField(event, "city"));
     const app = await assetText(request, env, "/app.js");
-    const poster = stringPatch("image", app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || imageFromCatalogueUpdate(events, id) || cloudEvent?.image || eventField(event, "image"));
+    // events.js editorial updates are applied after app.js's poster map in the
+    // browser, so they are the current source of truth here as well. This
+    // avoids serving an older fallback (including legacy social-page links).
+    const poster = stringPatch("image", imageFromCatalogueUpdate(events, id) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(event, "image"));
     const url = new URL(request.url);
     const canonical = `${url.origin}/evento/${encodeURIComponent(id)}`;
     const dateLabel = endDate && endDate !== date ? `${humanDate(date)}–${humanDate(endDate)}` : humanDate(date);
@@ -336,7 +339,7 @@ async function eventPoster(request, env, id, executionCtx) {
     const cloudEvent = match ? null : await publishedEvent(env, id);
     if (!match && !cloudEvent) return new Response("Cartaz não encontrado.", { status: 404 });
     const app = await assetText(request, env, "/app.js");
-    const poster = (typeof patch.image === "string" && patch.image.trim()) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || imageFromCatalogueUpdate(events, id) || cloudEvent?.image || eventField(match?.[0] || "", "image");
+    const poster = (typeof patch.image === "string" && patch.image.trim()) || imageFromCatalogueUpdate(events, id) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(match?.[0] || "", "image");
     if (!poster) return shareFallback(request, env);
     const posterUrl = new URL(poster);
     if (!/^https?:$/.test(posterUrl.protocol)) return shareFallback(request, env);
