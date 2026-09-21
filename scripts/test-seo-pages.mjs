@@ -30,6 +30,7 @@ test("only publishes current main events in landing pages", () => {
   assert.ok(events.length > 100);
   assert.ok(events.every(event => (event.endDate || event.date) >= today));
   assert.ok(events.every(event => event.title && event.city && event.venue));
+  assert.ok(events.some(event => event.id === "reign-fury-hardcore-fest-2026" && event.type === "Festival"), "Reign of Fury Fest must be published as a festival");
 });
 
 const assets = {

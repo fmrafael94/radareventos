@@ -211,7 +211,7 @@ function render(event, poster) {
       <p class="event-disclaimer">Confirma sempre horários e disponibilidade na fonte oficial.</p>
     </div>
     <aside class="event-sidebar">
-      <div class="event-poster-panel">
+      <div class="event-poster-panel${event.id === "reign-fury-hardcore-fest-2026" ? " poster-dark" : ""}">
         <div class="share-card">
           ${poster ? `<button type="button" class="event-poster-trigger" data-event-poster aria-label="Ampliar cartaz oficial de ${escapeHtml(event.title)}"><img src="${escapeHtml(posterDownloadUrl)}" data-fallback-poster="${escapeHtml(poster)}" alt="Cartaz oficial de ${escapeHtml(event.title)}" fetchpriority="high" decoding="async" /></button>` : `<div class="share-card-empty" role="status"><strong>Cartaz oficial<br>ainda não publicado.</strong><span>Estamos a acompanhar a fonte do evento.</span></div>`}
         </div>

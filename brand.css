@@ -193,8 +193,10 @@
 .home-page .featured-heading h2{font-size:30px}
 .home-page .featured-rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;overflow:visible}
 .home-page .featured-card{display:flex;width:auto;min-width:0;min-height:0;flex:auto;flex-direction:column;padding:0;scroll-snap-align:none}
-.home-page .featured-poster{display:block;width:100%;aspect-ratio:4/5;border-radius:12px;background:rgba(183,164,90,.1)!important}
+.home-page .featured-poster{display:block;width:100%;aspect-ratio:4/5;border-radius:0;background:transparent!important}
 .home-page .featured-poster img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center}
+.home-page .featured-poster.poster-dark,.home-page .nearby-poster.poster-dark,.home-page .hero-feature-poster.poster-dark{background:#000!important}
+.event-page .event-poster-panel.poster-dark,.event-page .event-poster-panel.poster-dark .event-poster-trigger,.event-page .event-poster-panel.poster-dark .event-poster-trigger img{background:#000!important}
 .home-page .featured-copy{display:flex;flex:1;padding:12px 2px 0}
 .home-page .featured-copy p{margin:0 0 7px;font-size:10px}
 .home-page .featured-copy h3{min-height:0;font-size:19px;line-height:1.05}

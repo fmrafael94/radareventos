@@ -938,6 +938,8 @@ const posterUrl = event => {
   const image = safePublicUrl(event.image);
   return image ? `/api/event-poster/${encodeURIComponent(event.id)}?v=${posterCacheVersion(image)}` : "";
 };
+const darkPosterBackgroundIds = new Set(["reign-fury-hardcore-fest-2026"]);
+const posterPresentationClass = event => darkPosterBackgroundIds.has(event.id) ? " poster-dark" : "";
 const posterStyle = image => {
   const url = safePublicUrl(image);
   return url ? `style="--poster-image:url(&quot;${escapeHtml(encodeURI(url))}&quot;)"` : "";
@@ -969,7 +971,7 @@ function renderNearby(latitude, longitude, area) {
   }
   nearbyRail.innerHTML = matches.map(({ event }) => `<article class="nearby-card">
     <a href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
-      <span class="nearby-poster" ${posterStyle(posterUrl(event))}><img src="${escapeHtml(posterUrl(event))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="lazy" decoding="async" /></span>
+      <span class="nearby-poster${posterPresentationClass(event)}" ${posterStyle(posterUrl(event))}><img src="${escapeHtml(posterUrl(event))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="lazy" decoding="async" /></span>
       <span class="nearby-copy"><time datetime="${escapeHtml(event.date)}">${escapeHtml(compactNearbyDate(event))}</time><h3>${escapeHtml(event.title)}</h3></span>
     </a>
   </article>`).join("");
@@ -1011,7 +1013,7 @@ function renderFeatured() {
     const loading = index < 2 ? "eager" : "lazy";
     const priority = index === 0 ? ' fetchpriority="high"' : "";
     return `<article class="featured-card" data-event-id="${escapeHtml(event.id)}">
-      <span class="featured-poster" ${posterStyle(posterUrl(event))}><img src="${escapeHtml(posterUrl(event))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="${loading}"${priority} decoding="async"></span>
+      <span class="featured-poster${posterPresentationClass(event)}" ${posterStyle(posterUrl(event))}><img src="${escapeHtml(posterUrl(event))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="${loading}"${priority} decoding="async"></span>
       <div class="featured-copy"><p>${escapeHtml(eventType(event))} · ${escapeHtml(event.city)}</p><h3>${escapeHtml(event.title)}</h3><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><a href="${eventUrl(event)}">Abrir evento <svg class="link-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></a></div>
     </article>`;
   }).join("") : '<p class="featured-empty">Ainda estamos a confirmar os próximos eventos.</p>';
@@ -1034,7 +1036,7 @@ function renderHeroFeature(event) {
     return;
   }
   const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
-  heroFeature.innerHTML = `<a class="hero-feature-poster" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
+  heroFeature.innerHTML = `<a class="hero-feature-poster${posterPresentationClass(event)}" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
       <img src="${escapeHtml(posterUrl(event))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="eager" fetchpriority="high" decoding="async" />
     </a>
     <div class="hero-feature-copy">
