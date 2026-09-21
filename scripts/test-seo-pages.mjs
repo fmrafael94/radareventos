@@ -74,7 +74,8 @@ test("unknown event returns the branded no-store 404 page", async () => {
   assert.match(html, /\/brand\/404\//);
   assert.match(html, /\/brand\/logo-icon\.png\?v=2/);
   assert.match(html, /src="\/404\.js\?v=2"/);
-  assert.match(html, /href="\/404\.css\?v=5"/);
+  assert.match(html, /href="\/404\.css\?v=6"/);
+  assert.match(html, /\/brand\/404\/[a-z]+-normalizad[oa]\.png\?v=1/);
   assert.match(html, /noindex,follow/);
 });
 
@@ -212,6 +213,8 @@ test("404 artwork and copy use one consistent visual system", async () => {
   assert.doesNotMatch(css, /img\[data-variant=/);
   assert.match(css, /h1\s*\{[^}]*min-height:1\.05em/s);
   assert.match(css, /\.lede\s*\{[^}]*min-height:1\.6em/s);
+  assert.match(css, /@media \(max-width:780px\)[\s\S]*?\.copy\s*\{[^}]*text-align:center/s);
+  assert.match(css, /@media \(max-width:780px\)[\s\S]*?main\s*\{[^}]*gap:0/s);
   const headings = [...script.matchAll(/heading: "([^"]+)"/g)].map(match => match[1]);
   const bodies = [...script.matchAll(/body: "([^"]+)"/g)].map(match => match[1]);
   assert.equal(headings.length, 5);
