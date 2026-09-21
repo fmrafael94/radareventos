@@ -88,7 +88,7 @@ test("event pages expose the bilingual controls and English date metadata", asyn
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-lang-toggle/);
-  assert.match(html, /src="\/i18n\.js\?v=1"/);
+  assert.match(html, /src="\/i18n\.js\?v=2"/);
   assert.match(html, /23 September/);
   assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
 });
