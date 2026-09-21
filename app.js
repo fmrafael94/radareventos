@@ -1294,6 +1294,8 @@ agendaEmpty.querySelector("button").addEventListener("click", () => {
   render();
 });
 document.addEventListener("click", event => {
+  const instagramLink = event.target.closest("[data-instagram-link]");
+  if (instagramLink) trackInteraction("instagram_open", { placement: instagramLink.dataset.instagramLink || "unknown" });
   const eventLink = event.target.closest('a[href^="/evento/"]');
   if (eventLink) trackInteraction("event_open", { event_id: decodeURIComponent(eventLink.pathname.split("/").pop() || ""), source: "agenda" });
   const dayTab = event.target.closest("[data-festival-day]");

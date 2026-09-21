@@ -103,6 +103,37 @@
 
 .event-page .event-poster-trigger,.event-page .event-poster-trigger img,.event-page .related-poster{background:transparent!important;box-shadow:none!important;filter:none!important}
 
+/* Instagram is an editorial extension of the agenda, not another wall of
+   buttons. One calm, high-contrast invitation carries the profile identity. */
+.instagram-callout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr);align-items:center;gap:clamp(28px,6vw,82px);min-height:230px;margin:0 2px 58px;padding:clamp(28px,4vw,46px);overflow:hidden;border-radius:18px;color:var(--brand-cream);background:var(--brand-ink)}
+.instagram-callout-copy{max-width:660px}
+.instagram-callout .kicker{margin:0 0 12px;color:var(--brand-gold)}
+.instagram-callout h2{max-width:17ch;margin:0;color:var(--brand-cream);font:700 clamp(32px,4vw,48px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.065em}
+.instagram-callout-copy>p:not(.kicker){max-width:54ch;margin:16px 0 0;color:rgba(247,245,240,.68);font-size:14px;line-height:1.55}
+.instagram-callout-copy>a{display:inline-flex;align-items:center;justify-content:space-between;gap:34px;min-width:210px;margin-top:25px;padding:10px 0;border-bottom:1px solid rgba(247,245,240,.36);color:var(--brand-cream);font-size:13px;font-weight:700}
+.instagram-callout-copy>a:hover,.instagram-callout-copy>a:focus-visible{border-color:var(--brand-gold);color:var(--brand-gold)}
+.instagram-callout-profile{display:flex;align-items:center;justify-self:end;gap:17px;min-width:0;padding:13px 18px 13px 13px;border:1px solid rgba(247,245,240,.2);border-radius:999px;background:rgba(247,245,240,.055);transition:border-color .18s ease,background .18s ease}
+.instagram-callout-profile:hover,.instagram-callout-profile:focus-visible{border-color:var(--brand-gold);background:rgba(183,164,90,.1)}
+.instagram-callout-profile img{display:block;width:96px;height:96px;flex:0 0 auto;border-radius:50%;object-fit:cover;background:#090f11}
+.instagram-callout-profile span{display:grid;min-width:0;gap:5px}
+.instagram-callout-profile strong{color:var(--brand-cream);font:700 17px "Space Grotesk",sans-serif;letter-spacing:-.035em}
+.instagram-callout-profile small{color:rgba(247,245,240,.58);font-size:11px;white-space:nowrap}
+.site-footer .footer-brand{display:grid;justify-items:start;gap:7px}
+.site-footer .footer-instagram-link{color:#8a7734;font-size:10px;font-weight:700;text-decoration:underline;text-decoration-color:rgba(138,119,52,.35);text-underline-offset:4px}
+.site-footer .footer-instagram-link:hover,.site-footer .footer-instagram-link:focus-visible{color:var(--brand-coral);text-decoration-color:var(--brand-coral)}
+
+@media(max-width:760px){
+  .instagram-callout{grid-template-columns:1fr;gap:27px;margin-bottom:45px;padding:28px 23px}
+  .instagram-callout h2{font-size:36px}
+  .instagram-callout-profile{justify-self:start}
+  .instagram-callout-profile img{width:74px;height:74px}
+}
+@media(max-width:420px){
+  .instagram-callout{border-radius:16px}
+  .instagram-callout-copy>a{width:100%}
+  .instagram-callout-profile{width:100%;padding-right:14px}
+}
+
 @media(max-width:580px){.home-page .site-header,.event-page .site-header,.landing-page .site-header,.legal-page .legal-header{min-height:64px;padding-inline:15px}.site-header .brand-logo,.legal-header .brand-logo{width:33px;height:33px}.site-header .brand-wordmark,.legal-header .brand-wordmark{font-size:15px}.home-page .featured-copy{padding-top:7px}}
 
 /* The masthead is now the shortest route into the product: brand promise,
