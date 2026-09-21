@@ -66,13 +66,37 @@ const eventLiteral = (source, id) => {
 
 // The catalogue starts with compact event records and completes some of them
 // later through Object.assign. Browsers evaluate that JavaScript, while this
-// Worker reads it as text for event and share pages. Include the explicit
-// image update so those two views never fall back to the generic share card.
-const imageFromCatalogueUpdate = (source, id) => {
-  const start = source.indexOf(`"${id}": {`);
-  if (start < 0) return "";
-  return source.slice(start, start + 4_000).match(/\bimage:\s*"((?:\\.|[^"\\])*)"/)?.[1]?.replace(/\\"/g, '"') || "";
+// Worker reads it as text for event and share pages. Read only the matching
+// update object: a fixed-size slice can cross into the following event and
+// accidentally assign that event's poster to this one.
+const catalogueUpdateLiteral = (source, id) => {
+  const marker = `"${id}":`;
+  const markerStart = source.indexOf(marker);
+  if (markerStart < 0) return "";
+  const objectStart = source.indexOf("{", markerStart + marker.length);
+  if (objectStart < 0) return "";
+  let depth = 0;
+  let quote = "";
+  let escaped = false;
+  for (let index = objectStart; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = "";
+      continue;
+    }
+    if (character === '"' || character === "'" || character === "`") {
+      quote = character;
+      continue;
+    }
+    if (character === "{") depth += 1;
+    else if (character === "}" && --depth === 0) return source.slice(objectStart, index + 1);
+  }
+  return "";
 };
+
+export const imageFromCatalogueUpdate = (source, id) => eventField(catalogueUpdateLiteral(source, id), "image");
 
 async function publishedEvent(env, id) {
   if (!env.EVENT_RADAR_DB) return null;

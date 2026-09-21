@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import vm from "node:vm";
-import worker, { landingRoutes, publicEventRecords } from "../src/worker.js";
+import worker, { imageFromCatalogueUpdate, landingRoutes, publicEventRecords } from "../src/worker.js";
 
 const root = new URL("../", import.meta.url);
 const source = await readFile(new URL("events.js", root), "utf8");
@@ -31,6 +31,22 @@ test("only publishes current main events in landing pages", () => {
   assert.ok(events.every(event => (event.endDate || event.date) >= today));
   assert.ok(events.every(event => event.title && event.city && event.venue));
   assert.ok(events.some(event => event.id === "reign-fury-hardcore-fest-2026" && event.type === "Festival"), "Reign of Fury Fest must be published as a festival");
+});
+
+test("catalogue poster lookup never leaks an image from the next event", () => {
+  const synthetic = `const updates = {
+    "without-poster": { programme:[{ title:"No {poster} here" }] },
+    "with-poster": { image:"https://example.com/right.jpg" }
+  };`;
+  assert.equal(imageFromCatalogueUpdate(synthetic, "without-poster"), "");
+  assert.equal(imageFromCatalogueUpdate(synthetic, "with-poster"), "https://example.com/right.jpg");
+  for (const id of ["rock-dao", "semibreve-2026", "casa-capitao-abertura", "rockalhau-2026", "terapia-invicta-viii"]) {
+    assert.equal(imageFromCatalogueUpdate(source, id), "", `${id} must use its own poster catalogue entry`);
+  }
+  assert.equal(
+    imageFromCatalogueUpdate(source, "faro-alternativo-2026"),
+    "https://www.theblackplanet.org/wp-content/uploads/2026/08/faro-alternativo-2026-473x620.jpg"
+  );
 });
 
 const assets = {
