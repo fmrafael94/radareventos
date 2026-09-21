@@ -31,6 +31,9 @@ const nearbyRail = document.querySelector("#nearby-rail");
 const nearbyPrevious = document.querySelector("#nearby-previous");
 const nearbyNext = document.querySelector("#nearby-next");
 const featuredRail = document.querySelector("#featured-rail");
+const heroFeature = document.querySelector("#hero-feature");
+const heroSearch = document.querySelector("#hero-search");
+const heroSearchInput = document.querySelector("#hero-search-input");
 let featuredAutoscroll;
 let featuredRefreshTimer;
 let nearbyPosition;
@@ -987,6 +990,7 @@ function renderFeatured() {
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 5);
+  renderHeroFeature(featured[0]);
   featuredRail.innerHTML = featured.length ? featured.map((event, index) => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     // On a phone the first two cards are already visible below the hero. Do
@@ -1006,6 +1010,20 @@ function renderFeatured() {
   featuredRail.setAttribute("aria-label", "Cinco próximos eventos por ordem cronológica");
   featuredRail.setAttribute("aria-busy", "false");
   startFeaturedAutoscroll();
+}
+
+function renderHeroFeature(event) {
+  if (!heroFeature) return;
+  if (!event) {
+    heroFeature.innerHTML = '<p class="hero-feature-kicker">A seguir</p><p class="hero-feature-loading">Ainda estamos a confirmar o próximo evento.</p><a class="hero-feature-link" href="#agenda">Explorar a agenda <span aria-hidden="true">→</span></a>';
+    return;
+  }
+  const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
+  heroFeature.innerHTML = `<p class="hero-feature-kicker">A seguir em ${escapeHtml(event.city)}</p>
+    <time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time>
+    <h2 data-i18n-event-title>${escapeHtml(event.title)}</h2>
+    <p class="hero-feature-meta">${escapeHtml(event.venue)} · ${escapeHtml(eventType(event))}</p>
+    <a class="hero-feature-link" href="${eventUrl(event)}">Ver evento <span aria-hidden="true">→</span></a>`;
 }
 
 function scheduleFeaturedRefresh() {
@@ -1140,6 +1158,7 @@ function updateFilter(key, value) {
 function resetAgendaSelection() {
   Object.assign(state, { search: "", date: "", price: "", ticketPrice: [], genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
   document.querySelector("#search").value = "";
+  if (heroSearchInput) heroSearchInput.value = "";
   dateSelect.value = "";
   priceSelect.value = "";
   document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
@@ -1163,6 +1182,16 @@ document.querySelector("#search").addEventListener("input", event => {
     const query = String(event.target.value || "").trim();
     if (query.length >= 2) trackInteraction("search", { query, result_count: filteredEvents().length });
   }, 700);
+});
+heroSearch?.addEventListener("submit", event => {
+  event.preventDefault();
+  const query = String(heroSearchInput?.value || "").trim();
+  const agendaSearch = document.querySelector("#search");
+  agendaSearch.value = query;
+  updateFilter("search", query);
+  if (query.length >= 2) trackInteraction("search", { query, result_count: filteredEvents().length, source: "hero" });
+  document.querySelector("#agenda")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  agendaSearch.focus({ preventScroll:true });
 });
 featuredRail.addEventListener("click", event => {
   if (event.target.closest(".featured-copy a")) return;
@@ -1196,8 +1225,9 @@ document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEvent
   dateSelect.value = state.date;
   state.page = 1;
   trackInteraction("filter_used", { filter: "quick_pick", value: pick, enabled: Boolean(next) });
-  document.querySelectorAll("[data-quick-pick]").forEach(item => item.setAttribute("aria-pressed", String(item === button && Boolean(next))));
+  document.querySelectorAll("[data-quick-pick]").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.quickPick === pick && Boolean(next))));
   dateSelect.dispatchEvent(new Event("change"));
+  if (button.closest(".hero-shortcuts")) document.querySelector("#agenda")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 }));
 nearbyPrevious?.addEventListener("click", () => moveNearby(-1));
 nearbyNext?.addEventListener("click", () => moveNearby(1));

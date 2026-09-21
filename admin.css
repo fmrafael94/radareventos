@@ -26,3 +26,51 @@ html .review-controls .status-filters button[aria-pressed="true"] { border-color
 .agenda-report { border-left:4px solid #182226; }
 .agenda-report.archived { border-left-color:#8e796f; opacity:.86; }
 @media (max-width:600px) { .review-views { grid-template-columns:1fr; }.agenda-tools>div { display:grid; } }
+
+/* Admin uses the same restrained system as the public site: solid ink,
+   warm paper, gold for context and coral only for destructive attention. */
+body{background:#f7f5f0}
+.admin-shell{width:min(1180px,calc(100% - 40px));padding:24px 0 72px}
+.admin-header{min-height:72px;padding:16px 20px;border:0;border-radius:16px;color:#f7f5f0;background:#182226}
+.admin-brand{color:#f7f5f0}.admin-brand img{width:34px;height:34px;border-radius:0}
+.admin-header p{color:rgba(247,245,240,.6)}
+.admin-security-note{color:#b7a45a}
+.admin-header-actions .secondary{border-color:rgba(247,245,240,.28);color:#f7f5f0;background:transparent}
+.admin-header-actions .secondary:hover{border-color:#b7a45a;color:#b7a45a}
+.admin-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.72fr);align-items:end;gap:34px;max-width:none;margin:22px 0;padding:34px 38px;border-radius:18px;color:#f7f5f0;background:#182226}
+.admin-intro .eyebrow{color:#b7a45a}
+.admin-intro h1{margin:8px 0 0;color:#f7f5f0;font-size:clamp(42px,5vw,64px)}
+.admin-intro>p:last-child{max-width:43ch;margin:0;padding:0 0 5px;border-left:1px solid rgba(247,245,240,.2);padding-left:28px;color:rgba(247,245,240,.68);font-size:14px;line-height:1.6}
+.review-controls{margin-bottom:16px;border-color:rgba(24,34,38,.17);border-radius:14px;background:transparent}
+.review-source,.review-state{padding:17px 18px}
+.review-state{border-color:rgba(24,34,38,.14)}
+.control-label{color:#8a7734}
+.review-views,.review-controls .status-filters{gap:7px}
+.review-views button,html .review-controls .status-filters button{min-height:54px;border-color:rgba(24,34,38,.18);border-radius:9px;color:#182226;background:transparent;box-shadow:none}
+.review-views button small{color:rgba(24,34,38,.58)}
+.review-views button:hover,html .review-controls .status-filters button:hover{border-color:#b7a45a;background:rgba(183,164,90,.1)}
+.review-views button[aria-pressed="true"],html .review-controls .status-filters button[aria-pressed="true"]{border-color:#182226;color:#f7f5f0;background:#182226;box-shadow:none}
+.review-views button[aria-pressed="true"] small{color:rgba(247,245,240,.66)}
+.agenda-tools,.automation-bulk-actions,.access-management{border-color:rgba(24,34,38,.17);background:transparent}
+.agenda-tools input,.add-admin-user input,.automation-editor input,.automation-editor textarea,.event-review-fields input,.staff-note textarea{border-color:rgba(24,34,38,.22);color:#182226;background:#f7f5f0}
+.agenda-tools button,.automation-bulk-actions button,.add-admin-user button{border-color:#182226;color:#f7f5f0;background:#182226}
+.admin-status{margin:7px 0 14px}
+.reports{gap:10px}
+.report{padding:20px;border-color:rgba(24,34,38,.17);border-radius:12px;background:transparent;box-shadow:none}
+.automation-report{border-left-color:#b7a45a}.agenda-report{border-left-color:#182226}
+.report-actions button,.secondary{box-shadow:none}
+.report-actions button:not(.secondary):not(.reject){border-color:#182226;color:#f7f5f0;background:#182226}
+.report-actions .reject{border-color:#e35e44;color:#9d3825;background:rgba(227,94,68,.09)}
+.publication-checklist{border-color:rgba(24,34,38,.15);background:rgba(183,164,90,.08)}
+.empty-state{border-color:rgba(24,34,38,.24)}
+@media(max-width:700px){
+  .admin-shell{width:min(100% - 24px,1180px);padding-top:12px}
+  .admin-header{align-items:flex-start;padding:15px}
+  .admin-header p{max-width:22ch}
+  .admin-intro{grid-template-columns:1fr;gap:16px;margin:12px 0;padding:27px 22px}
+  .admin-intro h1{font-size:43px}
+  .admin-intro>p:last-child{padding:16px 0 0;border-top:1px solid rgba(247,245,240,.2);border-left:0}
+  .review-views{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .review-views button small{white-space:normal}
+}
+@media(max-width:430px){.review-views{grid-template-columns:1fr}.admin-header{display:grid;gap:14px}.admin-header-actions{justify-content:flex-start}}
