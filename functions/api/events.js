@@ -36,5 +36,6 @@ export async function onRequestGet(context) {
       return [];
     }
   });
-  return json({ items, overrides });
+  const overrideMap = new Map(overrides.map(item => [item.id, item.patch]));
+  return json({ items: items.map(item => ({ ...item, ...(overrideMap.get(item.id) || {}) })), overrides });
 }

@@ -5,6 +5,7 @@ import { onRequestGet as getAdminFeedback, onRequestPatch as patchAdminFeedback,
 import { onRequestGet as getAutomationReviews, onRequestPatch as patchAutomationReview, onRequestPost as postAutomationReviewBulk } from "../functions/api/admin/automation-reviews.js";
 import { onRequestGet as getAdminPoster } from "../functions/api/admin/poster.js";
 import { onRequestGet as getPosterHolds, onRequestPost as postPosterHold } from "../functions/api/admin/poster-holds.js";
+import { onRequestGet as getAdminEvents, onRequestPatch as patchAdminEvent } from "../functions/api/admin/events.js";
 import { clearAdminSession, loginWithAdminEmailCode, loginWithAdminPassword, requestAdminEmailCode, requireAdmin } from "../functions/admin-auth.js";
 import { onRequestPost as postAuditReport } from "../functions/api/internal/audit-report.js";
 import { ensureEventStore } from "../functions/event-store.js";
@@ -101,6 +102,24 @@ async function publicEventPatch(env, id) {
   }
 }
 
+async function archivedEventIds(env) {
+  if (!env.EVENT_RADAR_DB) return new Set();
+  try {
+    await ensureEventStore(env.EVENT_RADAR_DB);
+    const { results = [] } = await env.EVENT_RADAR_DB.prepare("SELECT event_id, patch_json FROM event_overrides").all();
+    return new Set(results.flatMap(row => {
+      try {
+        const patch = JSON.parse(row.patch_json || "{}");
+        return patch?.publicationStatus === "archived" && row.event_id ? [row.event_id] : [];
+      } catch {
+        return [];
+      }
+    }));
+  } catch {
+    return new Set();
+  }
+}
+
 async function releasedPosterHoldIds(env, source, today = "0000-00-00") {
   if (!env.EVENT_RADAR_DB) return [];
   const holds = posterPublicationHoldIds(source);
@@ -112,6 +131,7 @@ async function releasedPosterHoldIds(env, source, today = "0000-00-00") {
       if (!holds.has(row.event_id)) return [];
       try {
         const patch = JSON.parse(row.patch_json || "{}");
+        if (patch?.publicationStatus === "archived") return [];
         const literal = eventLiteral(source, row.event_id);
         const lastDate = eventField(literal, "endDate") || eventField(literal, "date");
         return staticHoldIsReady(literal, patch) && lastDate >= today ? [row.event_id] : [];
@@ -188,6 +208,7 @@ async function eventPage(request, env, id) {
   try {
     const events = await assetText(request, env, "/events.js");
     const patch = await publicEventPatch(env, id);
+    if (patch.publicationStatus === "archived") return notFoundPage(request, env);
     const literal = eventLiteral(events, id);
     if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return notFoundPage(request, env);
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -264,8 +285,8 @@ const slugify = value => String(value || "")
 const eventGenres = literal => [...(literal.match(/\bgenres:\s*\[([^\]]*)\]/)?.[1] || "").matchAll(/"((?:\\.|[^"\\])*)"/g)].map(match => match[1].replace(/\\"/g, '"'));
 const isFreeEvent = event => /entrada livre|entrada gratuita|gratuit[oa]|gr[aá]tis|\bfree\b/i.test(`${event.tickets} ${event.availability}`);
 
-export function publicEventRecords(source, today = "0000-00-00") {
-  return sitemapEventIds(source, today).map(id => {
+export function publicEventRecords(source, today = "0000-00-00", excluded = new Set()) {
+  return sitemapEventIds(source, today).filter(id => !excluded.has(id)).map(id => {
     const literal = eventLiteral(source, id);
     return {
       id,
@@ -307,8 +328,8 @@ const weekendRange = today => {
 
 const routeEntry = (path, label, kind, value = "") => ({ path, label, kind, value });
 
-export function landingRoutes(source, today = "0000-00-00") {
-  const events = publicEventRecords(source, today);
+export function landingRoutes(source, today = "0000-00-00", excluded = new Set()) {
+  const events = publicEventRecords(source, today, excluded);
   const cities = countsFor(events, "city").filter(item => item.count >= 2);
   const districts = countsFor(events, "district").filter(item => item.count >= 3);
   const areas = countsFor(events, "area").filter(item => item.count >= 3);
@@ -333,12 +354,12 @@ export function landingRoutes(source, today = "0000-00-00") {
   return routes;
 }
 
-function resolveLanding(source, pathname, today) {
-  const routes = landingRoutes(source, today);
+function resolveLanding(source, pathname, today, excluded = new Set()) {
+  const routes = landingRoutes(source, today, excluded);
   const cleanPath = pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
   const route = routes.find(item => item.path === cleanPath);
   if (!route) return null;
-  const allEvents = publicEventRecords(source, today);
+  const allEvents = publicEventRecords(source, today, excluded);
   const [weekendStart, weekendEnd] = weekendRange(today);
   const [city, genre] = route.value.split("\u0000");
   const events = allEvents.filter(event => {
@@ -371,7 +392,7 @@ function landingNavigation(routes, activePath) {
 async function landingPage(request, env, pathname) {
   try {
     const [template, source] = await Promise.all([assetText(request, env, "/landing.html"), assetText(request, env, "/events.js")]);
-    const landing = resolveLanding(source, pathname, lisbonToday());
+    const landing = resolveLanding(source, pathname, lisbonToday(), await archivedEventIds(env));
     if (!landing) return null;
     const origin = new URL(request.url).origin;
     const canonical = `${origin}${landing.path}`;
@@ -425,8 +446,8 @@ export function homepageEventLinks(source, today = "0000-00-00", limit = 12) {
     .slice(0, limit);
 }
 
-function homepageEventLinksHtml(source, today) {
-  const events = homepageEventLinks(source, today);
+function homepageEventLinksHtml(source, today, excluded = new Set()) {
+  const events = homepageEventLinks(source, today).filter(event => !excluded.has(event.id));
   if (!events.length) return "";
   const links = events.map(event => {
     const date = event.endDate && event.endDate !== event.date
@@ -474,8 +495,9 @@ async function sitemap(request, env) {
         }
       } catch { /* the static catalogue remains available */ }
     }
-    const urls = [...new Set(ids)].map(id => `<url><loc>${escapeXml(`${origin}/evento/${encodeURIComponent(id)}`)}</loc></url>`).join("");
-    const landingUrls = landingRoutes(source, today).map(route => `<url><loc>${escapeXml(`${origin}${route.path}`)}</loc></url>`).join("");
+    const archived = await archivedEventIds(env);
+    const urls = [...new Set(ids)].filter(id => !archived.has(id)).map(id => `<url><loc>${escapeXml(`${origin}/evento/${encodeURIComponent(id)}`)}</loc></url>`).join("");
+    const landingUrls = landingRoutes(source, today, archived).map(route => `<url><loc>${escapeXml(`${origin}${route.path}`)}</loc></url>`).join("");
     return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(`${origin}/`)}</loc></url>${landingUrls}${urls}</urlset>`, {
       headers: { "Content-Type": "application/xml; charset=UTF-8", "Cache-Control": "public, max-age=3600" }
     });
@@ -503,6 +525,7 @@ async function eventPoster(request, env, id, executionCtx) {
     // public poster can outlive a newly applied publication hold.
     const events = await assetText(request, env, "/events.js");
     const patch = await publicEventPatch(env, id);
+    if (patch.publicationStatus === "archived") return new Response("Cartaz não encontrado.", { status: 404 });
     const literal = eventLiteral(events, id);
     if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return new Response("Cartaz não encontrado.", { status: 404 });
     const cache = caches.default;
@@ -701,6 +724,8 @@ export default {
     if (pathname === "/api/admin/poster" && request.method === "GET") return secureResponse(await getAdminPoster(context));
     if (pathname === "/api/admin/poster-holds" && request.method === "GET") return secureResponse(await getPosterHolds(context));
     if (pathname === "/api/admin/poster-holds" && request.method === "POST") return secureResponse(await postPosterHold(context));
+    if (pathname === "/api/admin/events" && request.method === "GET") return secureResponse(await getAdminEvents(context));
+    if (pathname === "/api/admin/events" && request.method === "PATCH") return secureResponse(await patchAdminEvent(context));
     if (canonicalAdminPage && ["GET", "HEAD"].includes(request.method)) {
       const session = await requireAdmin(context);
       const response = await privateAssetPage(request, env, session.response ? "/admin-login" : "/admin");

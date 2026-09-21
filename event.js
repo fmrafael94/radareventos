@@ -63,6 +63,7 @@ async function applyStoredEventOverride(event) {
     for (const key of ["title", "city", "venue", "tickets", "availability"]) {
       if (typeof patch[key] === "string" && patch[key].trim()) event[key] = patch[key].trim().slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
     }
+    if (["published", "archived"].includes(patch.publicationStatus)) event.publicationStatus = patch.publicationStatus;
     for (const key of ["date", "endDate"]) {
       if (/^\d{4}-\d{2}-\d{2}$/.test(patch[key] || "")) event[key] = patch[key];
     }
@@ -302,18 +303,46 @@ function render(event, poster) {
   });
 }
 
-page.setAttribute("aria-busy", "true");
-const event = (window.EVENTS || []).find(item => item.id === eventId);
-if (!event) {
-  page.innerHTML = `<section class="event-not-found"><p class="event-eyebrow">Evento não encontrado</p><h1>Este desvio já não está na agenda.</h1><a class="event-ticket" href="/">Voltar à agenda</a></section>`;
-  page.setAttribute("aria-busy", "false");
+async function resolveEvent() {
+  const bundled = (window.EVENTS || []).find(item => item.id === eventId);
+  if (bundled) return bundled;
+  try {
+    const response = await fetch("/api/events", { headers: { Accept: "application/json" } });
+    if (!response.ok) return null;
+    const result = await response.json();
+    const raw = Array.isArray(result.items) ? result.items.find(item => item?.id === eventId) : null;
+    if (!raw || !String(raw.title || "").trim() || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date || "") || !safePublicUrl(raw.sourceUrl)) return null;
+    const event = {
+      ...raw,
+      title: String(raw.title).trim().slice(0, 180),
+      ticketUrl: safePublicUrl(raw.ticketUrl),
+      sourceUrl: safePublicUrl(raw.sourceUrl),
+      image: safePublicUrl(raw.image),
+      posterSourceUrl: safePublicUrl(raw.posterSourceUrl),
+      genres: Array.isArray(raw.genres) ? raw.genres.filter(value => typeof value === "string").slice(0, 12) : ["Outro"],
+      publicationStatus: "published"
+    };
+    window.EVENTS.push(event);
+    return event;
+  } catch {
+    return null;
+  }
 }
-else applyStoredEventOverride(event).finally(() => {
-  if (event.publicationStatus === "poster_pending" && publicationReady(event)) event.publicationStatus = "published";
-  if (event.publicationStatus === "poster_pending") {
+
+page.setAttribute("aria-busy", "true");
+resolveEvent().then(event => {
+  if (!event) {
     page.innerHTML = `<section class="event-not-found"><p class="event-eyebrow">Evento não encontrado</p><h1>Este desvio já não está na agenda.</h1><a class="event-ticket" href="/">Voltar à agenda</a></section>`;
     page.setAttribute("aria-busy", "false");
     return;
   }
-  posterFor(event.id).then(poster => render(event, poster));
+  applyStoredEventOverride(event).finally(() => {
+    if (event.publicationStatus === "poster_pending" && publicationReady(event)) event.publicationStatus = "published";
+    if (event.publicationStatus !== "published") {
+      page.innerHTML = `<section class="event-not-found"><p class="event-eyebrow">Evento não encontrado</p><h1>Este desvio já não está na agenda.</h1><a class="event-ticket" href="/">Voltar à agenda</a></section>`;
+      page.setAttribute("aria-busy", "false");
+      return;
+    }
+    posterFor(event.id).then(poster => render(event, poster));
+  });
 });

@@ -3,6 +3,9 @@ const adminStatus = document.querySelector("#admin-status");
 const viewFilters = document.querySelector("#review-views");
 const communityFilters = document.querySelector("#status-filters");
 const automationFilters = document.querySelector("#automation-status-filters");
+const agendaStatusFilters = document.querySelector("#agenda-status-filters");
+const agendaTools = document.querySelector("#agenda-tools");
+const agendaSearch = document.querySelector("#agenda-search");
 const filterContext = document.querySelector("#filter-context");
 const automationBulkActions = document.querySelector("#automation-bulk-actions");
 const bulkResolve = document.querySelector("#bulk-resolve");
@@ -12,6 +15,7 @@ const bulkPublishReady = document.querySelector("#bulk-publish-ready");
 let activeView = "community";
 let activeCommunityStatus = "new";
 let activeAutomationStatus = "new";
+let activeAgendaStatus = "published";
 
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 const dateTime = value => value ? new Intl.DateTimeFormat("pt-PT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(`${value.replace(" ", "T")}Z`)) : "—";
@@ -169,7 +173,34 @@ function posterHoldCard(item) {
       <label><span>Link direto do ficheiro do cartaz</span><input name="posterUrl" type="url" maxlength="1600" placeholder="https://…/cartaz.jpg" value="${escapeHtml(values.posterUrl || "")}" /><small>Usa o ficheiro JPG, PNG, WebP, etc. — não a página de Instagram, Facebook ou do evento.</small></label>
       <label class="official-source"><span>Página oficial que confirma a informação</span><input name="officialUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(values.officialUrl || item.sourceUrl || "")}" /></label>
     </fieldset>
-    <div class="report-actions"><button type="button" data-save-poster-hold="true">Guardar e publicar</button></div>
+    <div class="report-actions"><button type="button" data-save-poster-hold="true">Guardar e publicar</button><button type="button" data-archive-poster-hold="true" class="reject">Arquivar sugestão</button></div>
+  </article>`;
+}
+
+function agendaCard(item) {
+  const archived = item.publicationStatus === "archived";
+  const date = item.endDate && item.endDate !== item.date ? `${item.date} — ${item.endDate}` : item.date;
+  return `<article class="report agenda-report${archived ? " archived" : ""}" data-agenda-event="${escapeHtml(item.id)}">
+    <div class="report-meta"><span class="kind">${archived ? "Arquivado" : "Publicado"} · ${escapeHtml(item.origin === "registry" ? "Painel" : "Catálogo")}</span><time>${escapeHtml(date || "Data por confirmar")}</time></div>
+    <div class="report-heading"><div><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml([item.venue, item.city].filter(Boolean).join(" · ") || "Local por confirmar")}</p></div></div>
+    <dl><div><dt>Página pública</dt><dd><a href="/evento/${encodeURIComponent(item.id)}" target="_blank" rel="noopener">Abrir evento ↗</a></dd></div><div><dt>Fonte oficial</dt><dd>${displayUrl(item.sourceUrl)}</dd></div></dl>
+    ${archived ? "" : `<details class="automation-editor event-editor"><summary>Editar evento</summary>
+      <fieldset class="event-review-fields"><legend>Dados publicados</legend>
+        <label><span>Título</span><input name="eventName" maxlength="180" value="${escapeHtml(item.title || "")}" /></label>
+        <label><span>Data</span><input name="eventDate" type="date" value="${escapeHtml(item.date || "")}" /></label>
+        <label><span>Último dia (se aplicável)</span><input name="eventEndDate" type="date" value="${escapeHtml(item.endDate || "")}" /></label>
+        <label><span>Cidade / concelho</span><input name="city" maxlength="100" value="${escapeHtml(item.city || "")}" /></label>
+        <label><span>Local</span><input name="venue" maxlength="180" value="${escapeHtml(item.venue || "")}" /></label>
+        <label><span>Bilheteira / entrada</span><input name="tickets" maxlength="220" value="${escapeHtml(item.tickets || "")}" /></label>
+        <label><span>Link de bilheteira</span><input name="ticketUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(item.ticketUrl || "")}" /></label>
+        <label><span>Link direto do cartaz</span><input name="posterUrl" type="url" maxlength="1600" placeholder="https://…/cartaz.jpg" value="${escapeHtml(item.image || "")}" /></label>
+        <label class="official-source"><span>Página oficial</span><input name="officialUrl" type="url" maxlength="1600" placeholder="https://" value="${escapeHtml(item.sourceUrl || "")}" /></label>
+      </fieldset>
+    </details>`}
+    <div class="report-actions">${archived
+      ? `<button type="button" data-agenda-action="restore">Restaurar na agenda</button>`
+      : `<button type="button" data-agenda-action="update">Guardar alterações</button><button type="button" data-agenda-action="archive" class="reject">Arquivar evento</button>`}
+    </div>
   </article>`;
 }
 
@@ -234,23 +265,46 @@ async function loadPosterHolds() {
   }
 }
 
+async function loadAgenda() {
+  adminStatus.textContent = "A carregar a agenda…";
+  reports.innerHTML = "";
+  try {
+    const query = agendaSearch.value.trim();
+    const response = await fetch(`/api/admin/events?status=${encodeURIComponent(activeAgendaStatus)}&q=${encodeURIComponent(query)}`, { headers: { Accept: "application/json" }, credentials: "same-origin" });
+    requireCurrentSession(response);
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Não foi possível carregar a agenda.");
+    const items = Array.isArray(result.items) ? result.items : [];
+    reports.innerHTML = items.length ? items.map(agendaCard).join("") : `<p class="empty-state">Não há eventos ${activeAgendaStatus === "archived" ? "arquivados" : "publicados"}${query ? " com esta pesquisa" : ""}.</p>`;
+    adminStatus.textContent = `${items.length} evento${items.length === 1 ? "" : "s"} ${activeAgendaStatus === "archived" ? "arquivado" : "publicado"}${items.length === 1 ? "" : "s"}.`;
+  } catch (error) {
+    adminStatus.textContent = error.message || "Não foi possível carregar a agenda.";
+  }
+}
+
 function loadActiveView() {
   if (activeView === "automation") return loadAutomationReviews();
   if (activeView === "poster-holds") return loadPosterHolds();
+  if (activeView === "agenda") return loadAgenda();
   return loadReports();
 }
 
 function updateReviewControls() {
   const automated = activeView === "automation";
   const posterHolds = activeView === "poster-holds";
-  communityFilters.hidden = automated || posterHolds;
+  const agenda = activeView === "agenda";
+  communityFilters.hidden = automated || posterHolds || agenda;
   automationFilters.hidden = !automated;
+  agendaStatusFilters.hidden = !agenda;
+  agendaTools.hidden = !agenda;
   const acceptedAutomation = activeAutomationStatus === "resolved";
   automationBulkActions.hidden = !automated || !["new", "reviewing", "resolved"].includes(activeAutomationStatus);
   bulkResolve.hidden = acceptedAutomation;
   bulkApply.textContent = acceptedAutomation ? "Aplicar todos os completos à agenda" : "Aceitar e aplicar completos";
-  communityBulkActions.hidden = automated || posterHolds || !["new", "reviewing"].includes(activeCommunityStatus);
-  filterContext.textContent = posterHolds
+  communityBulkActions.hidden = automated || posterHolds || agenda || !["new", "reviewing"].includes(activeCommunityStatus);
+  filterContext.textContent = agenda
+    ? "Eventos visíveis na agenda e arquivo editorial"
+    : posterHolds
     ? "Eventos guardados fora da agenda até terem toda a informação obrigatória"
     : automated
     ? "Resultados das rondas — confirma sempre na fonte oficial"
@@ -275,6 +329,19 @@ automationFilters.addEventListener("click", event => {
   loadAutomationReviews();
 });
 
+agendaStatusFilters.addEventListener("click", event => {
+  const button = event.target.closest("[data-agenda-status]");
+  if (!button) return;
+  activeAgendaStatus = button.dataset.agendaStatus;
+  agendaStatusFilters.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  loadAgenda();
+});
+
+document.querySelector("#agenda-search-button").addEventListener("click", loadAgenda);
+agendaSearch.addEventListener("keydown", event => {
+  if (event.key === "Enter") loadAgenda();
+});
+
 viewFilters.addEventListener("click", event => {
   const button = event.target.closest("[data-view]");
   if (!button) return;
@@ -285,6 +352,70 @@ viewFilters.addEventListener("click", event => {
 });
 
 reports.addEventListener("click", async event => {
+  const agendaButton = event.target.closest("[data-agenda-action]");
+  if (agendaButton) {
+    const card = agendaButton.closest("[data-agenda-event]");
+    const action = agendaButton.dataset.agendaAction;
+    const confirmations = {
+      archive: "Arquivar este evento? Deixa imediatamente de aparecer na agenda pública, mas pode ser restaurado.",
+      restore: "Restaurar este evento na agenda pública?"
+    };
+    if (confirmations[action] && !window.confirm(confirmations[action])) return;
+    const buttons = card.querySelectorAll("button");
+    buttons.forEach(item => { item.disabled = true; });
+    try {
+      const response = await fetch("/api/admin/events", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          id: card.dataset.agendaEvent,
+          action,
+          eventName: card.querySelector('[name="eventName"]')?.value,
+          eventDate: card.querySelector('[name="eventDate"]')?.value,
+          eventEndDate: card.querySelector('[name="eventEndDate"]')?.value,
+          city: card.querySelector('[name="city"]')?.value,
+          venue: card.querySelector('[name="venue"]')?.value,
+          tickets: card.querySelector('[name="tickets"]')?.value,
+          ticketUrl: card.querySelector('[name="ticketUrl"]')?.value,
+          posterUrl: card.querySelector('[name="posterUrl"]')?.value,
+          officialUrl: card.querySelector('[name="officialUrl"]')?.value
+        })
+      });
+      requireCurrentSession(response);
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "Não foi possível atualizar este evento.");
+      adminStatus.textContent = result.message || "Evento atualizado.";
+      loadAgenda();
+    } catch (error) {
+      adminStatus.textContent = error.message || "Não foi possível atualizar este evento.";
+      buttons.forEach(item => { item.disabled = false; });
+    }
+    return;
+  }
+  const archivePosterHold = event.target.closest("[data-archive-poster-hold]");
+  if (archivePosterHold) {
+    const card = archivePosterHold.closest("[data-poster-hold]");
+    if (!window.confirm("Arquivar esta sugestão? Sai da fila e mantém-se recuperável na área de eventos arquivados.")) return;
+    archivePosterHold.disabled = true;
+    try {
+      const response = await fetch("/api/admin/poster-holds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ id: card.dataset.posterHold, action: "archive" })
+      });
+      requireCurrentSession(response);
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "Não foi possível arquivar a sugestão.");
+      adminStatus.textContent = result.message || "Sugestão arquivada.";
+      loadPosterHolds();
+    } catch (error) {
+      adminStatus.textContent = error.message || "Não foi possível arquivar a sugestão.";
+      archivePosterHold.disabled = false;
+    }
+    return;
+  }
   const posterHoldButton = event.target.closest("[data-save-poster-hold]");
   if (posterHoldButton) {
     const card = posterHoldButton.closest("[data-poster-hold]");

@@ -5,7 +5,8 @@ let schemaReady;
 // event, its ticket status or its poster by itself.
 export function ensureAutomationReviewStore(db) {
   if (!schemaReady) {
-    schemaReady = db.batch([
+    schemaReady = (async () => {
+      await db.batch([
       db.prepare(`CREATE TABLE IF NOT EXISTS automation_reviews (
         id TEXT PRIMARY KEY,
         dedupe_key TEXT NOT NULL UNIQUE,
@@ -46,7 +47,22 @@ export function ensureAutomationReviewStore(db) {
         fingerprint TEXT NOT NULL,
         checked_at TEXT NOT NULL
       )`)
-    ]).catch(error => {
+      ]);
+      // CREATE TABLE IF NOT EXISTS does not add fields to an older D1 table.
+      // Keep production self-healing when a deployment predates the editor
+      // fields; otherwise the admin SELECT fails with Worker error 1101.
+      const { results = [] } = await db.prepare("PRAGMA table_info(automation_reviews)").all();
+      const columns = new Set(results.map(column => column.name));
+      const additions = [
+        ["proposal_title", "TEXT"],
+        ["proposal_url", "TEXT"],
+        ["editor_note", "TEXT"],
+        ["applied_at", "TEXT"]
+      ].filter(([name]) => !columns.has(name));
+      if (additions.length) {
+        await db.batch(additions.map(([name, type]) => db.prepare(`ALTER TABLE automation_reviews ADD COLUMN ${name} ${type}`)));
+      }
+    })().catch(error => {
       schemaReady = undefined;
       throw error;
     });
