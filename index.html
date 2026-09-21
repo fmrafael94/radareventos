@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="styles.css?v=2" />
     <link rel="stylesheet" href="immersive.css?v=2" />
     <link rel="stylesheet" href="midnight.css?v=2" />
-    <link rel="stylesheet" href="brand.css?v=10" />
+    <link rel="stylesheet" href="brand.css?v=11" />
   </head>
   <body class="home-page">
     <a class="skip-link" href="#agenda">Saltar para a agenda</a>
@@ -80,30 +80,8 @@
         <div id="nearby-rail" class="nearby-rail" aria-live="polite"></div>
       </section>
 
-      <section class="discovery-gateway" aria-labelledby="discovery-title">
-        <div class="discovery-copy">
-          <p id="discovery-count" class="kicker">Agenda confirmada</p>
-          <h2 id="discovery-title">Encontra o teu próximo concerto.</h2>
-          <p>Começa por uma cidade, um género ou pelo momento certo.</p>
-        </div>
-        <nav class="discovery-links" aria-label="Explorar a agenda">
-          <a href="/concertos/lisboa">Lisboa <span>→</span></a>
-          <a href="/concertos/porto">Porto <span>→</span></a>
-          <a href="/concertos-este-fim-de-semana">Este fim de semana <span>→</span></a>
-          <a href="/metal/portugal">Metal <span>→</span></a>
-          <a href="/concertos-gratis">Entrada livre <span>→</span></a>
-          <a href="/festivais/2026">Festivais <span>→</span></a>
-        </nav>
-      </section>
-
       <section id="agenda" class="browse-panel" aria-labelledby="browse-title">
-        <div class="browse-heading"><div><h2 id="browse-title">Encontra algo teu.</h2><p id="result-count" class="result-count" aria-live="polite"></p></div></div>
-        <nav class="agenda-shortcuts" aria-label="Atalhos rápidos da agenda">
-          <button type="button" data-quick-pick="today">Hoje</button>
-          <button type="button" data-quick-pick="weekend">Este fim de semana</button>
-          <button type="button" data-quick-pick="week">Próximos 7 dias</button>
-          <button type="button" data-quick-pick="free">Entrada livre</button>
-        </nav>
+        <div class="browse-heading"><div><p class="kicker">Agenda completa</p><h2 id="browse-title">Encontra música ao teu ritmo.</h2><p class="browse-description">Pesquisa diretamente ou usa os filtros apenas quando precisares.</p><p id="result-count" class="visually-hidden" aria-live="polite"></p></div></div>
         <div class="agenda-search">
           <label class="agenda-search-input"><input id="search" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" aria-label="Procurar artista, sala ou cidade" /></label>
           <button id="filter-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="filter-panel"><span>Filtros</span><i aria-hidden="true">+</i></button>
@@ -239,10 +217,10 @@
         </div>
       </form>
     </dialog>
-    <script src="i18n.js?v=7"></script>
+    <script src="i18n.js?v=8"></script>
     <script src="events.js"></script>
     <script src="sources.js"></script>
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
     <!-- Cloudflare Web Analytics -->
     <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"44d10bbe8f0042b8b602b3e78be2cc7e"}'></script>
   </body>
