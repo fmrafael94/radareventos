@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="view-transition" content="same-origin" />
+    <title>{{PAGE_TITLE}}</title>
+    <meta name="description" content="{{PAGE_DESCRIPTION}}" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="{{CANONICAL_URL}}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=3" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png?v=3" />
+    <link rel="manifest" href="/site.webmanifest?v=3" />
+    <meta name="theme-color" content="#193427" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Desvio" />
+    <meta property="og:title" content="{{PAGE_HEADING}}" />
+    <meta property="og:description" content="{{PAGE_DESCRIPTION}}" />
+    <meta property="og:url" content="{{CANONICAL_URL}}" />
+    <meta property="og:image" content="https://odesvio.pt/brand/logo-icon.png" />
+    <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json">{{PAGE_SCHEMA}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/landing.css?v=1" />
+  </head>
+  <body>
+    <a class="skip-link" href="#agenda">Saltar para os eventos</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Desvio — voltar à agenda"><img src="/brand/logo-icon.png" alt="" width="30" height="30" /><span>Desvio</span></a>
+      <p>Menos procura. <em>Mais música.</em></p>
+      <a class="back" href="/">Agenda completa ↗</a>
+    </header>
+    <main>
+      <nav class="breadcrumbs" aria-label="Percurso"><a href="/">Agenda</a><span aria-hidden="true">/</span><span>{{PAGE_HEADING}}</span></nav>
+      <header class="landing-hero">
+        <p class="eyebrow">Agenda confirmada · Portugal</p>
+        <h1>{{PAGE_HEADING}}</h1>
+        <p>{{PAGE_DESCRIPTION}}</p>
+        <strong>{{PAGE_COUNT}}</strong>
+      </header>
+      <section id="agenda" class="landing-list" aria-label="Eventos encontrados">{{EVENT_CARDS}}</section>
+      <aside class="discovery" aria-labelledby="discovery-title">
+        <p class="eyebrow">Continuar a descobrir</p>
+        <h2 id="discovery-title">Segue outro desvio.</h2>
+        <nav>{{DISCOVERY_LINKS}}</nav>
+      </aside>
+    </main>
+    <footer><a class="brand" href="/"><img src="/brand/logo-icon.png" alt="" width="28" height="28" /><span>Desvio</span></a><p>Agenda pública de música em Portugal.</p><nav><a href="/termos.html">Termos</a><a href="/privacidade.html">Privacidade</a><a href="/cookies.html">Cookies</a></nav></footer>
+    <script src="/landing.js"></script>
+    <!-- Cloudflare Web Analytics -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"44d10bbe8f0042b8b602b3e78be2cc7e"}'></script>
+  </body>
+</html>

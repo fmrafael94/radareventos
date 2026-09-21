@@ -16,6 +16,10 @@ const posterCacheVersion = value => {
 };
 const arrowIcon = `<svg class="event-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg>`;
 const calendarIcon = `<svg class="event-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="3.4" y="4.6" width="13.2" height="11.5" rx="1.4" /><path d="M6.6 2.8v3.7M13.4 2.8v3.7M3.5 8.4h13" /></svg>`;
+const trackInteraction = (name, properties = {}) => {
+  if (typeof window.zaraz?.track !== "function") return;
+  Promise.resolve(window.zaraz.track(name, Object.fromEntries(Object.entries(properties).map(([key, value]) => [key, String(value).slice(0, 120)])))).catch(() => {});
+};
 
 async function posterFor(id) {
   const event = (window.EVENTS || []).find(item => item.id === id);
@@ -221,7 +225,9 @@ function render(event, poster) {
   </article>`;
   page.setAttribute("aria-busy", "false");
   page.classList.add("is-ready");
+  trackInteraction("event_open", { event_id: event.id, city: event.city, type: event.type || "Concerto" });
   const status = page.querySelector(".share-status");
+  page.querySelector(".event-ticket[href]")?.addEventListener("click", () => trackInteraction("ticket_click", { event_id: event.id, city: event.city }));
   page.querySelector("[data-calendar]").addEventListener("click", () => {
     const file = calendarFile(event, shareUrl);
     try {
@@ -280,6 +286,7 @@ function render(event, poster) {
     posterDialog.addEventListener("click", click => { if (click.target === posterDialog) posterDialog.close(); });
   }
   page.querySelector("[data-share]").addEventListener("click", async () => {
+    trackInteraction("share", { event_id: event.id, method: navigator.share ? "native" : "copy" });
     if (navigator.share) {
       try {
         // Share one canonical URL. Messaging apps then fetch this page's Open Graph

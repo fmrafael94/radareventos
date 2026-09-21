@@ -22,7 +22,7 @@ const escapeXml = value => escapeHtml(value).replace(/\"/g, "&quot;");
 // static pages and API replies.
 function secureResponse(response) {
   const headers = new Headers(response.headers);
-  headers.set("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests");
+  headers.set("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -177,18 +177,44 @@ async function privateAssetPage(request, env, path) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+const notFoundVariants = [
+  { eyebrow: "404 · Sem sinal", heading: "A banda saiu do palco.", body: "Este evento já não está na agenda. O cabo ficou, mas o concerto não.", cta: "Voltar ao alinhamento", image: "/brand/404/amplificador.png", alt: "Amplificador mascote com o cabo desligado" },
+  { eyebrow: "404 · Fora da faixa", heading: "Perdemos o beat.", body: "Este evento saltou da playlist. Vamos pôr outra coisa a tocar.", cta: "Voltar à agenda", image: "/brand/404/vinil.png", alt: "Disco de vinil mascote à procura do beat" },
+  { eyebrow: "404 · Desvio na estrada", heading: "O evento foi de tournée.", body: "Virou na saída errada e já não mora aqui.", cta: "Traçar nova rota", image: "/brand/404/carrinha.png", alt: "Carrinha de tournée mascote num desvio" },
+  { eyebrow: "404 · Depois do encore", heading: "Silêncio no alinhamento.", body: "O palco ficou vazio. A agenda, felizmente, não.", cta: "Ver quem toca a seguir", image: "/brand/404/bateria.png", alt: "Bateria mascote num palco vazio" },
+  { eyebrow: "404 · Corda partida", heading: "Este riff ficou por tocar.", body: "A corda partiu e o evento saiu do alinhamento. Há mais música logo a seguir.", cta: "Afinar nova procura", image: "/brand/404/guitarra.png", alt: "Guitarra mascote com uma corda partida" }
+];
+
+async function notFoundPage(request, env) {
+  try {
+    const template = await assetText(request, env, "/404.html");
+    const variant = notFoundVariants[Math.floor(Math.random() * notFoundVariants.length)];
+    const html = template
+      .replaceAll("{{ERROR_TITLE}}", escapeHtml(variant.heading))
+      .replaceAll("{{ERROR_EYEBROW}}", escapeHtml(variant.eyebrow))
+      .replaceAll("{{ERROR_HEADING}}", escapeHtml(variant.heading))
+      .replaceAll("{{ERROR_BODY}}", escapeHtml(variant.body))
+      .replaceAll("{{ERROR_CTA}}", escapeHtml(variant.cta))
+      .replaceAll("{{ERROR_IMAGE}}", escapeHtml(variant.image))
+      .replaceAll("{{ERROR_ALT}}", escapeHtml(variant.alt));
+    return new Response(html, { status: 404, headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "no-store" } });
+  } catch {
+    return new Response("Evento não encontrado.", { status: 404, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } });
+  }
+}
+
 async function eventPage(request, env, id) {
-  if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Evento não encontrado.", { status: 404 });
+  if (!/^[a-z0-9-]{1,180}$/i.test(id)) return notFoundPage(request, env);
   try {
     const events = await assetText(request, env, "/events.js");
     const patch = await publicEventPatch(env, id);
-    if (patch.publicationStatus === "archived") return new Response("Evento não encontrado.", { status: 404 });
+    if (patch.publicationStatus === "archived") return notFoundPage(request, env);
     const literal = eventLiteral(events, id);
-    if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return new Response("Evento não encontrado.", { status: 404 });
+    if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return notFoundPage(request, env);
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
     const cloudEvent = match ? null : await publishedEvent(env, id);
-    if (!match && !cloudEvent) return new Response("Evento não encontrado.", { status: 404 });
+    if (!match && !cloudEvent) return notFoundPage(request, env);
     const event = match?.[0] || "";
     const stringPatch = (key, fallback = "") => typeof patch[key] === "string" && patch[key].trim() ? patch[key].trim() : fallback;
     const title = stringPatch("title", cloudEvent?.title || eventField(event, "title") || "Evento");
@@ -250,6 +276,154 @@ export function sitemapEventIds(source, today = "0000-00-00") {
   return [...new Set(records.filter(({ id }) => !series.some(({ parentId, prefix }) => id !== parentId && id.startsWith(prefix))).map(record => record.id))];
 }
 
+const slugify = value => String(value || "")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .toLocaleLowerCase("pt-PT")
+  .replace(/&/g, " e ")
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
+const eventGenres = literal => [...(literal.match(/\bgenres:\s*\[([^\]]*)\]/)?.[1] || "").matchAll(/"((?:\\.|[^"\\])*)"/g)].map(match => match[1].replace(/\\"/g, '"'));
+const isFreeEvent = event => /entrada livre|entrada gratuita|gratuit[oa]|gr[aá]tis|\bfree\b/i.test(`${event.tickets} ${event.availability}`);
+
+export function publicEventRecords(source, today = "0000-00-00", excluded = new Set()) {
+  return sitemapEventIds(source, today).filter(id => !excluded.has(id)).map(id => {
+    const literal = eventLiteral(source, id);
+    return {
+      id,
+      title: eventField(literal, "title"),
+      date: eventField(literal, "date"),
+      endDate: eventField(literal, "endDate"),
+      time: eventField(literal, "time"),
+      venue: eventField(literal, "venue"),
+      city: eventField(literal, "city"),
+      district: eventField(literal, "district"),
+      area: eventField(literal, "area"),
+      type: eventField(literal, "type") || "Concerto",
+      tickets: eventField(literal, "tickets"),
+      availability: eventField(literal, "availability"),
+      genres: eventGenres(literal)
+    };
+  }).filter(event => event.title && event.date && (event.endDate || event.date) >= today);
+}
+
+const countsFor = (events, key) => {
+  const counts = new Map();
+  for (const event of events) {
+    const values = key === "genres" ? event.genres : [event[key]];
+    for (const value of values.filter(Boolean)) counts.set(value, (counts.get(value) || 0) + 1);
+  }
+  return [...counts].map(([name, count]) => ({ name, slug: slugify(name), count })).sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "pt"));
+};
+
+const weekendRange = today => {
+  const date = new Date(`${today}T12:00:00Z`);
+  const weekday = date.getUTCDay();
+  const daysUntilFriday = (5 - weekday + 7) % 7;
+  const friday = new Date(date);
+  friday.setUTCDate(date.getUTCDate() + daysUntilFriday);
+  const sunday = new Date(friday);
+  sunday.setUTCDate(friday.getUTCDate() + 2);
+  return [friday.toISOString().slice(0, 10), sunday.toISOString().slice(0, 10)];
+};
+
+const routeEntry = (path, label, kind, value = "") => ({ path, label, kind, value });
+
+export function landingRoutes(source, today = "0000-00-00", excluded = new Set()) {
+  const events = publicEventRecords(source, today, excluded);
+  const cities = countsFor(events, "city").filter(item => item.count >= 2);
+  const districts = countsFor(events, "district").filter(item => item.count >= 3);
+  const areas = countsFor(events, "area").filter(item => item.count >= 3);
+  const genres = countsFor(events, "genres").filter(item => item.count >= 3);
+  const years = [...new Set(events.filter(event => event.type === "Festival").map(event => event.date.slice(0, 4)))].sort();
+  const routes = [
+    routeEntry("/concertos", "Concertos em Portugal", "all"),
+    routeEntry("/concertos-este-fim-de-semana", "Concertos este fim de semana", "weekend"),
+    routeEntry("/concertos-gratis", "Concertos grátis", "free"),
+    ...years.map(year => routeEntry(`/festivais/${year}`, `Festivais em Portugal em ${year}`, "festival", year)),
+    ...cities.map(item => routeEntry(`/concertos/${item.slug}`, `Concertos em ${item.name}`, "city", item.name)),
+    ...districts.map(item => routeEntry(`/concertos/distrito/${item.slug}`, `Concertos no distrito de ${item.name}`, "district", item.name)),
+    ...areas.map(item => routeEntry(`/concertos/regiao/${item.slug}`, `Concertos em ${item.name}`, "area", item.name)),
+    ...genres.map(item => routeEntry(`/${item.slug}/portugal`, `${item.name} em Portugal`, "genre", item.name))
+  ];
+  for (const city of cities) {
+    for (const genre of genres) {
+      const count = events.filter(event => event.city === city.name && event.genres.includes(genre.name)).length;
+      if (count >= 3) routes.push(routeEntry(`/concertos/${city.slug}/${genre.slug}`, `${genre.name} ao vivo em ${city.name}`, "cityGenre", `${city.name}\u0000${genre.name}`));
+    }
+  }
+  return routes;
+}
+
+function resolveLanding(source, pathname, today, excluded = new Set()) {
+  const routes = landingRoutes(source, today, excluded);
+  const cleanPath = pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
+  const route = routes.find(item => item.path === cleanPath);
+  if (!route) return null;
+  const allEvents = publicEventRecords(source, today, excluded);
+  const [weekendStart, weekendEnd] = weekendRange(today);
+  const [city, genre] = route.value.split("\u0000");
+  const events = allEvents.filter(event => {
+    if (route.kind === "weekend") return event.date <= weekendEnd && (event.endDate || event.date) >= weekendStart;
+    if (route.kind === "free") return isFreeEvent(event);
+    if (route.kind === "festival") return event.type === "Festival" && event.date.startsWith(`${route.value}-`);
+    if (route.kind === "city") return event.city === route.value;
+    if (route.kind === "district") return event.district === route.value;
+    if (route.kind === "area") return event.area === route.value;
+    if (route.kind === "genre") return event.genres.includes(route.value);
+    if (route.kind === "cityGenre") return event.city === city && event.genres.includes(genre);
+    return true;
+  }).sort((left, right) => left.date.localeCompare(right.date) || left.title.localeCompare(right.title, "pt"));
+  return { ...route, events, routes };
+}
+
+const landingDescription = landing => {
+  const count = landing.events.length;
+  if (landing.kind === "weekend") return `${count} concertos e eventos de música ao vivo para este fim de semana em Portugal, com datas, salas, cartazes e ligações oficiais.`;
+  if (landing.kind === "free") return `${count} concertos e eventos de música com entrada livre em Portugal, confirmados em fontes oficiais.`;
+  return `${count} eventos em agenda: ${landing.label}. Datas, salas, cartazes, bilhetes e fontes oficiais no Desvio.`;
+};
+
+function landingNavigation(routes, activePath) {
+  const priority = ["/concertos", "/concertos-este-fim-de-semana", "/concertos-gratis", "/concertos/lisboa", "/concertos/porto", "/metal/portugal", "/rock/portugal", "/jazz/portugal"];
+  return priority.map(path => routes.find(route => route.path === path)).filter(route => route && route.path !== activePath)
+    .map(route => `<a href="${escapeHtml(route.path)}">${escapeHtml(route.label)}</a>`).join("");
+}
+
+async function landingPage(request, env, pathname) {
+  try {
+    const [template, source] = await Promise.all([assetText(request, env, "/landing.html"), assetText(request, env, "/events.js")]);
+    const landing = resolveLanding(source, pathname, lisbonToday(), await archivedEventIds(env));
+    if (!landing) return null;
+    const origin = new URL(request.url).origin;
+    const canonical = `${origin}${landing.path}`;
+    const description = landingDescription(landing);
+    const cards = landing.events.map(event => {
+      const date = event.endDate && event.endDate !== event.date ? `${humanDate(event.date)}–${humanDate(event.endDate)}` : humanDate(event.date);
+      const format = [event.type, event.genres.slice(0, 2).join(" · ")].filter(Boolean).join(" · ");
+      return `<article class="landing-event"><a href="/evento/${encodeURIComponent(event.id)}"><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><div><p>${escapeHtml(format)}</p><h2>${escapeHtml(event.title)}</h2><span>${escapeHtml([event.venue, event.city].filter(Boolean).join(" · "))}</span></div><b aria-hidden="true">↗</b></a></article>`;
+    }).join("");
+    const itemList = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: landing.label,
+      numberOfItems: landing.events.length,
+      itemListElement: landing.events.map((event, index) => ({ "@type": "ListItem", position: index + 1, url: `${origin}/evento/${encodeURIComponent(event.id)}`, name: event.title }))
+    }).replace(/</g, "\\u003c");
+    const html = template
+      .replaceAll("{{PAGE_TITLE}}", escapeHtml(`${landing.label} | Desvio`))
+      .replaceAll("{{PAGE_HEADING}}", escapeHtml(landing.label))
+      .replaceAll("{{PAGE_DESCRIPTION}}", escapeHtml(description))
+      .replaceAll("{{PAGE_COUNT}}", escapeHtml(`${landing.events.length} ${landing.events.length === 1 ? "evento" : "eventos"}`))
+      .replaceAll("{{CANONICAL_URL}}", escapeHtml(canonical))
+      .replaceAll("{{EVENT_CARDS}}", cards || '<p class="landing-empty">Ainda não há eventos confirmados para esta seleção.</p>')
+      .replaceAll("{{DISCOVERY_LINKS}}", landingNavigation(landing.routes, landing.path))
+      .replaceAll("{{PAGE_SCHEMA}}", itemList);
+    return new Response(html, { headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "public, max-age=300" } });
+  } catch {
+    return new Response("Não foi possível abrir esta agenda.", { status: 503 });
+  }
+}
+
 // The app renders its full, interactive agenda in the browser. This small
 // server-rendered collection gives crawlers and no-JavaScript visitors a
 // stable set of ordinary links into the same current, public agenda.
@@ -287,11 +461,10 @@ function homepageEventLinksHtml(source, today, excluded = new Set()) {
 
 async function homepage(request, env) {
   try {
-    const [template, events] = await Promise.all([
-      assetText(request, env, "/index.html"),
-      assetText(request, env, "/events.js")
-    ]);
-    const html = template.replace("<!-- SEO_UPCOMING_EVENTS -->", homepageEventLinksHtml(events, lisbonToday(), await archivedEventIds(env)));
+    const template = await assetText(request, env, "/index.html");
+    // Dedicated, server-rendered discovery pages replace the duplicated event
+    // list that previously appeared below the interactive agenda.
+    const html = template.replace("<!-- SEO_UPCOMING_EVENTS -->", "");
     return new Response(html, {
       headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "public, max-age=300" }
     });
@@ -324,7 +497,8 @@ async function sitemap(request, env) {
     }
     const archived = await archivedEventIds(env);
     const urls = [...new Set(ids)].filter(id => !archived.has(id)).map(id => `<url><loc>${escapeXml(`${origin}/evento/${encodeURIComponent(id)}`)}</loc></url>`).join("");
-    return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(`${origin}/`)}</loc></url>${urls}</urlset>`, {
+    const landingUrls = landingRoutes(source, today, archived).map(route => `<url><loc>${escapeXml(`${origin}${route.path}`)}</loc></url>`).join("");
+    return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(`${origin}/`)}</loc></url>${landingUrls}${urls}</urlset>`, {
       headers: { "Content-Type": "application/xml; charset=UTF-8", "Cache-Control": "public, max-age=3600" }
     });
   } catch {
@@ -488,6 +662,16 @@ export default {
       const response = await sitemap(request, env);
       return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);
     }
+    const isLandingPath = pathname === "/concertos"
+      || pathname === "/concertos-este-fim-de-semana"
+      || pathname === "/concertos-gratis"
+      || /^\/festivais\/\d{4}\/?$/.test(pathname)
+      || /^\/concertos\/(?:distrito\/|regiao\/)?[a-z0-9-]+(?:\/[a-z0-9-]+)?\/?$/.test(pathname)
+      || /^\/[a-z0-9-]+\/portugal\/?$/.test(pathname);
+    if (isLandingPath && ["GET", "HEAD"].includes(request.method)) {
+      const response = await landingPage(request, env, pathname);
+      if (response) return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);
+    }
     if (pathname.startsWith("/api/event-poster/") && ["GET", "HEAD"].includes(request.method)) {
       const response = await eventPoster(request, env, decodeURIComponent(pathname.slice("/api/event-poster/".length)), executionCtx);
       return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);
@@ -549,7 +733,12 @@ export default {
     }
     if (pathname === "/api/internal/audit-report" && request.method === "POST") return secureResponse(await postAuditReport(context));
 
-    return secureResponse(await env.ASSETS.fetch(request));
+    const assetResponse = await env.ASSETS.fetch(request);
+    if (assetResponse.status === 404 && ["GET", "HEAD"].includes(request.method)) {
+      const response = await notFoundPage(request, env);
+      return secureResponse(request.method === "HEAD" ? new Response(null, { status: 404, headers: response.headers }) : response);
+    }
+    return secureResponse(assetResponse);
   },
   async scheduled(_controller, env, executionCtx) {
     executionCtx.waitUntil(purgeExpiredPersonalData(env));

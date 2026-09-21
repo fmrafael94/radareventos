@@ -64,6 +64,17 @@ const maxPosterUploadBytes = 2 * 1024 * 1024;
 const maxPosterDimension = 2400;
 let turnstileConfigured = false;
 
+// Cloudflare Zaraz receives only interaction context, never names, email
+// addresses, search histories tied to an identity, or form contents.
+const trackInteraction = (name, properties = {}) => {
+  const safeProperties = Object.fromEntries(Object.entries(properties)
+    .filter(([, value]) => ["string", "number", "boolean"].includes(typeof value))
+    .map(([key, value]) => [key, String(value).slice(0, 120)]));
+  if (typeof window.zaraz?.track !== "function") return;
+  Promise.resolve(window.zaraz.track(name, safeProperties)).catch(() => {});
+};
+let searchAnalyticsTimer;
+
 const unique = values => [...new Set(values)].sort((a, b) => a.localeCompare(b, "pt"));
 const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
 const safePublicUrl = value => {
@@ -744,6 +755,7 @@ function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => 
       option.setAttribute("aria-pressed", "false");
       option.addEventListener("click", () => {
         state[key] = state[key].includes(value) ? state[key].filter(item => item !== value) : [...state[key], value];
+        trackInteraction("filter_used", { filter: key, value, enabled: state[key].includes(value) });
         state.page = 1;
         onChange(key);
         sync();
@@ -1118,7 +1130,12 @@ function syncFilterToggle() {
   filterToggle.classList.toggle("has-active", Boolean(active));
 }
 
-function updateFilter(key, value) { state[key] = value; state.page = 1; render(); }
+function updateFilter(key, value) {
+  state[key] = value;
+  state.page = 1;
+  if (key !== "search") trackInteraction("filter_used", { filter: key, value: value || "all" });
+  render();
+}
 function resetAgendaSelection() {
   Object.assign(state, { search: "", date: "", price: "", ticketPrice: [], genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
   document.querySelector("#search").value = "";
@@ -1131,13 +1148,21 @@ function resetAgendaSelection() {
 }
 function openFeaturedEvent(id) {
   const eventPage = `/evento/${encodeURIComponent(id)}`;
+  trackInteraction("event_open", { event_id: id, source: "featured" });
   location.assign(eventPage);
 }
 function renderSources() {
   document.querySelector("#source-groups").innerHTML = SOURCE_GROUPS.map(group => `<article class="source-group"><h3>${escapeHtml(group.title)}</h3>${group.sources.map(([name, type, url]) => url ? `<a href="${escapeHtml(safePublicUrl(url))}" target="_blank" rel="noopener">${escapeHtml(name)}<span>${escapeHtml(type)}</span></a>` : `<p class="source-pending"><b>${escapeHtml(name)}</b><span>${escapeHtml(type)}</span></p>`).join("")}</article>`).join("");
 }
 
-document.querySelector("#search").addEventListener("input", event => updateFilter("search", event.target.value));
+document.querySelector("#search").addEventListener("input", event => {
+  updateFilter("search", event.target.value);
+  window.clearTimeout(searchAnalyticsTimer);
+  searchAnalyticsTimer = window.setTimeout(() => {
+    const query = String(event.target.value || "").trim();
+    if (query.length >= 2) trackInteraction("search", { query, result_count: filteredEvents().length });
+  }, 700);
+});
 featuredRail.addEventListener("click", event => {
   if (event.target.closest(".featured-copy a")) return;
   const card = event.target.closest(".featured-card");
@@ -1169,6 +1194,7 @@ document.querySelectorAll("[data-quick-pick]").forEach(button => button.addEvent
   state.date = isDatePick ? next : state.date;
   dateSelect.value = state.date;
   state.page = 1;
+  trackInteraction("filter_used", { filter: "quick_pick", value: pick, enabled: Boolean(next) });
   document.querySelectorAll("[data-quick-pick]").forEach(item => item.setAttribute("aria-pressed", String(item === button && Boolean(next))));
   dateSelect.dispatchEvent(new Event("change"));
 }));
@@ -1212,6 +1238,8 @@ agendaEmpty.querySelector("button").addEventListener("click", () => {
   render();
 });
 document.addEventListener("click", event => {
+  const eventLink = event.target.closest('a[href^="/evento/"]');
+  if (eventLink) trackInteraction("event_open", { event_id: decodeURIComponent(eventLink.pathname.split("/").pop() || ""), source: "agenda" });
   const dayTab = event.target.closest("[data-festival-day]");
   if (dayTab) {
     const programme = dayTab.closest(".festival-program");
@@ -1404,6 +1432,7 @@ feedbackForm.addEventListener("submit", async event => {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || "Não foi possível enviar agora.");
+    trackInteraction(feedbackKind.value === "promoter" ? "promoter_submission" : "event_submission", { kind: feedbackKind.value });
     feedbackStatus.textContent = "Recebido para revisão. Se deixaste um email, usamos esse contacto apenas para responder ao pedido.";
     feedbackForm.reset();
     feedbackSubmit.textContent = "Enviado ✓";
