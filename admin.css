@@ -191,3 +191,45 @@ html .review-controls .status-filters button[aria-pressed="true"]{border-color:#
   .report-heading{gap:8px}
   .report h2{font-size:16px}
 }
+
+/* The private workspace is a protected tab of the same Desvio interface. */
+.admin-site-header{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:clamp(22px,4vw,56px);
+  min-height:70px;
+  padding:0 clamp(22px,5vw,76px);
+  color:#f7f5f0;
+  background:#182226;
+}
+.admin-site-header .brand{justify-self:start}
+.admin-site-header .primary-nav{justify-self:center}
+.admin-header-actions{display:flex;align-items:center;justify-self:end;gap:8px}
+.admin-header-actions button{
+  display:inline-flex;
+  min-height:36px;
+  align-items:center;
+  justify-content:center;
+  padding:0 12px;
+  border:1px solid rgba(247,245,240,.28);
+  border-radius:999px;
+  color:#f7f5f0;
+  background:transparent;
+  font:600 10px "DM Mono",monospace;
+  cursor:pointer;
+}
+.admin-header-actions button:hover{border-color:#b7a45a;color:#b7a45a}
+.admin-header-actions #refresh{border-color:#e35e44;background:#e35e44}
+.admin-header-actions #refresh:hover{border-color:#c94c35;color:#f7f5f0;background:#c94c35}
+
+@media(max-width:900px){
+  .admin-site-header{grid-template-columns:1fr auto}
+  .admin-site-header .primary-nav{display:none}
+}
+@media(max-width:580px){
+  .admin-site-header{min-height:64px;padding:0 15px;gap:10px}
+  .admin-header-actions{gap:5px}
+  .admin-header-actions button{min-height:34px;padding:0 9px;font-size:9px}
+  .admin-header-actions #logout{display:none}
+}

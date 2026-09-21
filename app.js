@@ -35,8 +35,20 @@ const featuredRail = document.querySelector("#featured-rail");
 const heroFeature = document.querySelector("#hero-feature");
 const heroSearch = document.querySelector("#hero-search");
 const heroSearchInput = document.querySelector("#hero-search-input");
+const adminTabs = [...document.querySelectorAll("[data-admin-tab]")];
 let featuredAutoscroll;
 let featuredRefreshTimer;
+
+async function revealAdminNavigation() {
+  if (!adminTabs.length) return;
+  try {
+    const response = await fetch("/api/admin/session", { headers: { Accept: "application/json" }, credentials: "same-origin" });
+    if (!response.ok) return;
+    adminTabs.forEach(link => { link.hidden = false; });
+  } catch { /* The public agenda stays unchanged when session lookup fails. */ }
+}
+
+revealAdminNavigation();
 let nearbyPosition;
 const filterToggle = document.querySelector("#filter-toggle");
 const filterPanel = document.querySelector("#filter-panel");
