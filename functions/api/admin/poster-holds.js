@@ -115,6 +115,7 @@ async function publicationIssues(context) {
   return all.flatMap(event => {
     const override = overrides.get(event.id);
     const held = holds.has(event.id);
+    if (override?.patch?.publicationStatus === "archived") return [];
     const values = valuesFor(event, override?.patch, appSource, source, held);
     // The static hold is a safety net, not a permanent ban. Once the complete
     // override is saved it must leave this list and become public.
@@ -152,6 +153,19 @@ export async function onRequestPost(context) {
     const existing = await context.env.EVENT_RADAR_DB.prepare("SELECT patch_json FROM event_overrides WHERE event_id = ?").bind(id).first();
     let previous = {};
     try { previous = JSON.parse(existing?.patch_json || "{}"); } catch { /* replace malformed legacy data */ }
+    if (payload?.action === "archive") {
+      const patch = { ...previous, publicationStatus: "archived" };
+      await context.env.EVENT_RADAR_DB.prepare(`
+        INSERT INTO event_overrides (event_id, patch_json, source_url, verified_at, updated_at)
+        VALUES (?, ?, ?, date('now'), datetime('now'))
+        ON CONFLICT(event_id) DO UPDATE SET
+          patch_json = excluded.patch_json,
+          source_url = excluded.source_url,
+          verified_at = excluded.verified_at,
+          updated_at = excluded.updated_at
+      `).bind(id, JSON.stringify(patch), previous.sourceUrl || event.sourceUrl || null).run();
+      return json({ ok: true, id, message: "Sugestão arquivada e retirada da fila." });
+    }
     const held = new Set(holdIds(source)).has(id);
     const values = valuesFor(event, {
       ...previous,
@@ -177,7 +191,8 @@ export async function onRequestPost(context) {
       ticketUrl: values.ticketUrl,
       image: values.posterUrl,
       sourceUrl: values.officialUrl,
-      posterSourceUrl: values.officialUrl
+      posterSourceUrl: values.officialUrl,
+      publicationStatus: "published"
     };
     await context.env.EVENT_RADAR_DB.prepare(`
       INSERT INTO event_overrides (event_id, patch_json, source_url, verified_at, updated_at)

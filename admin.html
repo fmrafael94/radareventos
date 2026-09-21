@@ -36,6 +36,7 @@
             <button type="button" data-view="community" aria-pressed="true"><b>Utilizadores</b><small>Eventos e correções enviados</small></button>
             <button type="button" data-view="automation" aria-pressed="false"><b>Rondas automáticas</b><small>Sinais a confirmar manualmente</small></button>
             <button type="button" data-view="poster-holds" aria-pressed="false"><b>Informação em falta</b><small>Completar antes de publicar</small></button>
+            <button type="button" data-view="agenda" aria-pressed="false"><b>Agenda</b><small>Editar ou arquivar publicados</small></button>
           </nav>
         </div>
         <div class="review-state">
@@ -54,7 +55,15 @@
             <button type="button" data-status="applied" aria-pressed="false">Aplicados</button>
             <button type="button" data-status="ignored" aria-pressed="false">Ignorados</button>
           </nav>
+          <nav id="agenda-status-filters" class="status-filters" aria-label="Filtrar a agenda" hidden>
+            <button type="button" data-agenda-status="published" aria-pressed="true">Publicados</button>
+            <button type="button" data-agenda-status="archived" aria-pressed="false">Arquivados</button>
+          </nav>
         </div>
+      </section>
+      <section id="agenda-tools" class="agenda-tools" aria-label="Pesquisar na agenda" hidden>
+        <label for="agenda-search">Pesquisar evento, sala ou cidade</label>
+        <div><input id="agenda-search" type="search" maxlength="100" placeholder="Ex.: Porto, Hard Club, Placebo" /><button id="agenda-search-button" type="button">Pesquisar</button></div>
       </section>
       <section id="automation-bulk-actions" class="automation-bulk-actions" aria-label="Ações em lote para a ronda" hidden>
         <p>Aplica apenas eventos completos e sem duplicados. Os restantes mantêm-se para revisão.</p>

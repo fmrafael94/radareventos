@@ -171,7 +171,7 @@ function programmeParent(candidate) { return EVENTS.find(parent => {
 // in the public agenda. Explicit children use seriesId; this also catches old
 // imported records that pre-date that field.
 function isMainAgendaEvent(event) {
-  return event.publicationStatus !== "poster_pending" && !event.seriesId && !programmeParent(event);
+  return event.publicationStatus === "published" && !event.seriesId && !programmeParent(event);
 }
 
 // Poster rule: always look in this order before publishing a visual:
@@ -1445,7 +1445,7 @@ async function loadApprovedCloudflareEvents() {
     if (!Array.isArray(result.items)) return;
     const overrides = Array.isArray(result.overrides) ? result.overrides : [];
     let changed = false;
-    const safePatchFields = new Set(["title", "date", "endDate", "city", "venue", "tickets", "ticketUrl", "availability", "sourceUrl", "image", "posterSourceUrl"]);
+    const safePatchFields = new Set(["title", "date", "endDate", "city", "venue", "tickets", "ticketUrl", "availability", "sourceUrl", "image", "posterSourceUrl", "publicationStatus"]);
     overrides.forEach(override => {
       const existing = EVENTS.find(event => event.id === override.id);
       if (!existing || !override.patch || typeof override.patch !== "object") return;
@@ -1458,6 +1458,10 @@ async function loadApprovedCloudflareEvents() {
         if (["ticketUrl", "sourceUrl", "image", "posterSourceUrl"].includes(key)) {
           const safeUrl = safePublicUrl(value);
           if (safeUrl) existing[key] = safeUrl;
+          continue;
+        }
+        if (key === "publicationStatus") {
+          if (["published", "archived"].includes(value)) existing[key] = value;
           continue;
         }
         existing[key] = value.slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
@@ -1494,7 +1498,8 @@ async function loadApprovedCloudflareEvents() {
         sourceUrl,
         image: safePublicUrl(raw.image),
         posterSourceUrl: safePublicUrl(raw.posterSourceUrl),
-        verifiedAt: /^\d{4}-\d{2}-\d{2}$/.test(raw.verifiedAt || "") ? raw.verifiedAt : ""
+        verifiedAt: /^\d{4}-\d{2}-\d{2}$/.test(raw.verifiedAt || "") ? raw.verifiedAt : "",
+        publicationStatus: "published"
       }];
     });
     if (!additions.length && !changed) return;
