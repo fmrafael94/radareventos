@@ -247,6 +247,7 @@
   border:0;
   border-top:1px solid rgba(24,34,38,.18);
   border-radius:0;
+  scroll-margin-top:92px;
 }
 .home-page .browse-heading{margin:0 0 19px}
 .home-page .browse-heading>div{max-width:580px}
@@ -258,7 +259,7 @@
 .home-page .filter-toggle:hover,.home-page .filter-toggle:focus-visible{color:var(--brand-cream);background:var(--brand-ink)}
 
 @media(max-width:580px){
-  .home-page .browse-panel{margin-top:3px;padding:26px 0 0}
+  .home-page .browse-panel{margin-top:3px;padding:26px 0 0;scroll-margin-top:78px}
   .home-page .browse-heading{margin-bottom:16px}
   .home-page .browse-heading h2{font-size:31px}
   .home-page .browse-description{font-size:14px}
