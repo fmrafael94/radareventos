@@ -590,7 +590,6 @@ window.EVENTS.forEach(event => { event.type = event.type || "Concerto"; });
 // A lista inclui tanto os eventos sem cartaz como três URLs que deixaram de
 // responder com uma imagem na verificação integral de 2026-09-12.
 window.POSTER_PUBLICATION_HOLDS = [
-  "reign-fury-hardcore-fest-2026",
   "ferro-avoid-friends",
   "lagos-jazzing-christmas",
   "viseu-rock-fest-2026",
