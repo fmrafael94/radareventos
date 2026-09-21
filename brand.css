@@ -104,3 +104,56 @@
 .event-page .event-poster-trigger,.event-page .event-poster-trigger img,.event-page .related-poster{background:transparent!important;box-shadow:none!important;filter:none!important}
 
 @media(max-width:580px){.home-page .site-header,.event-page .site-header,.landing-page .site-header,.legal-page .legal-header{min-height:64px;padding-inline:15px}.site-header .brand-logo,.legal-header .brand-logo{width:33px;height:33px}.site-header .brand-wordmark,.legal-header .brand-wordmark{font-size:15px}.home-page .featured-copy{padding-top:7px}}
+
+/* The masthead is now the shortest route into the product: brand promise,
+   search, useful shortcuts and one real event — without decorative scenery. */
+.home-page .intro{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);
+  align-items:stretch;
+  gap:clamp(38px,6vw,84px);
+  min-height:0;
+  padding:clamp(34px,5vw,58px);
+  overflow:hidden;
+  border-radius:20px;
+  background:var(--brand-ink);
+}
+.home-page .intro-copy{display:flex;min-width:0;flex-direction:column;align-items:flex-start}
+.home-page .intro .kicker{margin-bottom:17px;color:var(--brand-gold)}
+.home-page .intro h1{font-size:clamp(48px,6vw,76px);line-height:.91;letter-spacing:-.082em}
+.home-page .intro-description{max-width:34ch!important;margin-top:20px!important;color:rgba(247,245,240,.72)!important;font-size:17px!important;line-height:1.45!important}
+.hero-search{width:100%;max-width:590px;margin-top:30px}
+.hero-search>label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.hero-search>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:6px;border:1px solid rgba(247,245,240,.2);border-radius:13px;background:var(--brand-cream)}
+.hero-search input{min-width:0;height:45px;padding:0 13px;border:0;outline:0;color:var(--brand-ink);background:transparent;font-size:15px}
+.hero-search input::placeholder{color:rgba(24,34,38,.55)}
+.hero-search button{display:inline-flex;align-items:center;gap:12px;min-height:45px;padding:0 17px;border:0;border-radius:9px;color:var(--brand-cream);background:var(--brand-coral);font-weight:700;cursor:pointer}
+.hero-search button:hover{background:#c94c35}
+.hero-shortcuts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.hero-shortcuts button{min-height:34px;padding:0 12px;border:1px solid rgba(247,245,240,.26);border-radius:999px;color:rgba(247,245,240,.78);background:transparent;font:600 10px "DM Mono",monospace;cursor:pointer}
+.hero-shortcuts button:hover,.hero-shortcuts button:focus-visible,.hero-shortcuts button[aria-pressed="true"]{border-color:var(--brand-gold);color:var(--brand-ink);background:var(--brand-gold)}
+.hero-feature{position:relative;display:flex;min-width:0;flex-direction:column;justify-content:flex-end;padding:28px 0 4px 32px;border-left:1px solid rgba(247,245,240,.2)}
+.hero-feature::before{content:"";position:absolute;top:0;left:-1px;width:2px;height:62px;background:var(--brand-gold)}
+.hero-feature-kicker{margin:0 0 18px!important;color:var(--brand-gold)!important;font:600 10px "DM Mono",monospace!important;letter-spacing:.1em;text-transform:uppercase}
+.hero-feature time{color:rgba(247,245,240,.62);font:500 11px "DM Mono",monospace;letter-spacing:.035em;text-transform:uppercase}
+.hero-feature h2{max-width:14ch;margin:10px 0 12px;color:var(--brand-cream);font:700 clamp(26px,3vw,42px)/.98 "Space Grotesk",sans-serif;letter-spacing:-.065em}
+.hero-feature-meta{max-width:29ch!important;margin:0!important;color:rgba(247,245,240,.68)!important;font-size:13px!important;line-height:1.45!important}
+.hero-feature-loading{margin:0 0 24px!important;color:rgba(247,245,240,.68)!important;font-size:16px!important}
+.hero-feature-link{display:inline-flex;align-items:center;justify-content:space-between;align-self:flex-start;min-width:150px;margin-top:28px;padding:10px 0;border-bottom:1px solid rgba(247,245,240,.3);color:var(--brand-cream);font-weight:700}
+.hero-feature-link:hover{border-color:var(--brand-coral);color:var(--brand-coral)}
+@media(max-width:760px){
+  .home-page .intro{grid-template-columns:1fr;gap:28px;padding:29px 23px 25px;border-radius:17px}
+  .home-page .intro h1{max-width:none;font-size:clamp(43px,13vw,58px)}
+  .home-page .intro-description{max-width:29ch!important;margin-top:17px!important;font-size:15px!important}
+  .hero-search{margin-top:24px}
+  .hero-search>div{grid-template-columns:1fr}
+  .hero-search button{justify-content:space-between}
+  .hero-shortcuts{flex-wrap:nowrap;width:calc(100% + 23px);padding-right:23px;overflow-x:auto;scrollbar-width:none}
+  .hero-shortcuts::-webkit-scrollbar{display:none}
+  .hero-shortcuts button{flex:0 0 auto;min-height:38px}
+  .hero-feature{min-height:210px;padding:26px 0 0;border-top:1px solid rgba(247,245,240,.2);border-left:0}
+  .hero-feature::before{top:-1px;left:0;width:62px;height:2px}
+  .hero-feature-kicker{margin-bottom:13px!important}
+  .hero-feature h2{max-width:18ch;font-size:30px}
+  .hero-feature-link{margin-top:21px}
+}

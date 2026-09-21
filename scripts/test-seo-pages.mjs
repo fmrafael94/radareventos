@@ -120,7 +120,7 @@ test("event pages expose the bilingual controls and English date metadata", asyn
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-lang-toggle/);
-  assert.match(html, /src="\/i18n\.js\?v=5"/);
+  assert.match(html, /src="\/i18n\.js\?v=6"/);
   assert.match(html, /23 September/);
   assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
 });
@@ -191,7 +191,7 @@ test("public pages use the approved vinyl icon and current language bundle", asy
     const html = await readFile(new URL(file, root), "utf8");
     assert.match(html, /logo-icon\.png\?v=2/, `${file} must use the approved vinyl icon`);
     assert.doesNotMatch(html, /desvio-mark\.svg/, `${file} still uses the simplified mark`);
-    assert.match(html, /i18n\.js\?v=5/, `${file} must load the current language bundle`);
+    assert.match(html, /i18n\.js\?v=6/, `${file} must load the current language bundle`);
   }
 });
 
