@@ -175,8 +175,8 @@
 .home-page .intro-copy{justify-content:center}
 .hero-feature{display:grid;grid-template-rows:minmax(245px,1fr) auto;gap:18px;justify-content:stretch;padding:16px;border:0;border-radius:16px;background:rgba(247,245,240,.065)}
 .hero-feature::before{display:none}
-.hero-feature-poster{display:block;min-height:245px;overflow:hidden;border-radius:11px;background:rgba(0,0,0,.18)}
-.hero-feature-poster img{display:block;width:100%;height:100%;min-height:245px;max-height:315px;object-fit:cover;object-position:center;background:transparent}
+.hero-feature-poster{display:grid;min-height:245px;place-items:center;overflow:hidden;border-radius:11px;background:rgba(0,0,0,.18)}
+.hero-feature-poster img{display:block;width:100%;height:100%;min-height:245px;max-height:315px;padding:10px;box-sizing:border-box;object-fit:contain;object-position:center;background:transparent}
 .hero-feature-poster.poster-unavailable,.featured-poster.poster-unavailable{display:grid;place-items:end start;padding:18px;background:linear-gradient(145deg,rgba(183,164,90,.2),rgba(247,245,240,.04))!important}
 .hero-feature-poster.poster-unavailable span,.featured-poster.poster-unavailable span{max-width:12ch;color:var(--brand-cream);font:700 clamp(22px,3vw,38px)/.92 "Space Grotesk",sans-serif;letter-spacing:-.055em;text-transform:uppercase}
 .featured-poster.poster-unavailable span{color:var(--brand-ink);font-size:22px}
@@ -194,7 +194,7 @@
 .home-page .featured-rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;overflow:visible}
 .home-page .featured-card{display:flex;width:auto;min-width:0;min-height:0;flex:auto;flex-direction:column;padding:0;scroll-snap-align:none}
 .home-page .featured-poster{display:block;width:100%;aspect-ratio:4/5;border-radius:12px;background:rgba(183,164,90,.1)!important}
-.home-page .featured-poster img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center}
+.home-page .featured-poster img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center}
 .home-page .featured-copy{display:flex;flex:1;padding:12px 2px 0}
 .home-page .featured-copy p{margin:0 0 7px;font-size:10px}
 .home-page .featured-copy h3{min-height:0;font-size:19px;line-height:1.05}
