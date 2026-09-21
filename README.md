@@ -37,6 +37,14 @@ O endereço público é `https://odesvio.pt`. A versão `www` redireciona perman
 - O contacto público nos Termos e na Política de Privacidade usa `ola@odesvio.pt`.
 - Alertas opcionais por cidade e artista continuam previstos, enviados apenas a quem os subscrever.
 
+### Páginas de descoberta
+
+O Worker gera páginas HTML pesquisáveis diretamente a partir da agenda publicada. Inclui páginas por cidade/concelho, distrito, região, género e combinações cidade + género, além de `/concertos-este-fim-de-semana`, `/concertos-gratis` e `/festivais/2026`. Apenas combinações com eventos suficientes entram no sitemap; novas páginas aparecem automaticamente à medida que a agenda cresce.
+
+### Métricas
+
+Cloudflare Web Analytics mede visitas e desempenho sem cookies. O site também envia ao Cloudflare Zaraz os eventos `search`, `filter_used`, `event_open`, `ticket_click`, `share`, `promoter_submission` e `event_submission`. Não são enviados nomes, emails nem conteúdo dos formulários. Os volumes podem ser consultados em **Web tag management → Monitoring → Events** depois de o Zaraz estar ativo para `odesvio.pt`.
+
 ## Public suggestions, corrections and legal pages
 
 The site contains a public, moderated form for event suggestions and corrections. It is only activated after deploying the Cloudflare Pages Functions, binding a D1 database and configuring Turnstile. The setup is documented in [CLOUDFLARE_SETUP.md](CLOUDFLARE_SETUP.md).
