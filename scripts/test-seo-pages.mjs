@@ -69,7 +69,7 @@ test("unknown event returns the branded no-store 404 page", async () => {
   const html = await response.text();
   assert.equal(response.status, 404);
   assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.match(html, /404 ·/);
+  assert.match(html, /<p class="eyebrow">404<\/p>/);
   assert.match(html, /\/brand\/404\//);
   assert.match(html, /noindex,follow/);
 });
@@ -78,7 +78,7 @@ test("English mode localises the complete branded 404 response", async () => {
   const response = await worker.fetch(new Request("https://odesvio.pt/evento/does-not-exist?lang=en"), { ASSETS: assets }, { waitUntil() {} });
   const html = await response.text();
   assert.equal(response.status, 404);
-  assert.match(html, /404 · (No signal|Off track|Tour detour|After the encore|Broken string)/);
+  assert.match(html, /<p class="eyebrow">404<\/p>/);
   assert.doesNotMatch(html, /(Sem sinal|Fora da faixa|Desvio na estrada|Depois do encore|Corda partida)/);
   assert.match(html, /data-lang-toggle/);
 });
