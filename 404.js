@@ -2,38 +2,38 @@
   const storageKey = "desvio-404-deck-v1";
   const variants = {
     amplificador: {
-      heading: "A banda saiu do palco.",
-      body: "Este evento já não está na agenda. O cabo ficou, mas o concerto não.",
+      heading: "Puxaram-lhe a ficha.",
+      body: "Este evento ficou sem corrente.",
       cta: "Voltar ao alinhamento",
-      image: "/brand/404/amplificador.png?v=3",
+      image: "/brand/404/amplificador-normalizado.png?v=1",
       alt: "Amplificador mascote com o cabo desligado"
     },
     vinil: {
-      heading: "Perdemos o beat.",
-      body: "Este evento saltou da playlist. Vamos pôr outra coisa a tocar.",
+      heading: "O disco saltou.",
+      body: "Este evento saiu da faixa.",
       cta: "Voltar à agenda",
-      image: "/brand/404/vinil.png?v=3",
+      image: "/brand/404/vinil-normalizado.png?v=1",
       alt: "Disco de vinil mascote à procura do beat"
     },
     carrinha: {
-      heading: "O evento foi de tournée.",
-      body: "Virou na saída errada e já não mora aqui.",
+      heading: "A tournée perdeu-se.",
+      body: "Este evento fez um desvio a mais.",
       cta: "Traçar nova rota",
-      image: "/brand/404/carrinha.png?v=3",
+      image: "/brand/404/carrinha-normalizada.png?v=1",
       alt: "Carrinha de tournée mascote num desvio"
     },
     bateria: {
-      heading: "Silêncio no alinhamento.",
-      body: "O palco ficou vazio. A agenda, felizmente, não.",
+      heading: "O beat foi ao bar.",
+      body: "E levou este evento com ele.",
       cta: "Ver quem toca a seguir",
-      image: "/brand/404/bateria.png?v=3",
+      image: "/brand/404/bateria-normalizada.png?v=1",
       alt: "Bateria mascote num palco vazio"
     },
     guitarra: {
-      heading: "Este riff ficou por tocar.",
-      body: "A corda partiu e o evento saiu do alinhamento. Há mais música logo a seguir.",
+      heading: "A corda deu o berro.",
+      body: "Este evento saiu do tom.",
       cta: "Afinar nova procura",
-      image: "/brand/404/guitarra.png?v=3",
+      image: "/brand/404/guitarra-normalizada.png?v=1",
       alt: "Guitarra mascote com uma corda partida"
     }
   };

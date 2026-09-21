@@ -73,8 +73,8 @@ test("unknown event returns the branded no-store 404 page", async () => {
   assert.match(html, /<p class="eyebrow">404<\/p>/);
   assert.match(html, /\/brand\/404\//);
   assert.match(html, /\/brand\/logo-icon\.png\?v=2/);
-  assert.match(html, /src="\/404\.js\?v=1"/);
-  assert.match(html, /href="\/404\.css\?v=4"/);
+  assert.match(html, /src="\/404\.js\?v=2"/);
+  assert.match(html, /href="\/404\.css\?v=5"/);
   assert.match(html, /noindex,follow/);
 });
 
@@ -120,7 +120,7 @@ test("event pages expose the bilingual controls and English date metadata", asyn
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-lang-toggle/);
-  assert.match(html, /src="\/i18n\.js\?v=4"/);
+  assert.match(html, /src="\/i18n\.js\?v=5"/);
   assert.match(html, /23 September/);
   assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
 });
@@ -139,6 +139,9 @@ test("English mode translates event genres and descriptive titles without changi
   vm.runInContext(await readFile(new URL("i18n.js", root), "utf8"), context);
   const { t, eventTitle } = context.window.DESVIO_I18N;
   assert.equal(t("Abrir evento"), "Open event");
+  assert.equal(t("Puxaram-lhe a ficha."), "They pulled the plug.");
+  assert.equal(t("O beat foi ao bar."), "The beat went to the bar.");
+  assert.equal(t("A corda deu o berro."), "The string snapped.");
   assert.equal(t("Concerto · Porto"), "Concert · Porto");
   assert.equal(t("Portas 17:00 · concertos 18:00"), "Doors 17:00 · concerts 18:00");
   assert.equal(t("Bilhete diário desde 65 € + taxas"), "Day ticket from 65 € + fees");
@@ -188,14 +191,34 @@ test("public pages use the approved vinyl icon and current language bundle", asy
     const html = await readFile(new URL(file, root), "utf8");
     assert.match(html, /logo-icon\.png\?v=2/, `${file} must use the approved vinyl icon`);
     assert.doesNotMatch(html, /desvio-mark\.svg/, `${file} still uses the simplified mark`);
-    assert.match(html, /i18n\.js\?v=4/, `${file} must load the current language bundle`);
+    assert.match(html, /i18n\.js\?v=5/, `${file} must load the current language bundle`);
   }
 });
 
-test("404 artwork uses one consistent stage with a smaller guitar", async () => {
+test("404 mascots use identical transparent square PNG canvases", async () => {
+  for (const file of ["amplificador-normalizado.png", "vinil-normalizado.png", "carrinha-normalizada.png", "bateria-normalizada.png", "guitarra-normalizada.png"]) {
+    const png = await readFile(new URL(`brand/404/${file}`, root));
+    assert.equal(png.toString("hex", 0, 8), "89504e470d0a1a0a", `${file} must be a PNG`);
+    assert.equal(png.readUInt32BE(16), 1254, `${file} must have the shared width`);
+    assert.equal(png.readUInt32BE(20), 1254, `${file} must have the shared height`);
+    assert.equal(png[25], 6, `${file} must keep RGBA transparency`);
+  }
+});
+
+test("404 artwork and copy use one consistent visual system", async () => {
   const css = await readFile(new URL("404.css", root), "utf8");
+  const script = await readFile(new URL("404.js", root), "utf8");
   assert.match(css, /figure\s*\{[^}]*aspect-ratio:1/s);
-  assert.match(css, /img\[data-variant="guitarra"\]\s*\{\s*transform:scale\(\.65\)/);
-  assert.match(css, /h1\s*\{[^}]*min-height:1\.76em/s);
-  assert.match(css, /\.lede\s*\{[^}]*min-height:3\.1em/s);
+  assert.doesNotMatch(css, /img\[data-variant=/);
+  assert.match(css, /h1\s*\{[^}]*min-height:1\.05em/s);
+  assert.match(css, /\.lede\s*\{[^}]*min-height:1\.6em/s);
+  const headings = [...script.matchAll(/heading: "([^"]+)"/g)].map(match => match[1]);
+  const bodies = [...script.matchAll(/body: "([^"]+)"/g)].map(match => match[1]);
+  assert.equal(headings.length, 5);
+  assert.equal(bodies.length, 5);
+  assert.ok(headings.every(value => value.length <= 22));
+  assert.ok(Math.max(...headings.map(value => value.length)) - Math.min(...headings.map(value => value.length)) <= 6);
+  assert.ok(bodies.every(value => value.length <= 36));
+  assert.ok(Math.max(...bodies.map(value => value.length)) - Math.min(...bodies.map(value => value.length)) <= 12);
+  assert.equal((script.match(/-normalizad[oa]\.png/g) || []).length, 5);
 });
