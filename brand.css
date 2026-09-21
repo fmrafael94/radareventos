@@ -1,0 +1,62 @@
+.brand,.legal-brand{display:inline-flex;align-items:center;gap:9px;color:inherit;text-decoration:none;white-space:nowrap}.brand-logo,.brand>img,.legal-brand>img{display:block;width:34px;height:34px;border-radius:8px}.brand-wordmark{display:inline-flex;align-items:baseline;gap:.28em;padding:7px 11px 7px 9px;border-radius:9px;color:#f7f5f0;background:#182226;font:800 15px/1 "Space Grotesk","DM Sans",Arial,sans-serif;letter-spacing:-.045em}.brand-wordmark small{color:#b7a45a;font:inherit;font-size:.68em;letter-spacing:.02em}.header-actions{display:flex;align-items:center;justify-self:end;gap:12px}.language-toggle{display:inline-grid;min-width:43px;min-height:36px;place-items:center;padding:0 10px;border:1px solid rgba(83,98,89,.32);border-radius:999px;color:inherit;background:transparent;font:700 11px/1 "DM Mono",monospace;letter-spacing:.08em;cursor:pointer}.language-toggle:hover{border-color:#b7a45a;color:#8a7734}.language-toggle:focus-visible{outline:3px solid #b7a45a;outline-offset:3px}.event-page .brand-wordmark,.landing-page .brand-wordmark{font-size:14px}.legal-header .header-actions{margin-left:auto}.legal-header .language-toggle{color:#f7f5f0;border-color:rgba(247,245,240,.32)}
+@media(max-width:580px){.brand-logo,.brand>img,.legal-brand>img{width:31px;height:31px}.brand-wordmark{padding:6px 8px 6px 7px;font-size:13px}.header-actions{gap:7px}.language-toggle{min-width:40px;min-height:34px;padding:0 8px}.site-header .submit-link{font-size:12px}.event-page .brand-wordmark{font-size:12px}}
+@media(max-width:390px){.brand-wordmark{font-size:12px}.brand-logo,.brand>img,.legal-brand>img{width:29px;height:29px}.site-header .submit-link{max-width:96px;line-height:1.1;text-align:right}}
+
+/* One visual system, taken directly from the mark. Neutral depth is produced
+   with alpha rather than introducing unrelated green, blue or neon hues. */
+:root{--brand-ink:#182226;--brand-gold:#b7a45a;--brand-coral:#e35e44;--brand-cream:#f7f5f0}
+.home-page{--ink:var(--brand-ink);--muted:rgba(24,34,38,.66);--cream:var(--brand-cream);--white:var(--brand-cream);--line:rgba(24,34,38,.18);--lime:var(--brand-gold);--blue:rgba(183,164,90,.16);--accent:var(--brand-coral);color:var(--brand-ink);background:radial-gradient(circle at 88% 3%,rgba(183,164,90,.2),transparent 30rem),radial-gradient(circle at 8% 42%,rgba(227,94,68,.08),transparent 27rem),var(--brand-cream)}
+.home-page .site-header{border-color:rgba(24,34,38,.16)}
+.home-page .site-header>p{color:rgba(24,34,38,.62)}
+.home-page .submit-link,.home-page .featured-heading>a,.home-page .featured-copy a,.home-page .report-link{color:var(--brand-coral)}
+.home-page .intro{color:var(--brand-cream);background:radial-gradient(circle at 91% 10%,rgba(183,164,90,.32),transparent 20rem),radial-gradient(circle at 72% 110%,rgba(227,94,68,.22),transparent 25rem),var(--brand-ink);box-shadow:0 24px 55px rgba(24,34,38,.2)}
+.home-page .intro h1,.home-page .intro h1 em{color:var(--brand-cream)}
+.home-page .intro>p:not(.kicker){color:rgba(247,245,240,.72)}
+.home-page .kicker,.home-page .format,.home-page .date-box b,.home-page .featured-copy p,.home-page .featured-copy time,.home-page .nearby-card time{color:#8a7734}
+.home-page .atmosphere-grid{background-image:linear-gradient(rgba(247,245,240,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(247,245,240,.07) 1px,transparent 1px)}
+.home-page .beam-one{background:linear-gradient(180deg,transparent 6%,rgba(183,164,90,.44) 53%,transparent 94%)}
+.home-page .beam-two{background:linear-gradient(180deg,transparent 8%,rgba(247,245,240,.2) 51%,transparent 93%)}
+.home-page .beam-three{background:linear-gradient(180deg,transparent 12%,rgba(227,94,68,.28) 55%,transparent 90%)}
+.home-page .glow-one{background:var(--brand-gold);box-shadow:0 0 0 7px rgba(183,164,90,.09),0 0 27px rgba(183,164,90,.62)}
+.home-page .glow-two{background:var(--brand-coral);box-shadow:0 0 0 6px rgba(227,94,68,.08),0 0 23px rgba(227,94,68,.56)}
+.home-page .featured-card,.home-page .browse-panel,.home-page .drawer,.home-page .source-group,.home-page .nearby-events{border-color:rgba(24,34,38,.16);background:rgba(247,245,240,.78);box-shadow:0 14px 32px rgba(24,34,38,.08)}
+.home-page .browse-panel::before{background:linear-gradient(90deg,transparent,var(--brand-gold) 34%,var(--brand-coral) 67%,transparent)}
+.home-page .featured-poster{background:rgba(183,164,90,.12)!important}
+.home-page .featured-copy h3,.home-page .featured-heading h2,.home-page .browse-heading h2,.home-page .event-title,.home-page .event-location strong,.home-page .nearby-heading h2,.home-page .nearby-card h3{color:var(--brand-ink)}
+.home-page .agenda-search,.home-page .filter-grid label,.home-page .location-bar label,.home-page .multi-filter,.home-page .custom-select-menu,.home-page .multi-select-menu{border-color:rgba(24,34,38,.2);background:rgba(247,245,240,.9)}
+.home-page .filter-toggle,.home-page .agenda-shortcuts button:hover,.home-page .agenda-shortcuts button:focus-visible,.home-page .agenda-shortcuts button[aria-pressed="true"]{color:var(--brand-cream);background:var(--brand-ink)}
+.home-page .filter-toggle i{color:var(--brand-gold)}
+.home-page .filter-toggle.has-active,.home-page .quick-picks button[aria-pressed="true"],.home-page .festival-day-tabs button[aria-selected="true"]{border-color:var(--brand-gold);color:var(--brand-ink);background:var(--brand-gold)}
+.home-page .custom-select-option:hover,.home-page .custom-select-option[aria-selected="true"],.home-page .multi-select-option:hover,.home-page .multi-select-option[aria-pressed="true"],.home-page .event-card-link:hover,.home-page .event-card-link:focus-visible{color:var(--brand-ink);background:rgba(183,164,90,.18)}
+.home-page .event-card{border-color:rgba(24,34,38,.16)}
+.home-page .event-card[open] summary,.home-page .event-details{background:rgba(183,164,90,.1)}
+.home-page .status{border-color:rgba(183,164,90,.42);color:#8a7734;background:rgba(183,164,90,.18)}
+.home-page .status.sold{border-color:rgba(227,94,68,.35);color:#9d3825;background:rgba(227,94,68,.13)}
+.home-page .ticket-link{color:var(--brand-ink);background:var(--brand-gold)}
+.home-page .nearby-card a:hover h3,.home-page .nearby-card a:focus-visible h3{color:var(--brand-coral)}
+.home-page .nearby-button{border-color:rgba(183,164,90,.62)!important;color:var(--brand-ink);background:rgba(183,164,90,.15)}
+.home-page :focus-visible{outline-color:var(--brand-gold)}
+
+.event-page{--brand-page-line:rgba(24,34,38,.17);background:radial-gradient(circle at 82% 11%,rgba(183,164,90,.16),transparent 26rem),radial-gradient(circle at 5% 68%,rgba(227,94,68,.08),transparent 29rem),var(--brand-cream)}
+.event-page .event-eyebrow,.event-page .event-meta-date,.event-page .event-section-kicker{color:#8a7734}
+.event-page .event-view h1,.event-page .event-not-found h1,.event-page .festival-day-panel strong{color:var(--brand-ink)}
+.event-page .event-ticket,.event-page .event-route,.event-page .event-source,.event-page .event-calendar,.event-page .share-actions>*{border-color:var(--brand-ink);color:var(--brand-cream);background:var(--brand-ink)}
+.event-page .event-route,.event-page .event-source,.event-page .event-calendar,.event-page .event-ticket.muted{color:var(--brand-ink);background:transparent}
+.event-page .festival-tabs button[aria-selected="true"]{border-color:var(--brand-ink);color:var(--brand-cream);background:var(--brand-ink)}
+.event-page :focus-visible,.landing-page :focus-visible,.legal-page :focus-visible,.not-found-page :focus-visible{outline-color:var(--brand-gold)}
+
+.landing-page{--ink:var(--brand-ink);--paper:var(--brand-cream);--panel:rgba(183,164,90,.14);--line:rgba(24,34,38,.17);--green:var(--brand-ink);--sage:var(--brand-gold);--lime:var(--brand-gold);--coral:var(--brand-coral);background:radial-gradient(circle at 92% 2%,rgba(183,164,90,.2),transparent 30rem),var(--brand-cream)}
+.landing-page .landing-hero{background:var(--brand-ink)}
+.landing-page .landing-hero .eyebrow,.landing-page .landing-event time,.landing-page .discovery .eyebrow{color:var(--brand-gold)}
+.landing-page .landing-hero h1,.landing-page .landing-hero>p{color:var(--brand-cream)}
+.landing-page .landing-event,.landing-page .discovery{border-color:rgba(24,34,38,.17);background:rgba(247,245,240,.82)}
+.landing-page .landing-event a,.landing-page .back{color:var(--brand-coral)}
+
+.legal-page{--paper:var(--brand-cream);--ink:var(--brand-ink);--muted:#667075;--line:rgba(24,34,38,.17);--accent:var(--brand-coral);background:radial-gradient(circle at 90% 0,rgba(183,164,90,.2),transparent 28rem),var(--brand-cream)}
+.legal-page .eyebrow{color:#8a7734}
+.legal-page .notice{border-left-color:var(--brand-gold);background:rgba(183,164,90,.13)}
+.legal-page .contact{border-color:rgba(24,34,38,.17);background:rgba(247,245,240,.78)}
+
+.not-found-page .brand-wordmark{box-shadow:none}
+.not-found-page .language-toggle{border-color:rgba(247,245,240,.32);color:var(--brand-cream)}
+.not-found-page .primary:hover{color:var(--brand-ink);background:var(--brand-cream)}

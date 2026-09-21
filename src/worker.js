@@ -54,9 +54,9 @@ const cacheVersion = value => {
   return (hash >>> 0).toString(36);
 };
 const lisbonToday = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-const humanDate = iso => {
+const humanDate = (iso, locale = "pt-PT") => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return "";
-  return new Intl.DateTimeFormat("pt-PT", { timeZone: "UTC", day: "numeric", month: "long" }).format(new Date(`${iso}T12:00:00Z`));
+  return new Intl.DateTimeFormat(locale, { timeZone: "UTC", day: "numeric", month: "long" }).format(new Date(`${iso}T12:00:00Z`));
 };
 
 const eventLiteral = (source, id) => {
@@ -178,28 +178,29 @@ async function privateAssetPage(request, env, path) {
 }
 
 const notFoundVariants = [
-  { eyebrow: "404 · Sem sinal", heading: "A banda saiu do palco.", body: "Este evento já não está na agenda. O cabo ficou, mas o concerto não.", cta: "Voltar ao alinhamento", image: "/brand/404/amplificador.png", alt: "Amplificador mascote com o cabo desligado" },
-  { eyebrow: "404 · Fora da faixa", heading: "Perdemos o beat.", body: "Este evento saltou da playlist. Vamos pôr outra coisa a tocar.", cta: "Voltar à agenda", image: "/brand/404/vinil.png", alt: "Disco de vinil mascote à procura do beat" },
-  { eyebrow: "404 · Desvio na estrada", heading: "O evento foi de tournée.", body: "Virou na saída errada e já não mora aqui.", cta: "Traçar nova rota", image: "/brand/404/carrinha.png", alt: "Carrinha de tournée mascote num desvio" },
-  { eyebrow: "404 · Depois do encore", heading: "Silêncio no alinhamento.", body: "O palco ficou vazio. A agenda, felizmente, não.", cta: "Ver quem toca a seguir", image: "/brand/404/bateria.png", alt: "Bateria mascote num palco vazio" },
-  { eyebrow: "404 · Corda partida", heading: "Este riff ficou por tocar.", body: "A corda partiu e o evento saiu do alinhamento. Há mais música logo a seguir.", cta: "Afinar nova procura", image: "/brand/404/guitarra.png", alt: "Guitarra mascote com uma corda partida" }
+  { eyebrow: "404", heading: "A banda saiu do palco.", body: "Este evento já não está na agenda. O cabo ficou, mas o concerto não.", cta: "Voltar ao alinhamento", image: "/brand/404/amplificador.png?v=3", alt: "Amplificador mascote com o cabo desligado", en: { eyebrow:"404", heading:"The band has left the stage.", body:"This event is no longer listed. The cable stayed; the concert did not.", cta:"Back to the setlist", alt:"Amplifier mascot with an unplugged cable" } },
+  { eyebrow: "404", heading: "Perdemos o beat.", body: "Este evento saltou da playlist. Vamos pôr outra coisa a tocar.", cta: "Voltar à agenda", image: "/brand/404/vinil.png?v=3", alt: "Disco de vinil mascote à procura do beat", en: { eyebrow:"404", heading:"We lost the beat.", body:"This event skipped the playlist. Let’s put something else on.", cta:"Back to the listings", alt:"Vinyl record mascot looking for the beat" } },
+  { eyebrow: "404", heading: "O evento foi de tournée.", body: "Virou na saída errada e já não mora aqui.", cta: "Traçar nova rota", image: "/brand/404/carrinha.png?v=3", alt: "Carrinha de tournée mascote num desvio", en: { eyebrow:"404", heading:"The event went on tour.", body:"It took the wrong exit and no longer lives here.", cta:"Plot a new route", alt:"Tour van mascot taking a detour" } },
+  { eyebrow: "404", heading: "Silêncio no alinhamento.", body: "O palco ficou vazio. A agenda, felizmente, não.", cta: "Ver quem toca a seguir", image: "/brand/404/bateria.png?v=3", alt: "Bateria mascote num palco vazio", en: { eyebrow:"404", heading:"Silence on the setlist.", body:"The stage is empty. Fortunately, the listings are not.", cta:"See who plays next", alt:"Drum kit mascot on an empty stage" } },
+  { eyebrow: "404", heading: "Este riff ficou por tocar.", body: "A corda partiu e o evento saiu do alinhamento. Há mais música logo a seguir.", cta: "Afinar nova procura", image: "/brand/404/guitarra.png?v=3", alt: "Guitarra mascote com uma corda partida", en: { eyebrow:"404", heading:"This riff went unplayed.", body:"The string snapped and the event dropped off the setlist. More music is just ahead.", cta:"Tune a new search", alt:"Guitar mascot with a broken string" } }
 ];
 
 async function notFoundPage(request, env) {
   try {
     const template = await assetText(request, env, "/404.html");
     const variant = notFoundVariants[Math.floor(Math.random() * notFoundVariants.length)];
+    const copy = new URL(request.url).searchParams.get("lang") === "en" ? { ...variant, ...variant.en } : variant;
     const html = template
-      .replaceAll("{{ERROR_TITLE}}", escapeHtml(variant.heading))
-      .replaceAll("{{ERROR_EYEBROW}}", escapeHtml(variant.eyebrow))
-      .replaceAll("{{ERROR_HEADING}}", escapeHtml(variant.heading))
-      .replaceAll("{{ERROR_BODY}}", escapeHtml(variant.body))
-      .replaceAll("{{ERROR_CTA}}", escapeHtml(variant.cta))
+      .replaceAll("{{ERROR_TITLE}}", escapeHtml(copy.heading))
+      .replaceAll("{{ERROR_EYEBROW}}", escapeHtml(copy.eyebrow))
+      .replaceAll("{{ERROR_HEADING}}", escapeHtml(copy.heading))
+      .replaceAll("{{ERROR_BODY}}", escapeHtml(copy.body))
+      .replaceAll("{{ERROR_CTA}}", escapeHtml(copy.cta))
       .replaceAll("{{ERROR_IMAGE}}", escapeHtml(variant.image))
-      .replaceAll("{{ERROR_ALT}}", escapeHtml(variant.alt));
+      .replaceAll("{{ERROR_ALT}}", escapeHtml(copy.alt));
     return new Response(html, { status: 404, headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "no-store" } });
   } catch {
-    return new Response("Evento não encontrado.", { status: 404, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } });
+    return new Response(new URL(request.url).searchParams.get("lang") === "en" ? "Event not found." : "Evento não encontrado.", { status: 404, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } });
   }
 }
 
@@ -229,8 +230,10 @@ async function eventPage(request, env, id) {
     const poster = stringPatch("image", imageFromCatalogueUpdate(events, id) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(event, "image"));
     const url = new URL(request.url);
     const canonical = `${url.origin}/evento/${encodeURIComponent(id)}`;
-    const dateLabel = endDate && endDate !== date ? `${humanDate(date)}–${humanDate(endDate)}` : humanDate(date);
-    const description = [dateLabel, venue, city].filter(Boolean).join(" · ") || "Agenda de concertos, festivais e música ao vivo em Portugal.";
+    const english = url.searchParams.get("lang") === "en";
+    const pageLocale = english ? "en-GB" : "pt-PT";
+    const dateLabel = endDate && endDate !== date ? `${humanDate(date, pageLocale)}–${humanDate(endDate, pageLocale)}` : humanDate(date, pageLocale);
+    const description = [dateLabel, venue, city].filter(Boolean).join(" · ") || (english ? "Concerts, festivals and live music in Portugal." : "Agenda de concertos, festivais e música ao vivo em Portugal.");
     // Serve the official artwork from our own origin. That makes social previews
     // and the native share sheet independent from a third-party image host.
     // Bump this query version when proxy handling changes. Social crawlers and

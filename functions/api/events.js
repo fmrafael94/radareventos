@@ -37,5 +37,12 @@ export async function onRequestGet(context) {
     }
   });
   const overrideMap = new Map(overrides.map(item => [item.id, item.patch]));
-  return json({ items: items.map(item => ({ ...item, ...(overrideMap.get(item.id) || {}) })), overrides });
+  // PT and EN deliberately share one approved record. The browser localises
+  // editorial fields at render time, while official names remain unchanged;
+  // this prevents two language copies of an event from drifting apart.
+  return json({
+    items: items.map(item => ({ ...item, ...(overrideMap.get(item.id) || {}) })),
+    overrides,
+    meta: { locales: ["pt-PT", "en-GB"], localisation: "automatic-shared-record" }
+  });
 }

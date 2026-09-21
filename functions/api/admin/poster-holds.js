@@ -120,7 +120,8 @@ async function publicationIssues(context) {
     // The static hold is a safety net, not a permanent ban. Once the complete
     // override is saved it must leave this list and become public.
     const publication = { items: publicationChecklist(values), ready: publishingReady(values) };
-    return held || !publication.ready ? [{ ...event, values, publication, held }] : [];
+    const stillHeld = held && override?.patch?.publicationStatus !== "published";
+    return stillHeld || !publication.ready ? [{ ...event, values, publication, held: stillHeld }] : [];
   });
 }
 
