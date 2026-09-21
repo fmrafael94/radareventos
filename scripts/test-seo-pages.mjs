@@ -72,7 +72,37 @@ test("unknown event returns the branded no-store 404 page", async () => {
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.match(html, /<p class="eyebrow">404<\/p>/);
   assert.match(html, /\/brand\/404\//);
+  assert.match(html, /src="\/404\.js\?v=1"/);
+  assert.match(html, /href="\/404\.css\?v=3"/);
   assert.match(html, /noindex,follow/);
+});
+
+test("404 deck shows every mascot before repeating one", async () => {
+  const values = new Map();
+  const storage = {
+    getItem(key) { return values.get(key) || null; },
+    setItem(key, value) { values.set(key, value); }
+  };
+  const element = () => ({ textContent:"", dataset:{}, src:"", alt:"" });
+  const nodes = new Map([
+    [".copy h1", element()],
+    [".copy .lede", element()],
+    ["[data-error-cta]", element()],
+    ["figure img", element()]
+  ]);
+  const context = {
+    window: { sessionStorage:storage },
+    document: { title:"", body:{ dataset:{} }, querySelector(selector) { return nodes.get(selector) || null; } },
+    Math,
+    JSON
+  };
+  vm.createContext(context);
+  vm.runInContext(await readFile(new URL("404.js", root), "utf8"), context);
+  values.clear();
+  const shown = Array.from({ length:10 }, () => context.window.DESVIO_404.nextVariantKey(storage, () => 0.37));
+  assert.equal(new Set(shown.slice(0, 5)).size, 5);
+  assert.equal(new Set(shown.slice(5, 10)).size, 5);
+  assert.notEqual(shown[4], shown[5]);
 });
 
 test("English mode localises the complete branded 404 response", async () => {
