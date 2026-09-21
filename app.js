@@ -3,6 +3,7 @@ const siteLocale = window.DESVIO_I18N?.locale || "pt-PT";
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
+const discoveryCount = document.querySelector("#discovery-count");
 const agendaEmpty = document.querySelector("#agenda-empty");
 const pagination = document.querySelector("#pagination");
 const pageLabel = document.querySelector("#page-label");
@@ -984,12 +985,12 @@ function renderFeatured() {
   featuredRail.setAttribute("aria-busy", "true");
   window.clearInterval(featuredAutoscroll);
   const featured = EVENTS
-    // These are the five events whose programmes still begin today or later.
+    // These are the four events whose programmes still begin today or later.
     // A festival from the previous month never occupies a future slot.
     .filter(event => isMainAgendaEvent(event) && hasOfficialPoster(event) && event.date >= today)
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
-    .slice(0, 5);
+    .slice(0, 4);
   renderHeroFeature(featured[0]);
   featuredRail.innerHTML = featured.length ? featured.map((event, index) => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
@@ -1004,10 +1005,13 @@ function renderFeatured() {
     </article>`;
   }).join("") : '<p class="featured-empty">Ainda estamos a confirmar os próximos eventos.</p>';
   featuredRail.querySelectorAll("img").forEach(image => image.addEventListener("error", () => {
-    // A recommendation never remains on screen with an empty poster frame.
-    image.closest(".featured-card")?.remove();
+    const poster = image.closest(".featured-poster");
+    if (!poster) return;
+    image.remove();
+    poster.classList.add("poster-unavailable");
+    poster.insertAdjacentHTML("beforeend", `<span>${escapeHtml(image.alt.replace(/^Cartaz oficial de /, ""))}</span>`);
   }, { once: true }));
-  featuredRail.setAttribute("aria-label", "Cinco próximos eventos por ordem cronológica");
+  featuredRail.setAttribute("aria-label", "Quatro próximos eventos por ordem cronológica");
   featuredRail.setAttribute("aria-busy", "false");
   startFeaturedAutoscroll();
 }
@@ -1019,11 +1023,19 @@ function renderHeroFeature(event) {
     return;
   }
   const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
-  heroFeature.innerHTML = `<p class="hero-feature-kicker">A seguir em ${escapeHtml(event.city)}</p>
-    <time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time>
-    <h2 data-i18n-event-title>${escapeHtml(event.title)}</h2>
-    <p class="hero-feature-meta">${escapeHtml(event.venue)} · ${escapeHtml(eventType(event))}</p>
-    <a class="hero-feature-link" href="${eventUrl(event)}">Ver evento <span aria-hidden="true">→</span></a>`;
+  heroFeature.innerHTML = `<a class="hero-feature-poster" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
+      <img src="${escapeHtml(posterUrl(event))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="eager" fetchpriority="high" decoding="async" />
+    </a>
+    <div class="hero-feature-copy">
+      <div><p class="hero-feature-kicker">A seguir em ${escapeHtml(event.city)}</p><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><h2 data-i18n-event-title>${escapeHtml(event.title)}</h2><p class="hero-feature-meta">${escapeHtml(event.venue)} · ${escapeHtml(eventType(event))}</p></div>
+      <a class="hero-feature-link" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">Ver evento <span aria-hidden="true">↗</span></a>
+    </div>`;
+  heroFeature.querySelector("img")?.addEventListener("error", errorEvent => {
+    const poster = errorEvent.currentTarget.closest(".hero-feature-poster");
+    errorEvent.currentTarget.remove();
+    poster?.classList.add("poster-unavailable");
+    poster?.insertAdjacentHTML("beforeend", `<span>${escapeHtml(event.title)}</span>`);
+  }, { once: true });
 }
 
 function scheduleFeaturedRefresh() {
@@ -1134,6 +1146,7 @@ function render() {
   list.setAttribute("aria-busy", "false");
   if (calendarMode) renderCalendar(matches);
   if (resultCount) resultCount.textContent = `${matches.length} ${matches.length === 1 ? "evento" : "eventos"}`;
+  if (discoveryCount) discoveryCount.textContent = `${EVENTS.filter(event => isMainAgendaEvent(event) && isCurrentOrUpcoming(event)).length} eventos confirmados`;
   pagination.hidden = calendarMode || matches.length <= perPage;
   pageLabel.textContent = `Página ${state.page} de ${pages}`;
   previousPage.disabled = state.page === 1;

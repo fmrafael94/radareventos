@@ -157,3 +157,82 @@
   .hero-feature h2{max-width:18ch;font-size:30px}
   .hero-feature-link{margin-top:21px}
 }
+
+/* Editorial homepage v2: the masthead is useful navigation, the hero has a
+   real event poster, and discovery is split into clear starting points. */
+.home-page .site-header{grid-template-columns:auto 1fr auto;gap:clamp(22px,4vw,56px)}
+.home-page{overflow-x:clip}
+.primary-nav{display:flex;align-items:center;justify-content:center;gap:clamp(18px,3vw,36px);color:rgba(247,245,240,.68);font:600 12px "DM Sans",sans-serif}
+.primary-nav a{position:relative;padding:8px 0}
+.primary-nav a::after{content:"";position:absolute;right:0;bottom:2px;left:0;height:1px;transform:scaleX(0);background:var(--brand-gold);transition:transform .18s ease}
+.primary-nav a:hover{color:var(--brand-cream)}
+.primary-nav a:hover::after{transform:scaleX(1)}
+
+.home-page .intro{grid-template-columns:minmax(0,1.08fr) minmax(310px,.92fr);gap:clamp(26px,4vw,58px);min-height:470px;padding:clamp(24px,3.8vw,46px)}
+.home-page .intro-copy{justify-content:center}
+.hero-feature{display:grid;grid-template-rows:minmax(245px,1fr) auto;gap:18px;justify-content:stretch;padding:16px;border:0;border-radius:16px;background:rgba(247,245,240,.065)}
+.hero-feature::before{display:none}
+.hero-feature-poster{display:block;min-height:245px;overflow:hidden;border-radius:11px;background:rgba(0,0,0,.18)}
+.hero-feature-poster img{display:block;width:100%;height:100%;min-height:245px;max-height:315px;object-fit:cover;object-position:center;background:transparent}
+.hero-feature-poster.poster-unavailable,.featured-poster.poster-unavailable{display:grid;place-items:end start;padding:18px;background:linear-gradient(145deg,rgba(183,164,90,.2),rgba(247,245,240,.04))!important}
+.hero-feature-poster.poster-unavailable span,.featured-poster.poster-unavailable span{max-width:12ch;color:var(--brand-cream);font:700 clamp(22px,3vw,38px)/.92 "Space Grotesk",sans-serif;letter-spacing:-.055em;text-transform:uppercase}
+.featured-poster.poster-unavailable span{color:var(--brand-ink);font-size:22px}
+.hero-feature-copy{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;padding:0 3px 2px}
+.hero-feature-copy>div{min-width:0}
+.hero-feature .hero-feature-kicker{margin:0 0 7px!important}
+.hero-feature time{font-size:10px}
+.hero-feature h2{max-width:none;margin:7px 0 6px;font-size:clamp(24px,2.4vw,34px);white-space:normal}
+.hero-feature .hero-feature-meta{overflow:hidden;max-width:34ch!important;text-overflow:ellipsis;white-space:nowrap}
+.hero-feature .hero-feature-link{flex:0 0 auto;min-width:0;margin:0;padding:8px 0;gap:22px;white-space:nowrap}
+
+.home-page .featured-events{margin:36px 2px 56px}
+.home-page .featured-heading{margin-bottom:18px}
+.home-page .featured-heading h2{font-size:30px}
+.home-page .featured-rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;overflow:visible}
+.home-page .featured-card{display:flex;width:auto;min-width:0;min-height:0;flex:auto;flex-direction:column;padding:0;scroll-snap-align:none}
+.home-page .featured-poster{display:block;width:100%;aspect-ratio:4/5;border-radius:12px;background:rgba(183,164,90,.1)!important}
+.home-page .featured-poster img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center}
+.home-page .featured-copy{display:flex;flex:1;padding:12px 2px 0}
+.home-page .featured-copy p{margin:0 0 7px;font-size:10px}
+.home-page .featured-copy h3{min-height:0;font-size:19px;line-height:1.05}
+.home-page .featured-copy time{min-height:0;margin-top:7px;font-size:13px}
+.home-page .featured-copy a{align-self:flex-start;margin-top:11px;font-size:12px}
+
+.discovery-gateway{display:grid;grid-template-columns:minmax(0,.85fr) minmax(420px,1.15fr);gap:clamp(26px,5vw,74px);align-items:center;margin:0 2px 38px;padding:32px 0;border-top:1px solid rgba(24,34,38,.18);border-bottom:1px solid rgba(24,34,38,.18)}
+.discovery-copy h2{max-width:13ch;margin:8px 0 10px;font:700 clamp(32px,4vw,48px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.065em}
+.discovery-copy>p:last-child{max-width:39ch;margin:0;color:rgba(24,34,38,.62);font-size:14px;line-height:1.5}
+.discovery-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.discovery-links a{display:flex;min-height:57px;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:10px;color:var(--brand-ink);background:rgba(183,164,90,.12);font-size:12px;font-weight:700;transition:background .16s ease,color .16s ease}
+.discovery-links a span{color:#8a7734;font-size:17px}
+.discovery-links a:hover{color:var(--brand-cream);background:var(--brand-ink)}
+.discovery-links a:hover span{color:var(--brand-gold)}
+.home-page .browse-panel{margin:0;padding:26px;border-radius:16px}
+
+@media(max-width:900px){
+  .primary-nav{display:none}
+  .home-page .site-header{grid-template-columns:1fr auto}
+  .home-page .intro{grid-template-columns:1fr;min-height:0}
+  .hero-feature{grid-template-columns:minmax(180px,.8fr) minmax(0,1.2fr);grid-template-rows:auto;align-items:stretch}
+  .hero-feature-poster,.hero-feature-poster img{min-height:220px}
+  .hero-feature-copy{align-items:flex-start;flex-direction:column;justify-content:flex-end;padding:10px 6px}
+  .home-page .featured-rail{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .discovery-gateway{grid-template-columns:1fr;gap:22px}
+}
+@media(max-width:580px){
+  .home-page .site-header{gap:10px}
+  .home-page .header-actions{gap:5px}
+  .home-page .submit-link{max-width:92px;white-space:normal;line-height:1.15;text-align:right}
+  .home-page .intro{gap:20px}
+  .hero-feature{grid-template-columns:1fr;grid-template-rows:auto auto;gap:14px;padding:11px;border-top:0}
+  .hero-feature-poster,.hero-feature-poster img{min-height:0;aspect-ratio:16/10}
+  .hero-feature-copy{min-height:0;padding:2px 3px 4px}
+  .hero-feature .hero-feature-link{margin-top:5px}
+  .home-page .featured-rail{display:flex;grid-template-columns:none;gap:13px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+  .home-page .featured-card{flex:0 0 74%;scroll-snap-align:start}
+  .home-page .featured-poster{aspect-ratio:4/5}
+  .discovery-gateway{margin-bottom:28px;padding:27px 0}
+  .discovery-copy h2{font-size:36px}
+  .discovery-links{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .discovery-links a{min-height:54px;padding:11px;font-size:11px}
+  .home-page .browse-panel{padding:19px 14px}
+}

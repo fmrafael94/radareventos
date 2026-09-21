@@ -12,6 +12,15 @@ const bulkResolve = document.querySelector("#bulk-resolve");
 const bulkApply = document.querySelector("#bulk-apply");
 const communityBulkActions = document.querySelector("#community-bulk-actions");
 const bulkPublishReady = document.querySelector("#bulk-publish-ready");
+const reviewSearch = document.querySelector("#review-search");
+const reviewSort = document.querySelector("#review-sort");
+const adminSync = document.querySelector("#admin-sync strong");
+const dashboardMetrics = {
+  community: document.querySelector("#metric-community"),
+  automation: document.querySelector("#metric-automation"),
+  holds: document.querySelector("#metric-holds"),
+  published: document.querySelector("#metric-published")
+};
 let activeView = "community";
 let activeCommunityStatus = "new";
 let activeAutomationStatus = "new";
@@ -25,6 +34,62 @@ const requireCurrentSession = response => {
   window.location.replace("/painel");
   throw new Error("A sessão terminou. A voltar ao início de sessão…");
 };
+
+function applyReviewToolbar() {
+  const query = String(reviewSearch?.value || "").trim().toLocaleLowerCase("pt-PT");
+  const cards = [...reports.querySelectorAll(".report")];
+  cards.sort((left, right) => {
+    if (reviewSort?.value === "title") return String(left.dataset.sortTitle || "").localeCompare(String(right.dataset.sortTitle || ""), "pt");
+    const difference = Number(left.dataset.defaultOrder) - Number(right.dataset.defaultOrder);
+    return reviewSort?.value === "oldest" ? -difference : difference;
+  }).forEach(card => {
+    card.hidden = Boolean(query && !card.textContent.toLocaleLowerCase("pt-PT").includes(query));
+    reports.append(card);
+  });
+}
+
+function enhanceReportList() {
+  [...reports.querySelectorAll(".report")].forEach((card, index) => {
+    card.dataset.defaultOrder = String(index);
+    card.dataset.sortTitle = card.querySelector("h2")?.textContent.trim() || "";
+    card.classList.add("is-collapsed");
+    const meta = card.querySelector(".report-meta");
+    if (!meta || meta.querySelector(".report-toggle")) return;
+    const button = document.createElement("button");
+    button.className = "report-toggle";
+    button.type = "button";
+    button.setAttribute("aria-expanded", "false");
+    button.textContent = "Rever →";
+    button.addEventListener("click", () => {
+      const open = card.classList.toggle("is-open");
+      button.setAttribute("aria-expanded", String(open));
+      button.textContent = open ? "Fechar ×" : "Rever →";
+    });
+    meta.append(button);
+  });
+  applyReviewToolbar();
+}
+
+async function refreshDashboardMetrics() {
+  try {
+    const endpoints = [
+      "/api/admin/feedback?status=new",
+      "/api/admin/automation-reviews?status=new",
+      "/api/admin/poster-holds",
+      "/api/admin/events?status=published"
+    ];
+    const responses = await Promise.all(endpoints.map(endpoint => fetch(endpoint, { headers: { Accept: "application/json" }, credentials: "same-origin" })));
+    responses.forEach(requireCurrentSession);
+    const payloads = await Promise.all(responses.map(response => response.ok ? response.json() : Promise.resolve({ items: [] })));
+    ["community", "automation", "holds", "published"].forEach((key, index) => {
+      if (dashboardMetrics[key]) dashboardMetrics[key].textContent = String(Array.isArray(payloads[index]?.items) ? payloads[index].items.length : 0);
+    });
+    if (adminSync) adminSync.textContent = new Intl.DateTimeFormat("pt-PT", { hour: "2-digit", minute: "2-digit" }).format(new Date());
+  } catch {
+    Object.values(dashboardMetrics).forEach(metric => { if (metric) metric.textContent = "—"; });
+    if (adminSync) adminSync.textContent = "Não disponível";
+  }
+}
 
 const checklistMarkup = publication => {
   const entries = Array.isArray(publication?.items) ? publication.items : [];
@@ -217,7 +282,9 @@ async function loadReports() {
     }
     reports.innerHTML = result.items.length ? result.items.map(reportCard).join("") : document.querySelector("#empty-state").innerHTML;
     reports.querySelectorAll(".report").forEach(syncPublicationChecklist);
+    enhanceReportList();
     adminStatus.textContent = result.items.length ? `${result.items.length} pedido${result.items.length === 1 ? "" : "s"}.` : "";
+    refreshDashboardMetrics();
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar os pedidos.";
   }
@@ -233,6 +300,7 @@ async function loadAutomationReviews() {
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar a revisão automática.");
     if (!Array.isArray(result.items)) throw new Error("A revisão automática ainda não está configurada.");
     reports.innerHTML = result.items.length ? result.items.map(automationCard).join("") : "<p class=\"empty-state\">Não há sinais neste estado.</p>";
+    enhanceReportList();
     const count = Number(result.meta?.signals || result.items.length);
     const eventCount = Number(result.meta?.events || result.items.length);
     const statusLabel = activeAutomationStatus === "resolved"
@@ -243,6 +311,7 @@ async function loadAutomationReviews() {
         ? count === 1 ? "ignorado" : "ignorados"
         : "para rever";
     adminStatus.textContent = count ? `${eventCount} evento${eventCount === 1 ? "" : "s"} · ${count} sinal${count === 1 ? "" : "s"} ${statusLabel}.` : "";
+    refreshDashboardMetrics();
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar a revisão automática.";
   }
@@ -259,7 +328,9 @@ async function loadPosterHolds() {
     const items = Array.isArray(result.items) ? result.items : [];
     reports.innerHTML = items.length ? items.map(posterHoldCard).join("") : "<p class=\"empty-state\">Não há eventos com informação obrigatória em falta.</p>";
     reports.querySelectorAll(".report").forEach(syncPublicationChecklist);
+    enhanceReportList();
     adminStatus.textContent = items.length ? `${items.length} evento${items.length === 1 ? "" : "s"} a completar.` : "";
+    refreshDashboardMetrics();
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar os eventos incompletos.";
   }
@@ -276,7 +347,9 @@ async function loadAgenda() {
     if (!response.ok) throw new Error(result.message || "Não foi possível carregar a agenda.");
     const items = Array.isArray(result.items) ? result.items : [];
     reports.innerHTML = items.length ? items.map(agendaCard).join("") : `<p class="empty-state">Não há eventos ${activeAgendaStatus === "archived" ? "arquivados" : "publicados"}${query ? " com esta pesquisa" : ""}.</p>`;
+    enhanceReportList();
     adminStatus.textContent = `${items.length} evento${items.length === 1 ? "" : "s"} ${activeAgendaStatus === "archived" ? "arquivado" : "publicado"}${items.length === 1 ? "" : "s"}.`;
+    refreshDashboardMetrics();
   } catch (error) {
     adminStatus.textContent = error.message || "Não foi possível carregar a agenda.";
   }
@@ -539,7 +612,11 @@ reports.addEventListener("input", event => {
   if (event.target.closest(".event-review-fields")) syncPublicationChecklist(event.target.closest(".report"));
 });
 
-document.querySelector("#refresh").addEventListener("click", loadActiveView);
+reviewSearch?.addEventListener("input", applyReviewToolbar);
+reviewSort?.addEventListener("change", applyReviewToolbar);
+document.querySelector("#refresh").addEventListener("click", () => {
+  loadActiveView();
+});
 async function bulkReview(action) {
   const applying = action === "apply-confirmed";
   const confirmation = applying
