@@ -15,19 +15,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="admin.css?v=3" />
+    <link rel="stylesheet" href="admin.css?v=4" />
   </head>
   <body>
     <a class="skip-link" href="#reports">Saltar para os pedidos</a>
     <main class="admin-shell">
       <header class="admin-header">
-        <div><a class="admin-brand" href="https://odesvio.pt/"><img src="https://odesvio.pt/brand/logo-icon.png" alt="" width="28" height="28" /><span>Desvio</span></a><p>O teu radar de eventos · área privada</p><span class="admin-security-note">Sessão pessoal protegida</span></div>
-        <div class="admin-header-actions"><button id="logout" class="secondary" type="button">Sair</button><button id="refresh" class="secondary" type="button">Atualizar</button></div>
+        <div><a class="admin-brand" href="https://odesvio.pt/"><img src="/brand/logo-icon.png" alt="" width="34" height="34" /><span>Desvio <i>· Admin</i></span></a><p>Sessão pessoal protegida</p></div>
+        <div class="admin-header-actions"><a class="secondary" href="/" target="_blank" rel="noopener">Ver site ↗</a><button id="logout" class="secondary" type="button">Sair</button><button id="refresh" type="button">Atualizar dados</button></div>
       </header>
       <section class="admin-intro">
-        <p class="eyebrow">Moderação</p>
-        <h1>Pedidos para rever.</h1>
-        <p>Centraliza sugestões de utilizadores e sinais encontrados pelas rondas automáticas. Nada entra na agenda sem confirmação humana e uma fonte oficial.</p>
+        <div><p class="eyebrow">Moderação</p><h1>Revisão editorial.</h1><p>Pedidos, rondas automáticas e eventos publicados — organizados para chegar depressa ao que precisa de ação.</p></div>
+        <p id="admin-sync" class="admin-sync">Última sincronização<br /><strong>A carregar…</strong></p>
+      </section>
+      <section class="admin-metrics" aria-label="Resumo editorial">
+        <article class="attention"><span>Pedidos novos</span><strong id="metric-community">—</strong></article>
+        <article><span>Sinais por rever</span><strong id="metric-automation">—</strong></article>
+        <article><span>Informação em falta</span><strong id="metric-holds">—</strong></article>
+        <article><span>Agenda publicada</span><strong id="metric-published">—</strong></article>
       </section>
       <section class="review-controls" aria-label="Filtros da moderação">
         <div class="review-source">
@@ -61,6 +66,10 @@
           </nav>
         </div>
       </section>
+      <section class="review-toolbar" aria-label="Pesquisar e ordenar a fila atual">
+        <label><span>Pesquisar nesta fila</span><input id="review-search" type="search" placeholder="Artista, sala ou fonte" autocomplete="off" /></label>
+        <label><span>Ordem</span><select id="review-sort"><option value="newest">Mais recentes</option><option value="oldest">Mais antigos</option><option value="title">Título A–Z</option></select></label>
+      </section>
       <section id="agenda-tools" class="agenda-tools" aria-label="Pesquisar na agenda" hidden>
         <label for="agenda-search">Pesquisar evento, sala ou cidade</label>
         <div><input id="agenda-search" type="search" maxlength="100" placeholder="Ex.: Porto, Hard Club, Placebo" /><button id="agenda-search-button" type="button">Pesquisar</button></div>
@@ -77,6 +86,6 @@
       <section id="reports" class="reports" aria-live="polite"></section>
     </main>
     <template id="empty-state"><p class="empty-state">Não há pedidos neste estado.</p></template>
-    <script src="admin.js"></script>
+    <script src="admin.js?v=2"></script>
   </body>
 </html>
