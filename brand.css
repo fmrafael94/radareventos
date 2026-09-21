@@ -60,3 +60,47 @@
 .not-found-page .brand-wordmark{box-shadow:none}
 .not-found-page .language-toggle{border-color:rgba(247,245,240,.32);color:var(--brand-cream)}
 .not-found-page .primary:hover{color:var(--brand-ink);background:var(--brand-cream)}
+
+/* Simplified lock-up and editorial cards. The dark masthead lets the icon's
+   own ink field disappear, so the symbol and name read as one mark. */
+.home-page .site-header,.event-page .site-header,.landing-page .site-header,.legal-page .legal-header{max-width:none;min-height:70px;padding-inline:clamp(22px,5vw,76px);border:0;color:var(--brand-cream);background:var(--brand-ink)}
+.home-page .site-header>p,.event-page .site-header>p,.landing-page .site-header>p{color:rgba(247,245,240,.62)}
+.site-header .brand-wordmark,.legal-header .brand-wordmark{padding:0;border-radius:0;color:var(--brand-cream);background:transparent;font-size:16px;letter-spacing:-.055em}
+.site-header .brand-logo,.legal-header .brand-logo{width:36px;height:36px;border-radius:0}
+.site-header .language-toggle{border-color:rgba(247,245,240,.32);color:var(--brand-cream)}
+.site-header .language-toggle:hover{border-color:var(--brand-gold);color:var(--brand-gold)}
+.home-page .site-header .submit-link,.event-page .site-header .back-to-agenda,.landing-page .site-header .back{color:var(--brand-cream)}
+.home-page .site-header .submit-link:hover,.event-page .site-header .back-to-agenda:hover,.landing-page .site-header .back:hover{color:var(--brand-gold)}
+.legal-page .legal-header .back{color:var(--brand-cream)}
+.legal-page .legal-header .back:hover{color:var(--brand-gold)}
+
+.home-page,.event-page,.landing-page,.legal-page{background:var(--brand-cream)}
+.home-page .intro{background:var(--brand-ink);box-shadow:none}
+.home-page .intro::before,.home-page .intro::after{display:none!important}
+.home-page .hero-atmosphere{display:none}
+.home-page .featured-card{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.home-page .featured-card:hover{box-shadow:none;transform:none}
+.home-page .featured-poster,.home-page .event-art,.home-page .festival-slot-art{overflow:hidden;border:0;border-radius:0;background:transparent!important;box-shadow:none!important}
+.home-page .featured-poster::before,.home-page .featured-poster::after,.home-page .event-art::before,.home-page .event-art::after,.home-page .nearby-poster::before,.home-page .nearby-poster::after{display:none!important;content:none!important}
+.home-page .featured-poster img,.home-page .nearby-poster img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;background:transparent!important;box-shadow:none!important;filter:none!important;object-fit:cover!important}
+.home-page .event-art img,.home-page .festival-slot-art img{max-width:100%!important;max-height:100%!important;background:transparent!important;box-shadow:none!important;filter:none!important;object-fit:contain!important}
+.home-page .featured-copy{padding:8px 0 0}
+.home-page .featured-copy p,.home-page .featured-copy time{color:rgba(24,34,38,.62)}
+.home-page .featured-copy a{align-self:flex-start;color:var(--brand-ink);text-decoration-color:rgba(24,34,38,.35)}
+.home-page .featured-copy a:hover{color:var(--brand-coral);text-decoration-color:var(--brand-coral)}
+.home-page .browse-panel{border:1px solid rgba(24,34,38,.16);background:transparent;box-shadow:none;backdrop-filter:none}
+.home-page .browse-panel::before{display:none}
+.home-page .agenda-search{box-shadow:none}
+.home-page .agenda-shortcuts button{border-color:rgba(24,34,38,.22);color:var(--brand-ink);background:transparent}
+.home-page .event-card{border-color:rgba(24,34,38,.15);background:transparent;box-shadow:none}
+.home-page .event-card-link:hover,.home-page .event-card-link:focus-visible{background:rgba(24,34,38,.045)}
+.home-page .status{border-color:rgba(24,34,38,.25);color:rgba(24,34,38,.72);background:transparent}
+.home-page .status.sold{border-color:rgba(227,94,68,.45);color:#9d3825;background:transparent}
+.home-page .nearby-events{border:1px solid rgba(24,34,38,.14);background:transparent;box-shadow:none}
+.home-page .nearby-card a{background:transparent;box-shadow:none}
+.home-page .nearby-poster{background:transparent;box-shadow:none}
+.home-page .nearby-poster img{max-width:100%;max-height:100%;filter:none}
+
+.event-page .event-poster-trigger,.event-page .event-poster-trigger img,.event-page .related-poster{background:transparent!important;box-shadow:none!important;filter:none!important}
+
+@media(max-width:580px){.home-page .site-header,.event-page .site-header,.landing-page .site-header,.legal-page .legal-header{min-height:64px;padding-inline:15px}.site-header .brand-logo,.legal-header .brand-logo{width:33px;height:33px}.site-header .brand-wordmark,.legal-header .brand-wordmark{font-size:15px}.home-page .featured-copy{padding-top:7px}}

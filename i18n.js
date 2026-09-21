@@ -81,13 +81,46 @@
     "Ao fechar, os dados ainda não enviados serão perdidos. Queres continuar?":"Closing now will discard unsent data. Do you want to continue?","O cartaz deve ser JPG, PNG ou WebP.":"The poster must be JPG, PNG or WebP.","Escolhe um cartaz com menos de 15 MB antes da otimização.":"Choose a poster under 15 MB before optimisation.","Não foi possível reduzir este cartaz para 2 MB. Tenta uma imagem mais pequena.":"We could not reduce this poster to 2 MB. Try a smaller image.","Inclui o link do cartaz ou envia uma imagem oficial.":"Include the poster link or upload an official image.","A otimizar o cartaz…":"Optimising poster…","A enviar…":"Sending…","Recebido para revisão. Se deixaste um email, usamos esse contacto apenas para responder ao pedido.":"Received for review. If you provided an email address, we will use it only to reply to the request.","Enviado ✓":"Sent ✓","Não foi possível enviar agora.":"Unable to send right now.","Não foi possível enviar agora. Tenta novamente mais tarde.":"Unable to send right now. Try again later.","Tentar novamente":"Try again","Não foi possível preparar o calendário.":"We could not prepare the calendar."
   }));
 
+  const categoryTranslations = new Map(Object.entries({
+    "Alternativo":"Alternative","Antiga":"Early music","Arte":"Art","Arte urbana":"Urban art","Axé":"Axé","Banda sonora":"Soundtrack","Barroco":"Baroque","Câmara":"Chamber music","Canção de autor":"Singer-songwriter","Cine-concerto":"Film concert","Clássica":"Classical","Clássicos":"Classics","Contemporânea":"Contemporary","Coral":"Choral","Eletrónica":"Electronic","Emergente":"Emerging","Família":"Family","Folclore":"Folk traditions","Fusão":"Fusion","Guitarra":"Guitar","Improvisada":"Improvised","Infantil":"Children’s music","Meditação":"Meditation","Metal progressivo":"Progressive metal","Música Africana":"African music","Música Antiga":"Early music","Música Cabo-verdiana":"Cape Verdean music","Natal":"Christmas","Orquestral":"Orchestral","Popular":"Popular","Progressivo":"Progressive","Psicadélico":"Psychedelic","Rock ucraniano":"Ukrainian rock","Sinfónica":"Symphonic","Tributo":"Tribute","Fado regular":"Regular Fado","Night club":"Nightclub"
+  }));
+  for (const [source, target] of categoryTranslations) exact.set(source, target);
+
+  const eventTitleExact = new Map(Object.entries({
+    "Concerto no Bar do Rio Gondoriz":"Concert at Bar do Rio Gondoriz","Música na Esplanada":"Music on the Terrace","Festas de São Miguel":"São Miguel Festival","Cantar Juntos pelo Mundo":"Singing Together Around the World","Sinfonia n.º 5 de Beethoven":"Beethoven’s Symphony No. 5","Boca Canta Edu — Boca Livre + Edu Lobo":"Boca Sings Edu — Boca Livre + Edu Lobo","Trio Fantasma de Beethoven":"Beethoven’s Ghost Trio","Carmen de Bizet":"Bizet’s Carmen","Sul — Há Fado no Cais":"South — Fado at the Quay","Marco Rodrigues canta Carlos do Carmo":"Marco Rodrigues Sings Carlos do Carmo","Cancioneiro de Elvas — Sete Lágrimas":"Elvas Songbook — Sete Lágrimas","O Bolero de Ravel":"Ravel’s Boléro","Galáxia Vivaldi":"Vivaldi Galaxy","Concerto de Natal — Missa em Si menor de Bach":"Christmas Concert — Bach’s Mass in B minor","Clube do Choro Porto convida Cristóvão Bastos + Ilana Volcov":"Clube do Choro Porto Presents Cristóvão Bastos + Ilana Volcov","Berlioz em Itália":"Berlioz in Italy","Noite Branca — Ópera":"White Night — Opera","Clássicos de Natal 2026":"Christmas Classics 2026","Fado & Jazz: Uma Só Alma — Vânia Rodrigues e Gabriel Fialho":"Fado & Jazz: One Soul — Vânia Rodrigues and Gabriel Fialho","A Música de Mário Pacheco":"The Music of Mário Pacheco","A Voz do Rock & Convidadas":"The Voice of Rock & Guests","Lágrimas no Mar — Arnaldo Antunes e Vítor Araújo":"Tears in the Sea — Arnaldo Antunes and Vítor Araújo","A Flauta Mágica — Opera 2001":"The Magic Flute — Opera 2001","Kizomba na Rua":"Kizomba in the Street","Possível":"Possible","Patrimónios de Peso":"Weighty Heritage","Festival Jovens Músicos 2026":"Young Musicians Festival 2026","Festival Colombo 2026":"Columbus Festival 2026",
+    "Bonds Festival — 3.ª edição":"Bonds Festival — 3rd Edition","Candlelight — O melhor de Adele":"Candlelight — The Best of Adele","Ciclo Mendelssohn — Integral das Sinfonias e dos Concertos":"Mendelssohn Series — Complete Symphonies and Concertos","Concerto Lounge":"Lounge Concert","Diz — Concerto":"Diz — Concert","Festa do Avante! 2026":"Avante! Festival 2026","Ganso — Ciclo Novas Quintas":"Ganso — New Thursdays Series","Guimarães Jazz — Toninho Horta Quarteto c/ Orquestra de Guimarães":"Guimarães Jazz — Toninho Horta Quartet with Guimarães Orchestra","Jazz no Centro Histórico — Dixie Gang":"Jazz in the Historic Centre — Dixie Gang","Juntos pela Música":"Together for Music","Kevin Morby com Ensemble da Escola Profissional de Música de Espinho":"Kevin Morby with the Espinho Professional Music School Ensemble","Noites de Orfeu — ciclo de música e mitologia":"Nights of Orpheus — Music and Mythology Series","Orquestra Jazz de Leiria + Christian McBride":"Leiria Jazz Orchestra + Christian McBride","Os Músicos do Tejo — Música Portuguesa dos séculos XVI e XVII":"Os Músicos do Tejo — Portuguese Music from the 16th and 17th Centuries","The Jazz Room — Tributo a Frank Sinatra e Louis Armstrong":"The Jazz Room — Tribute to Frank Sinatra and Louis Armstrong","TT — 20 anos de RNB: Come Closer":"TT — 20 Years of R&B: Come Closer","UHF — Podia Ser Natal":"UHF — It Could Be Christmas","Under The Doom Festival 2026 — X Edição":"Under The Doom Festival 2026 — 10th Edition","Em Casa D'Amália — O Concerto ao Vivo":"Em Casa D'Amália — The Live Concert","Concerto Solidário — UHF e The Cartel":"Benefit Concert — UHF and The Cartel","Concerto de Natal 2026 — Jovem Orquestra Portuguesa":"Christmas Concert 2026 — Portuguese Youth Orchestra","Nanook, o Esquimó — cine-concerto por Nuno Costa e Óscar Graça":"Nanook of the North — Film Concert by Nuno Costa and Óscar Graça"
+  }));
+  const eventTitleReplacements = [
+    [/\bFestival Internacional de Música Exploratória\b/gi,"International Exploratory Music Festival"],[/\bFestas Populares de Corroios\b/g,"Corroios Popular Festival"],[/\bFestas de Corroios\b/g,"Corroios Festival"],[/\bFestas do Mar\b/g,"Sea Festival"],[/\bAmadora em Festa\b/g,"Amadora Festival"],[/\bFestival do Moscatel do Douro\b/g,"Douro Muscat Festival"],[/\bFesta do Avante!/g,"Avante! Festival"],[/\bFesta de abertura\b/gi,"Opening Party"],
+    [/\bConcerto de Natal\b/g,"Christmas Concert"],[/\bClássicos de Natal\b/g,"Christmas Classics"],[/\bConcerto Solidário\b/g,"Benefit Concert"],[/\bCine Concerto\b/g,"Film Concert"],[/\bcine-concerto por\b/gi,"film concert by"],[/\bTributo aos?\b/gi,"Tribute to"],[/\bO melhor (?:de|dos?)\b/gi,"The Best of"],[/\bao vivo\b/gi,"live"],[/\bexperiência intimista\b/gi,"intimate experience"],[/\bprogramação\b/gi,"programme"],[/\b(\d+) anos\b/gi,"$1 Years"],[/\b(\d+)\.ª edição\b/gi,(_,number)=>`${number}${number === "1" ? "st" : number === "2" ? "nd" : number === "3" ? "rd" : "th"} Edition`],
+    [/\bjaneiro\b/gi,"January"],[/\bfevereiro\b/gi,"February"],[/\bmarço\b/gi,"March"],[/\babril\b/gi,"April"],[/\bmaio\b/gi,"May"],[/\bjunho\b/gi,"June"],[/\bjulho\b/gi,"July"],[/\bagosto\b/gi,"August"],[/\bsetembro\b/gi,"September"],[/\boutubro\b/gi,"October"],[/\bnovembro\b/gi,"November"],[/\bdezembro\b/gi,"December"]
+  ];
+
+  function translateEventTitle(value) {
+    if (language !== "en" || value == null) return value;
+    const source = String(value);
+    const trimmed = source.trim();
+    if (!trimmed) return source;
+    let result = eventTitleExact.get(trimmed) || trimmed;
+    if (result === trimmed) for (const [pattern, replacement] of eventTitleReplacements) result = result.replace(pattern, replacement);
+    return source.replace(trimmed, result);
+  }
+
+  function translateComposite(value) {
+    if (!String(value).includes("·")) return value;
+    return String(value).split(/(\s*·\s*)/).map(part => {
+      const trimmed = part.trim();
+      return !trimmed || trimmed === "·" ? part : part.replace(trimmed, exact.get(trimmed) || trimmed);
+    }).join("");
+  }
+
   const replacements = [
     [/^Página (\d+) de (\d+)$/,"Page $1 of $2"],[/^(\d+) eventos$/,"$1 events"],[/^1 evento$/,"1 event"],[/^(\d+) selecionados?$/,"$1 selected"],[/^\+(\d+) eventos$/,"+$1 events"],
-    [/^Abrir (.+)$/,"Open $1"],
+    [/^Abrir (.+)$/,(_,title)=>`Open ${translateEventTitle(title)}`],[/^(.+) — Desvio$/,(_,title)=>`${translateEventTitle(title)} — Desvio`],
     [/^Concertos em Portugal$/,"Concerts in Portugal"],[/^Concertos este fim de semana$/,"Concerts this weekend"],[/^Concertos grátis$/,"Free concerts"],[/^Festivais em Portugal em (\d{4})$/,"Festivals in Portugal in $1"],[/^Concertos no distrito de (.+)$/,"Concerts in the $1 district"],[/^Concertos em (.+)$/,"Concerts in $1"],[/^(.+) ao vivo em (.+)$/,"Live $1 in $2"],[/^(.+) em Portugal$/,"$1 in Portugal"],
     [/^(\d+) concertos e eventos de música ao vivo para este fim de semana em Portugal, com datas, salas, cartazes e ligações oficiais\.$/,"$1 concerts and live-music events in Portugal this weekend, with dates, venues, posters and official links."],[/^(\d+) concertos e eventos de música com entrada livre em Portugal, confirmados em fontes oficiais\.$/,"$1 free concerts and music events in Portugal, confirmed through official sources."],[/^(\d+) eventos em agenda: (.+)\. Datas, salas, cartazes, bilhetes e fontes oficiais no Desvio\.$/,"$1 listed events: $2. Dates, venues, posters, tickets and official sources on Desvio."],
     [/^(\d{1,2}) de (janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?: de (\d{4}))?$/i,(_,day,month,year)=>`${day} ${{janeiro:"January",fevereiro:"February",março:"March",abril:"April",maio:"May",junho:"June",julho:"July",agosto:"August",setembro:"September",outubro:"October",novembro:"November",dezembro:"December"}[month.toLowerCase()]}${year ? ` ${year}` : ""}`],
-    [/^Cartaz oficial de (.+)$/,"Official poster for $1"],[/^Ampliar cartaz oficial de (.+)$/,"Enlarge the official poster for $1"],[/^Cartaz oficial ampliado de (.+)$/,"Enlarged official poster for $1"],
+    [/^Cartaz oficial de (.+)$/,(_,title)=>`Official poster for ${translateEventTitle(title)}`],[/^Ampliar cartaz oficial de (.+)$/,(_,title)=>`Enlarge the official poster for ${translateEventTitle(title)}`],[/^Cartaz oficial ampliado de (.+)$/,(_,title)=>`Enlarged official poster for ${translateEventTitle(title)}`],
     [/^Copia este link: /,"Copy this link: "],[/^A mostrar os eventos mais próximos da região de (.+)\.$/,"Showing the events closest to $1."],[/^Ainda não encontrámos cartazes oficiais perto de (.+)\.$/,"We have not found official posters near $1 yet."],
     [/^Vais corrigir: (.+)\. Indica o que mudou e deixa uma fonte oficial que o confirme\.$/,"You are correcting: $1. Tell us what changed and provide an official source confirming it."],
     [/\bDesde\b/g,"From"],[/\baté\b/g,"to"],[/\bBilhetes disponíveis\b/g,"Tickets available"],[/\bBilheteira oficial ainda não localizada\b/g,"Official ticketing not found yet"],[/\bBilheteira por confirmar\b/g,"Ticketing to be confirmed"],[/\bConsultar no site\b/g,"See website"],[/\bConsultar bilheteira oficial\b/g,"See official ticketing"],[/\bPré-venda\b/g,"Advance"],[/\bno dia\b/g,"on the day"],[/\bPortas\b/g,"Doors"],[/\binício\b/g,"start"],[/\bHorário a anunciar\b/g,"Time to be announced"],[/\bHorário por anunciar\b/g,"Time to be announced"],[/\bEntrada gratuita\b/g,"Free admission"],[/\bEntrada livre\b/g,"Free admission"],[/\bEsgotado\b/g,"Sold out"],[/\bDisponível\b/g,"Available"],[/\bPor confirmar\b/g,"To be confirmed"],[/\bCancelado\b/g,"Cancelled"],[/\bpágina oficial do evento\b/g,"official event page"],[/\bpágina do evento\b/g,"event page"],[/\bprogramação oficial\b/g,"official programme"],[/\bfonte oficial\b/g,"official source"]
@@ -98,9 +131,14 @@
     const source = String(value);
     const trimmed = source.trim();
     if (!trimmed) return source;
-    let result = exact.get(trimmed) || trimmed;
+    let result = exact.get(trimmed) || translateComposite(trimmed);
     if (result === trimmed) for (const [pattern, replacement] of replacements) result = result.replace(pattern, replacement);
     return source.replace(trimmed, result);
+  }
+
+  function translateNode(node) {
+    const titleContext = node.parentElement?.closest?.(".featured-copy h3,.event-title,.landing-event h2,.event-view h1,.similar-events strong,.festival-day-panel strong,.nearby-card h3,.calendar-day a,[data-i18n-event-title]");
+    return titleContext ? translateEventTitle(node.nodeValue) : translate(node.nodeValue);
   }
 
   function translateElement(root) {
@@ -108,7 +146,7 @@
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: node => node.parentElement?.closest("script,style,noscript") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node => { const next = translate(node.nodeValue); if (next !== node.nodeValue) node.nodeValue = next; });
+    nodes.forEach(node => { const next = translateNode(node); if (next !== node.nodeValue) node.nodeValue = next; });
     const elements = root.matches?.("*") ? [root, ...root.querySelectorAll("*")] : [...root.querySelectorAll?.("*") || []];
     for (const element of elements) for (const attribute of ["aria-label","alt","placeholder","title","content"]) {
       if (!element.hasAttribute?.(attribute)) continue;
@@ -132,12 +170,12 @@
     translateElement(document.documentElement);
     if (language === "en") new MutationObserver(mutations => {
       for (const mutation of mutations) {
-        if (mutation.type === "characterData") { const next = translate(mutation.target.nodeValue); if (next !== mutation.target.nodeValue) mutation.target.nodeValue = next; }
-        mutation.addedNodes.forEach(node => { if (node.nodeType === Node.TEXT_NODE) { const next = translate(node.nodeValue); if (next !== node.nodeValue) node.nodeValue = next; } else if (node.nodeType === Node.ELEMENT_NODE) translateElement(node); });
+        if (mutation.type === "characterData") { const next = translateNode(mutation.target); if (next !== mutation.target.nodeValue) mutation.target.nodeValue = next; }
+        mutation.addedNodes.forEach(node => { if (node.nodeType === Node.TEXT_NODE) { const next = translateNode(node); if (next !== node.nodeValue) node.nodeValue = next; } else if (node.nodeType === Node.ELEMENT_NODE) translateElement(node); });
       }
     }).observe(document.body, { subtree:true, childList:true, characterData:true });
   }
 
-  window.DESVIO_I18N = { language, locale, t: translate, setLanguage, apply: translateElement };
+  window.DESVIO_I18N = { language, locale, t: translate, eventTitle: translateEventTitle, setLanguage, apply: translateElement };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialise, { once:true }); else initialise();
 })();

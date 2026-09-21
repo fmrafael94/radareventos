@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
+import vm from "node:vm";
 import worker, { landingRoutes, publicEventRecords } from "../src/worker.js";
 
 const root = new URL("../", import.meta.url);
@@ -88,7 +89,27 @@ test("event pages expose the bilingual controls and English date metadata", asyn
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-lang-toggle/);
-  assert.match(html, /src="\/i18n\.js\?v=2"/);
+  assert.match(html, /src="\/i18n\.js\?v=3"/);
   assert.match(html, /23 September/);
   assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
+});
+
+test("English mode translates event genres and descriptive titles without changing artist names", async () => {
+  const context = {
+    window: {},
+    location: { search: "?lang=en", href: "https://odesvio.pt/?lang=en" },
+    localStorage: { getItem() { return null; } },
+    document: { documentElement: {}, readyState: "loading", addEventListener() {} },
+    URL,
+    URLSearchParams,
+    console
+  };
+  vm.createContext(context);
+  vm.runInContext(await readFile(new URL("i18n.js", root), "utf8"), context);
+  const { t, eventTitle } = context.window.DESVIO_I18N;
+  assert.equal(t("Concerto · Porto"), "Concert · Porto");
+  assert.equal(t("Metal progressivo"), "Progressive metal");
+  assert.equal(eventTitle("Festas do Mar — Alok"), "Sea Festival — Alok");
+  assert.equal(eventTitle("Concerto no Bar do Rio Gondoriz"), "Concert at Bar do Rio Gondoriz");
+  assert.equal(eventTitle("Heavenwood"), "Heavenwood");
 });
