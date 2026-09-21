@@ -16,11 +16,11 @@
       alt: "Disco de vinil mascote à procura do beat"
     },
     carrinha: {
-      heading: "A tournée perdeu-se.",
+      heading: "A tour perdeu-se.",
       body: "Este evento fez um desvio a mais.",
       cta: "Traçar nova rota",
       image: "/brand/404/carrinha-normalizada.png?v=1",
-      alt: "Carrinha de tournée mascote num desvio"
+      alt: "Carrinha de tour mascote num desvio"
     },
     bateria: {
       heading: "O beat foi ao bar.",
