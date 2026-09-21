@@ -221,8 +221,8 @@ test("poster zoom keeps every artwork fully inside the viewport", async () => {
     ["event page", eventCss, "event-poster-lightbox"]
   ]) {
     assert.match(css, new RegExp(`\\.${selector}\\s*\\{[^}]*width:100vw;[^}]*height:100dvh;[^}]*overflow:hidden;`, "s"), `${name} zoom must stay inside the viewport`);
-    assert.match(css, new RegExp(`\\.${selector} img\\s*\\{[^}]*max-width:100%;[^}]*max-height:100%;[^}]*object-fit:contain;`, "s"), `${name} zoom must preserve the complete poster`);
-    assert.match(css, new RegExp(`\\.${selector}\\[open\\]\\s*\\{[^}]*place-items:center;`, "s"), `${name} zoom must remain centred`);
+    assert.match(css, new RegExp(`\\.${selector} img\\s*\\{[^}]*width:100%;[^}]*height:100%;[^}]*min-width:0;[^}]*min-height:0;[^}]*object-fit:contain;`, "s"), `${name} zoom must fit the complete poster inside a definite box`);
+    assert.match(css, new RegExp(`\\.${selector}\\[open\\]\\s*\\{[^}]*grid-template-columns:minmax\\(0,1fr\\);[^}]*grid-template-rows:minmax\\(0,1fr\\);[^}]*place-items:center;`, "s"), `${name} zoom must remain centred without intrinsic overflow`);
   }
 });
 
