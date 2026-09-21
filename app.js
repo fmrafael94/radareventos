@@ -3,7 +3,6 @@ const siteLocale = window.DESVIO_I18N?.locale || "pt-PT";
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
-const discoveryCount = document.querySelector("#discovery-count");
 const agendaEmpty = document.querySelector("#agenda-empty");
 const pagination = document.querySelector("#pagination");
 const pageLabel = document.querySelector("#page-label");
@@ -1158,7 +1157,6 @@ function render() {
   list.setAttribute("aria-busy", "false");
   if (calendarMode) renderCalendar(matches);
   if (resultCount) resultCount.textContent = `${matches.length} ${matches.length === 1 ? "evento" : "eventos"}`;
-  if (discoveryCount) discoveryCount.textContent = `${EVENTS.filter(event => isMainAgendaEvent(event) && isCurrentOrUpcoming(event)).length} eventos confirmados`;
   pagination.hidden = calendarMode || matches.length <= perPage;
   pageLabel.textContent = `Página ${state.page} de ${pages}`;
   previousPage.disabled = state.page === 1;

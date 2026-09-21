@@ -201,14 +201,6 @@
 .home-page .featured-copy time{min-height:0;margin-top:7px;font-size:13px}
 .home-page .featured-copy a{align-self:flex-start;margin-top:11px;font-size:12px}
 
-.discovery-gateway{display:grid;grid-template-columns:minmax(0,.85fr) minmax(420px,1.15fr);gap:clamp(26px,5vw,74px);align-items:center;margin:0 2px 38px;padding:32px 0;border-top:1px solid rgba(24,34,38,.18);border-bottom:1px solid rgba(24,34,38,.18)}
-.discovery-copy h2{max-width:13ch;margin:8px 0 10px;font:700 clamp(32px,4vw,48px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.065em}
-.discovery-copy>p:last-child{max-width:39ch;margin:0;color:rgba(24,34,38,.62);font-size:14px;line-height:1.5}
-.discovery-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.discovery-links a{display:flex;min-height:57px;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:10px;color:var(--brand-ink);background:rgba(183,164,90,.12);font-size:12px;font-weight:700;transition:background .16s ease,color .16s ease}
-.discovery-links a span{color:#8a7734;font-size:17px}
-.discovery-links a:hover{color:var(--brand-cream);background:var(--brand-ink)}
-.discovery-links a:hover span{color:var(--brand-gold)}
 .home-page .browse-panel{margin:0;padding:26px;border-radius:16px}
 
 @media(max-width:900px){
@@ -220,7 +212,6 @@
   .hero-feature-poster,.hero-feature-poster img{min-height:220px}
   .hero-feature-copy{align-items:flex-start;flex-direction:column;justify-content:flex-end;padding:10px 6px}
   .home-page .featured-rail{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .discovery-gateway{grid-template-columns:1fr;gap:22px}
 }
 @media(max-width:580px){
   .home-page .site-header{gap:10px}
@@ -234,9 +225,42 @@
   .home-page .featured-rail{display:flex;grid-template-columns:none;gap:13px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
   .home-page .featured-card{flex:0 0 74%;scroll-snap-align:start}
   .home-page .featured-poster{aspect-ratio:4/5}
-  .discovery-gateway{margin-bottom:28px;padding:27px 0}
-  .discovery-copy h2{font-size:36px}
-  .discovery-links{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .discovery-links a{min-height:54px;padding:11px;font-size:11px}
   .home-page .browse-panel{padding:19px 14px}
+}
+
+/* The full agenda should feel like a calm continuation of the page, not a
+   second promotional gateway competing for another click. */
+.visually-hidden{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+.home-page .browse-panel{
+  margin:8px 2px 0;
+  padding:32px 0 0;
+  border:0;
+  border-top:1px solid rgba(24,34,38,.18);
+  border-radius:0;
+}
+.home-page .browse-heading{margin:0 0 19px}
+.home-page .browse-heading>div{max-width:580px}
+.home-page .browse-heading .kicker{margin:0 0 8px}
+.home-page .browse-heading h2{font-size:clamp(29px,3vw,40px);line-height:1;letter-spacing:-.06em}
+.home-page .browse-description{max-width:47ch;margin:10px 0 0;color:rgba(24,34,38,.62);font-size:14px;line-height:1.5}
+.home-page .agenda-search{padding:6px;border:1px solid rgba(24,34,38,.18);background:rgba(247,245,240,.58)}
+.home-page .filter-toggle{border:1px solid rgba(24,34,38,.22);color:var(--brand-ink);background:transparent}
+.home-page .filter-toggle:hover,.home-page .filter-toggle:focus-visible{color:var(--brand-cream);background:var(--brand-ink)}
+
+@media(max-width:580px){
+  .home-page .browse-panel{margin-top:3px;padding:26px 0 0}
+  .home-page .browse-heading{margin-bottom:16px}
+  .home-page .browse-heading h2{font-size:31px}
+  .home-page .browse-description{font-size:14px}
+  .home-page .agenda-search{padding:5px}
 }
