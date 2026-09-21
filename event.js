@@ -1,7 +1,8 @@
 const page = document.querySelector("#event-page");
 const eventId = decodeURIComponent(location.pathname.split("/").filter(Boolean).pop() || "");
+const siteLocale = window.DESVIO_I18N?.locale || "pt-PT";
 const eventDate = iso => new Date(`${iso}T12:00:00`);
-const prettyDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
+const prettyDate = iso => new Intl.DateTimeFormat(siteLocale, { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
 const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[character]);
 const eventUrl = id => `${location.origin}/evento/${encodeURIComponent(id)}`;
 const posterCacheVersion = value => {
@@ -113,13 +114,13 @@ const programmeParent = candidate => (window.EVENTS || []).find(parent => {
   return sharesSeriesName(parent, candidate) && (sameSource || samePlace);
 });
 const isMainAgendaEvent = candidate => !candidate.seriesId && !programmeParent(candidate);
-const shortDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" }).format(eventDate(iso)).replace(".", "");
+const shortDate = iso => new Intl.DateTimeFormat(siteLocale, { day: "numeric", month: "short" }).format(eventDate(iso)).replace(".", "");
 const compactEventDate = event => {
   const start = eventDate(event.date);
-  if (!event.endDate) return new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long" }).format(start);
+  if (!event.endDate) return new Intl.DateTimeFormat(siteLocale, { day: "numeric", month: "long" }).format(start);
   const end = eventDate(event.endDate);
   if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-    const month = new Intl.DateTimeFormat("pt-PT", { month: "long" }).format(start);
+    const month = new Intl.DateTimeFormat(siteLocale, { month: "long" }).format(start);
     return `${start.getDate()}–${end.getDate()} ${month}`;
   }
   return `${shortDate(event.date)} — ${shortDate(event.endDate)}`;
@@ -217,7 +218,7 @@ function render(event, poster) {
       </div>
       <p class="event-meta"><span class="event-meta-date">${escapeHtml(compactDate)}</span><span class="event-meta-place">${escapeHtml(event.venue)}, ${escapeHtml(event.city)}</span></p>
       <section class="share-panel" aria-label="Partilhar evento">
-        <div class="share-copy"><div class="share-brand" aria-hidden="true"><img src="/brand/logo-icon.png" alt="" width="32" height="32" /><span>Desvio</span></div><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>Escolhe a aplicação no menu de partilha do teu telemóvel.</p></div>
+        <div class="share-copy"><div class="share-brand" aria-hidden="true"><img src="/brand/desvio-mark.svg" alt="" width="32" height="32" /><span>O Desvio</span></div><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>Escolhe a aplicação no menu de partilha do teu telemóvel.</p></div>
         <div class="share-actions"><button type="button" data-share>Partilhar evento</button></div>
         <p class="share-status" aria-live="polite"></p>
       </section>

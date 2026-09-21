@@ -1,4 +1,5 @@
 const state = { search: "", date: "", price: "", ticketPrice: [], genre: [], area: [], district: [], city: [], type: [], highlight: "", view: "list", page: 1 };
+const siteLocale = window.DESVIO_I18N?.locale || "pt-PT";
 const perPage = 7;
 const list = document.querySelector("#event-list");
 const resultCount = document.querySelector("#result-count");
@@ -99,10 +100,10 @@ const eventType = event => event.type || "Concerto";
 const eventDate = iso => new Date(`${iso}T12:00:00`);
 const dateParts = iso => {
   const date = eventDate(iso);
-  return [String(date.getDate()).padStart(2, "0"), new Intl.DateTimeFormat("pt-PT", { month: "short" }).format(date).replace(".", "")];
+  return [String(date.getDate()).padStart(2, "0"), new Intl.DateTimeFormat(siteLocale, { month: "short" }).format(date).replace(".", "")];
 };
-const prettyDate = iso => new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
-const monthLabel = date => new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(date);
+const prettyDate = iso => new Intl.DateTimeFormat(siteLocale, { day: "numeric", month: "long", year: "numeric" }).format(eventDate(iso));
+const monthLabel = date => new Intl.DateTimeFormat(siteLocale, { month: "long", year: "numeric" }).format(date);
 // Keep the agenda forward-looking. Multi-day events remain visible until
 // their final day, but a finished festival must never keep the calendar in
 // a previous month.

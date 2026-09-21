@@ -18,11 +18,11 @@
     <meta name="twitter:title" content="Agenda de concertos e festivais em Portugal | Desvio" />
     <meta name="twitter:description" content="Encontra concertos, festivais e música ao vivo em Portugal — por cidade, data, género e bilhetes." />
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Desvio","url":"https://odesvio.pt/","inLanguage":"pt-PT","description":"Agenda de concertos, festivais e música ao vivo em Portugal."}</script>
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=3" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=3" />
-    <link rel="shortcut icon" href="/favicon.ico?v=3" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png?v=3" />
-    <link rel="manifest" href="/site.webmanifest?v=3" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=4" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=4" />
+    <link rel="shortcut icon" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png?v=4" />
+    <link rel="manifest" href="/site.webmanifest?v=4" />
     <meta name="apple-mobile-web-app-title" content="Desvio" />
     <meta name="theme-color" content="#193427" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,13 +31,14 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="immersive.css" />
     <link rel="stylesheet" href="midnight.css" />
+    <link rel="stylesheet" href="brand.css?v=4" />
   </head>
   <body>
     <a class="skip-link" href="#agenda">Saltar para a agenda</a>
     <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início"><img class="brand-logo" src="/brand/logo-icon.png" alt="" width="28" height="28" /><span>Desvio</span></a>
+      <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início"><img class="brand-logo" src="/brand/desvio-mark.svg" alt="" width="34" height="34" /><span class="brand-wordmark"><small>O</small> DESVIO</span></a>
       <p>Música em Portugal</p>
-      <button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Completa a agenda <span class="submit-link-arrow" aria-hidden="true">→</span></button>
+      <div class="header-actions"><button class="language-toggle" type="button" data-lang-toggle>EN</button><button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Completa a agenda <span class="submit-link-arrow" aria-hidden="true">→</span></button></div>
     </header>
 
     <main id="top" class="shell">
@@ -212,6 +213,7 @@
         </div>
       </form>
     </dialog>
+    <script src="i18n.js?v=1"></script>
     <script src="events.js"></script>
     <script src="sources.js"></script>
     <script src="app.js"></script>

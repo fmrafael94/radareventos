@@ -1,6 +1,6 @@
 {
-  "name": "Desvio — Menos procura. Mais música.",
-  "short_name": "Desvio",
+  "name": "O Desvio — Menos procura. Mais música.",
+  "short_name": "O Desvio",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -15,7 +15,7 @@
       "purpose": "any maskable"
     }
   ],
-  "theme_color": "#193427",
-  "background_color": "#193427",
+  "theme_color": "#182226",
+  "background_color": "#182226",
   "display": "standalone"
 }

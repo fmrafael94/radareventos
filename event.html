@@ -6,11 +6,11 @@
     <meta name="view-transition" content="same-origin" />
     <title>{{EVENT_TITLE}} — Desvio</title>
     <meta name="description" content="{{EVENT_DESCRIPTION}}" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=3" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=3" />
-    <link rel="shortcut icon" href="/favicon.ico?v=3" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png?v=3" />
-    <link rel="manifest" href="/site.webmanifest?v=3" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=4" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=4" />
+    <link rel="shortcut icon" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png?v=4" />
+    <link rel="manifest" href="/site.webmanifest?v=4" />
     <meta name="apple-mobile-web-app-title" content="Desvio" />
     <meta name="theme-color" content="#193427" />
     <link rel="canonical" href="{{CANONICAL_URL}}" />
@@ -34,13 +34,15 @@
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/midnight.css" />
     <link rel="stylesheet" href="/event.css" />
+    <link rel="stylesheet" href="/brand.css?v=4" />
   </head>
   <body class="event-page">
     <a class="skip-link" href="#event-page">Saltar para o evento</a>
-    <header class="site-header"><a class="brand" href="/" aria-label="Desvio — voltar à agenda"><img class="brand-logo" src="/brand/logo-icon.png" alt="" width="28" height="28" /><span>Desvio</span></a><p>Menos procura. <em>Mais música.</em></p><a class="back-to-agenda" href="/"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="m15 5-10 10M13 15H5V7" /></svg>Voltar à Agenda</a></header>
+    <header class="site-header"><a class="brand" href="/" aria-label="Desvio — voltar à agenda"><img class="brand-logo" src="/brand/desvio-mark.svg" alt="" width="34" height="34" /><span class="brand-wordmark"><small>O</small> DESVIO</span></a><p>Menos procura. <em>Mais música.</em></p><div class="header-actions"><button class="language-toggle" type="button" data-lang-toggle>EN</button><a class="back-to-agenda" href="/"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="m15 5-10 10M13 15H5V7" /></svg>Voltar à Agenda</a></div></header>
     <main class="event-page-shell" id="event-page" aria-live="polite" aria-busy="true"><p class="event-loading"><span aria-hidden="true"></span>A abrir evento…</p></main>
     <dialog id="event-poster-lightbox" class="event-poster-lightbox" aria-label="Cartaz ampliado"><button type="button" data-close-poster aria-label="Fechar cartaz">×</button><img alt="Cartaz oficial ampliado" /></dialog>
-    <footer><a class="brand" href="/"><img class="brand-logo" src="/brand/logo-icon.png" alt="" width="28" height="28" /><span>Desvio</span></a><p>Agenda pública de música em Portugal.</p><nav><a href="/privacidade.html">Privacidade</a><a href="/termos.html">Termos</a><a href="/cookies.html">Cookies</a><a href="/?corrigir={{EVENT_ID}}">Corrigir evento</a></nav></footer>
+    <footer><a class="brand" href="/"><img class="brand-logo" src="/brand/desvio-mark.svg" alt="" width="34" height="34" /><span class="brand-wordmark"><small>O</small> DESVIO</span></a><p>Agenda pública de música em Portugal.</p><nav><a href="/privacidade.html">Privacidade</a><a href="/termos.html">Termos</a><a href="/cookies.html">Cookies</a><a href="/?corrigir={{EVENT_ID}}">Corrigir evento</a></nav></footer>
+    <script src="/i18n.js?v=1"></script>
     <script src="/events.js"></script>
     <script src="/event.js"></script>
     <!-- Cloudflare Web Analytics -->

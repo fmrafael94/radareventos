@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">O Desvio</title>
+  <rect width="128" height="128" rx="27" fill="#182226"/>
+  <g fill="none" stroke="#b7a45a" stroke-linecap="round">
+    <path d="M93 31a45 45 0 1 0 13 31" stroke-width="7"/>
+    <path d="M87 42a33 33 0 1 0 9 23" stroke-width="6"/>
+    <path d="M81 52a21 21 0 1 0 6 15" stroke-width="5"/>
+    <path d="M94 20v25c0 10-6 15-15 19" stroke-width="10"/>
+  </g>
+  <circle cx="64" cy="68" r="13" fill="#b7a45a"/>
+  <circle cx="64" cy="68" r="4.5" fill="#e35e44"/>
+</svg>

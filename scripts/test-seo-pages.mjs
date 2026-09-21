@@ -73,3 +73,22 @@ test("unknown event returns the branded no-store 404 page", async () => {
   assert.match(html, /\/brand\/404\//);
   assert.match(html, /noindex,follow/);
 });
+
+test("English mode localises the complete branded 404 response", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/evento/does-not-exist?lang=en"), { ASSETS: assets }, { waitUntil() {} });
+  const html = await response.text();
+  assert.equal(response.status, 404);
+  assert.match(html, /404 · (No signal|Off track|Tour detour|After the encore|Broken string)/);
+  assert.doesNotMatch(html, /(Sem sinal|Fora da faixa|Desvio na estrada|Depois do encore|Corda partida)/);
+  assert.match(html, /data-lang-toggle/);
+});
+
+test("event pages expose the bilingual controls and English date metadata", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/evento/fat-freddys-drop?lang=en"), { ASSETS: assets }, { waitUntil() {} });
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /data-lang-toggle/);
+  assert.match(html, /src="\/i18n\.js\?v=1"/);
+  assert.match(html, /23 September/);
+  assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
+});
