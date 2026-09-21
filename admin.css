@@ -205,6 +205,22 @@ html .review-controls .status-filters button[aria-pressed="true"]{border-color:#
 }
 .admin-site-header .brand{justify-self:start}
 .admin-site-header .primary-nav{justify-self:center}
+.admin-site-header .primary-nav a{
+  color:rgba(247,245,240,.76);
+  font-weight:700;
+  text-decoration:none;
+}
+.admin-site-header .primary-nav a:hover,
+.admin-site-header .primary-nav a:focus-visible{
+  color:#f7f5f0;
+}
+.admin-site-header .primary-nav a[aria-current="page"]{
+  color:#f7f5f0;
+}
+.admin-site-header .primary-nav a::after{
+  height:2px;
+  background:#b7a45a;
+}
 .admin-header-actions{display:flex;align-items:center;justify-self:end;gap:8px}
 .admin-header-actions button{
   display:inline-flex;

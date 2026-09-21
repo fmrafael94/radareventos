@@ -15,8 +15,9 @@ h1 { min-height:1.05em; max-width:610px; margin:0; display:flex; align-items:fle
 .lede { min-height:1.6em; max-width:580px; margin:28px 0 0; color:var(--muted); font-size:clamp(1.05rem,1.8vw,1.34rem); line-height:1.55; }
 .actions { margin-top:36px; display:flex; flex-wrap:wrap; align-items:center; gap:12px 22px; }
 .actions a { font-weight:700; text-decoration:none; }
-.primary { display:inline-flex; align-items:center; gap:18px; padding:15px 19px; border-radius:999px; background:var(--green); color:#182226; }
-.primary:hover { background:var(--ink); }
+.primary { display:inline-flex; align-items:center; padding:11px 0 9px; border-bottom:1px solid var(--green); color:var(--ink); }
+.primary:hover { border-color:var(--ink); color:var(--green); background:transparent; }
+body.not-found-page .primary:hover { color:var(--green); background:transparent; }
 .secondary { padding:12px 0; border-bottom:1px solid var(--sage); }
 .refresh { margin:24px 0 0; color:#899387; font:.72rem/1.5 "DM Mono",monospace; }
 figure { width:min(100%,520px); aspect-ratio:1; min-height:0; margin:0; justify-self:center; display:grid; place-items:center; }
