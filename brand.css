@@ -167,6 +167,9 @@
 .primary-nav a::after{content:"";position:absolute;right:0;bottom:2px;left:0;height:1px;transform:scaleX(0);background:var(--brand-gold);transition:transform .18s ease}
 .primary-nav a:hover{color:var(--brand-cream)}
 .primary-nav a:hover::after{transform:scaleX(1)}
+.primary-nav a[aria-current="page"]{color:var(--brand-cream)}
+.primary-nav a[aria-current="page"]::after{transform:scaleX(1)}
+.mobile-admin-tab{display:none;color:var(--brand-gold);font:700 10px "DM Mono",monospace;letter-spacing:.05em;text-transform:uppercase}
 
 .home-page .intro{grid-template-columns:minmax(0,1.08fr) minmax(310px,.92fr);gap:clamp(26px,4vw,58px);min-height:470px;padding:clamp(24px,3.8vw,46px)}
 .home-page .intro-copy{justify-content:center}
@@ -211,6 +214,7 @@
 @media(max-width:900px){
   .primary-nav{display:none}
   .home-page .site-header{grid-template-columns:1fr auto}
+  .mobile-admin-tab:not([hidden]){display:inline-flex;align-items:center;min-height:34px}
   .home-page .intro{grid-template-columns:1fr;min-height:0}
   .hero-feature{grid-template-columns:minmax(180px,.8fr) minmax(0,1.2fr);grid-template-rows:auto;align-items:stretch}
   .hero-feature-poster,.hero-feature-poster img{min-height:220px}

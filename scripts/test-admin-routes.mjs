@@ -99,6 +99,10 @@ assert.equal(head.status, 200);
 assert.equal(await head.text(), "");
 assert.equal(head.headers.get("Cache-Control"), "no-store");
 
+const anonymousSession = await fetchRoute("https://odesvio.pt/api/admin/session");
+assert.equal(anonymousSession.status, 401);
+assert.equal(anonymousSession.headers.get("Cache-Control"), "no-store");
+
 const unavailableEmailCode = await fetchRoute("https://odesvio.pt/api/admin/request-code", {
   method: "POST",
   headers: { "CF-Connecting-IP": "192.0.2.1", "Content-Type": "application/json" },
@@ -120,5 +124,9 @@ assert.match(cookie, /HttpOnly; Secure; SameSite=Strict/);
 const authenticated = await fetchRoute("https://odesvio.pt/painel", { headers: { Cookie: cookie.split(";")[0] } });
 assert.equal(authenticated.status, 200);
 assert.equal(await authenticated.text(), "ADMIN_PAGE");
+
+const authenticatedSession = await fetchRoute("https://odesvio.pt/api/admin/session", { headers: { Cookie: cookie.split(";")[0] } });
+assert.equal(authenticatedSession.status, 200);
+assert.deepEqual(await authenticatedSession.json(), { ok: true });
 
 console.log("Admin routing and session checks passed.");

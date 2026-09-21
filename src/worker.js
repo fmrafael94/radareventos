@@ -718,6 +718,11 @@ export default {
     if (pathname === "/api/admin/logout" && request.method === "POST") {
       return secureResponse(new Response(null, { status: 204, headers: { "Cache-Control": "no-store", "Set-Cookie": clearAdminSession() } }));
     }
+    if (pathname === "/api/admin/session" && request.method === "GET") {
+      const session = await requireAdmin(context);
+      if (session.response) return secureResponse(session.response);
+      return secureResponse(Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } }));
+    }
     if (pathname === "/api/admin/feedback" && request.method === "GET") return secureResponse(await getAdminFeedback(context));
     if (pathname === "/api/admin/feedback" && request.method === "PATCH") return secureResponse(await patchAdminFeedback(context));
     if (pathname === "/api/admin/feedback/bulk" && request.method === "POST") return secureResponse(await postAdminFeedbackBulk(context));
