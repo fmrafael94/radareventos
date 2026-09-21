@@ -197,6 +197,19 @@ test("public pages use the approved vinyl icon and current language bundle", asy
   }
 });
 
+test("poster zoom keeps every artwork fully inside the viewport", async () => {
+  const homepageCss = await readFile(new URL("midnight.css", root), "utf8");
+  const eventCss = await readFile(new URL("event.css", root), "utf8");
+  for (const [name, css, selector] of [
+    ["homepage", homepageCss, "poster-lightbox"],
+    ["event page", eventCss, "event-poster-lightbox"]
+  ]) {
+    assert.match(css, new RegExp(`\\.${selector}\\s*\\{[^}]*width:100vw;[^}]*height:100dvh;[^}]*overflow:hidden;`, "s"), `${name} zoom must stay inside the viewport`);
+    assert.match(css, new RegExp(`\\.${selector} img\\s*\\{[^}]*max-width:100%;[^}]*max-height:100%;[^}]*object-fit:contain;`, "s"), `${name} zoom must preserve the complete poster`);
+    assert.match(css, new RegExp(`\\.${selector}\\[open\\]\\s*\\{[^}]*place-items:center;`, "s"), `${name} zoom must remain centred`);
+  }
+});
+
 test("404 mascots use identical transparent square PNG canvases", async () => {
   for (const file of ["amplificador-normalizado.png", "vinil-normalizado.png", "carrinha-normalizada.png", "bateria-normalizada.png", "guitarra-normalizada.png"]) {
     const png = await readFile(new URL(`brand/404/${file}`, root));
