@@ -157,17 +157,43 @@ async function privateAssetPage(request, env, path) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+const notFoundVariants = [
+  { eyebrow: "404 · Sem sinal", heading: "A banda saiu do palco.", body: "Este evento já não está na agenda. O cabo ficou, mas o concerto não.", cta: "Voltar ao alinhamento", image: "/brand/404/amplificador.png", alt: "Amplificador mascote com o cabo desligado" },
+  { eyebrow: "404 · Fora da faixa", heading: "Perdemos o beat.", body: "Este evento saltou da playlist. Vamos pôr outra coisa a tocar.", cta: "Voltar à agenda", image: "/brand/404/vinil.png", alt: "Disco de vinil mascote à procura do beat" },
+  { eyebrow: "404 · Desvio na estrada", heading: "O evento foi de tournée.", body: "Virou na saída errada e já não mora aqui.", cta: "Traçar nova rota", image: "/brand/404/carrinha.png", alt: "Carrinha de tournée mascote num desvio" },
+  { eyebrow: "404 · Depois do encore", heading: "Silêncio no alinhamento.", body: "O palco ficou vazio. A agenda, felizmente, não.", cta: "Ver quem toca a seguir", image: "/brand/404/bateria.png", alt: "Bateria mascote num palco vazio" },
+  { eyebrow: "404 · Corda partida", heading: "Este riff ficou por tocar.", body: "A corda partiu e o evento saiu do alinhamento. Há mais música logo a seguir.", cta: "Afinar nova procura", image: "/brand/404/guitarra.png", alt: "Guitarra mascote com uma corda partida" }
+];
+
+async function notFoundPage(request, env) {
+  try {
+    const template = await assetText(request, env, "/404.html");
+    const variant = notFoundVariants[Math.floor(Math.random() * notFoundVariants.length)];
+    const html = template
+      .replaceAll("{{ERROR_TITLE}}", escapeHtml(variant.heading))
+      .replaceAll("{{ERROR_EYEBROW}}", escapeHtml(variant.eyebrow))
+      .replaceAll("{{ERROR_HEADING}}", escapeHtml(variant.heading))
+      .replaceAll("{{ERROR_BODY}}", escapeHtml(variant.body))
+      .replaceAll("{{ERROR_CTA}}", escapeHtml(variant.cta))
+      .replaceAll("{{ERROR_IMAGE}}", escapeHtml(variant.image))
+      .replaceAll("{{ERROR_ALT}}", escapeHtml(variant.alt));
+    return new Response(html, { status: 404, headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "no-store" } });
+  } catch {
+    return new Response("Evento não encontrado.", { status: 404, headers: { "Content-Type": "text/plain; charset=UTF-8", "Cache-Control": "no-store" } });
+  }
+}
+
 async function eventPage(request, env, id) {
-  if (!/^[a-z0-9-]{1,180}$/i.test(id)) return new Response("Evento não encontrado.", { status: 404 });
+  if (!/^[a-z0-9-]{1,180}$/i.test(id)) return notFoundPage(request, env);
   try {
     const events = await assetText(request, env, "/events.js");
     const patch = await publicEventPatch(env, id);
     const literal = eventLiteral(events, id);
-    if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return new Response("Evento não encontrado.", { status: 404 });
+    if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return notFoundPage(request, env);
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
     const cloudEvent = match ? null : await publishedEvent(env, id);
-    if (!match && !cloudEvent) return new Response("Evento não encontrado.", { status: 404 });
+    if (!match && !cloudEvent) return notFoundPage(request, env);
     const event = match?.[0] || "";
     const stringPatch = (key, fallback = "") => typeof patch[key] === "string" && patch[key].trim() ? patch[key].trim() : fallback;
     const title = stringPatch("title", cloudEvent?.title || eventField(event, "title") || "Evento");
@@ -682,7 +708,12 @@ export default {
     }
     if (pathname === "/api/internal/audit-report" && request.method === "POST") return secureResponse(await postAuditReport(context));
 
-    return secureResponse(await env.ASSETS.fetch(request));
+    const assetResponse = await env.ASSETS.fetch(request);
+    if (assetResponse.status === 404 && ["GET", "HEAD"].includes(request.method)) {
+      const response = await notFoundPage(request, env);
+      return secureResponse(request.method === "HEAD" ? new Response(null, { status: 404, headers: response.headers }) : response);
+    }
+    return secureResponse(assetResponse);
   },
   async scheduled(_controller, env, executionCtx) {
     executionCtx.waitUntil(purgeExpiredPersonalData(env));

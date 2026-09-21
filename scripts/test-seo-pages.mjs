@@ -63,3 +63,13 @@ test("sitemap contains landing pages and event pages", async () => {
   assert.match(xml, /https:\/\/odesvio\.pt\/metal\/portugal/);
   assert.match(xml, /https:\/\/odesvio\.pt\/evento\//);
 });
+
+test("unknown event returns the branded no-store 404 page", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/evento/este-evento-nao-existe"), { ASSETS: assets }, { waitUntil() {} });
+  const html = await response.text();
+  assert.equal(response.status, 404);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.match(html, /404 ·/);
+  assert.match(html, /\/brand\/404\//);
+  assert.match(html, /noindex,follow/);
+});
