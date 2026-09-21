@@ -73,8 +73,8 @@ test("unknown event returns the branded no-store 404 page", async () => {
   assert.match(html, /<p class="eyebrow">404<\/p>/);
   assert.match(html, /\/brand\/404\//);
   assert.match(html, /\/brand\/logo-icon\.png\?v=2/);
-  assert.match(html, /src="\/404\.js\?v=2"/);
-  assert.match(html, /href="\/404\.css\?v=6"/);
+  assert.match(html, /src="\/404\.js\?v=3"/);
+  assert.match(html, /href="\/404\.css\?v=7"/);
   assert.match(html, /\/brand\/404\/[a-z]+-normalizad[oa]\.png\?v=1/);
   assert.match(html, /noindex,follow/);
 });

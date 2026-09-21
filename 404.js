@@ -4,7 +4,7 @@
     amplificador: {
       heading: "Puxaram-lhe a ficha.",
       body: "Este evento ficou sem corrente.",
-      cta: "Voltar ao alinhamento",
+      cta: "Voltar à agenda",
       image: "/brand/404/amplificador-normalizado.png?v=1",
       alt: "Amplificador mascote com o cabo desligado"
     },
@@ -18,21 +18,21 @@
     carrinha: {
       heading: "A tour perdeu-se.",
       body: "Este evento fez um desvio a mais.",
-      cta: "Traçar nova rota",
+      cta: "Voltar à agenda",
       image: "/brand/404/carrinha-normalizada.png?v=1",
       alt: "Carrinha de tour mascote num desvio"
     },
     bateria: {
       heading: "O beat foi ao bar.",
       body: "E levou este evento com ele.",
-      cta: "Ver quem toca a seguir",
+      cta: "Voltar à agenda",
       image: "/brand/404/bateria-normalizada.png?v=1",
       alt: "Bateria mascote num palco vazio"
     },
     guitarra: {
       heading: "A corda deu o berro.",
       body: "Este evento saiu do tom.",
-      cta: "Afinar nova procura",
+      cta: "Voltar à agenda",
       image: "/brand/404/guitarra-normalizada.png?v=1",
       alt: "Guitarra mascote com uma corda partida"
     }
