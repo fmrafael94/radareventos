@@ -1,5 +1,14 @@
 # Editorial carousel mascots
 
+The live weekly carousel renderer uses one consistent mascot family per week:
+the eight `vinyl/pose-*.png` variations for 28 September–4 October and the
+eight `guitar/pose-*.png` variations for 5–11 October. Each slide selects a
+different pose and placement so the character presents or points towards that
+slide's information rather than repeating a static cutout.
+
+The artist-specific files in this directory are retained as source material for
+future editorial formats, but are no longer used by `social/weekly/render.mjs`.
+
 These assets are exclusively for Instagram/editorial carousels. The 404 mascots
 and their production files are a separate, immutable set and must not be
 overwritten by this workflow.
