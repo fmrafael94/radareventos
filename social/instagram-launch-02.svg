@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-labelledby="title desc">
+  <title id="title">O Desvio — Tudo o que acontece em palco</title>
+  <desc id="desc">Segundo slide do carrossel de apresentação do O Desvio.</desc>
+  <rect width="1080" height="1350" fill="#182226"/>
+
+  <g fill="none" stroke="#b7a45a" stroke-width="3">
+    <circle cx="1000" cy="1140" r="360" opacity=".12"/>
+    <circle cx="1000" cy="1140" r="250" opacity=".2"/>
+    <circle cx="1000" cy="1140" r="140" opacity=".34"/>
+  </g>
+  <circle cx="1000" cy="1140" r="17" fill="#e35e44"/>
+
+  <g transform="translate(76 68)">
+    <rect width="102" height="102" rx="23" fill="#10191c"/>
+    <g fill="none" stroke="#b7a45a" stroke-linecap="round">
+      <path d="M74 25a36 36 0 1 0 11 27" stroke-width="5.8"/>
+      <path d="M69 34a27 27 0 1 0 8 20" stroke-width="4.8"/>
+      <path d="M64 43a18 18 0 1 0 5 13" stroke-width="4"/>
+      <path d="M75 16v21c0 8-5 13-12 16" stroke-width="8"/>
+    </g>
+    <circle cx="51" cy="56" r="10" fill="#b7a45a"/>
+    <circle cx="51" cy="56" r="3.8" fill="#e35e44"/>
+  </g>
+  <text x="198" y="130" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" letter-spacing="-1">O DESVIO</text>
+
+  <text x="80" y="295" fill="#b7a45a" font-family="Courier New, monospace" font-size="22" font-weight="700" letter-spacing="4">TUDO O QUE ACONTECE EM PALCO</text>
+  <text x="76" y="515" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="116" font-weight="800" letter-spacing="-6">Não é só</text>
+  <text x="76" y="635" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="116" font-weight="800" letter-spacing="-6">concertos.</text>
+
+  <line x1="80" y1="745" x2="1000" y2="745" stroke="#f7f5f0" stroke-opacity=".18"/>
+  <text x="80" y="840" fill="#f7f5f0" fill-opacity=".76" font-family="Arial, Helvetica, sans-serif" font-size="39">Festivais. DJ sets. Fado.</text>
+  <text x="80" y="900" fill="#f7f5f0" fill-opacity=".76" font-family="Arial, Helvetica, sans-serif" font-size="39">Ópera. Recitais. Musicais.</text>
+  <text x="80" y="960" fill="#f7f5f0" fill-opacity=".76" font-family="Arial, Helvetica, sans-serif" font-size="39">E tudo o resto.</text>
+
+  <text x="80" y="1235" fill="#b7a45a" font-family="Courier New, monospace" font-size="24" font-weight="700" letter-spacing="3">UMA AGENDA. TODO O PAÍS.</text>
+  <text x="1000" y="1285" text-anchor="end" fill="#f7f5f0" fill-opacity=".45" font-family="Courier New, monospace" font-size="20">02 / 05</text>
+</svg>

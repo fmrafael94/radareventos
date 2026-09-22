@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-labelledby="title desc">
+  <title id="title">O Desvio — Menos procura. Mais música.</title>
+  <desc id="desc">Apresentação da agenda independente de música ao vivo em Portugal.</desc>
+
+  <rect width="1080" height="1350" fill="#182226"/>
+
+  <g fill="none" stroke="#b7a45a" stroke-width="3">
+    <circle cx="1020" cy="185" r="360" opacity=".12"/>
+    <circle cx="1020" cy="185" r="250" opacity=".2"/>
+    <circle cx="1020" cy="185" r="140" opacity=".34"/>
+  </g>
+  <circle cx="1020" cy="185" r="17" fill="#e35e44"/>
+
+  <g transform="translate(76 68)">
+    <rect width="102" height="102" rx="23" fill="#10191c"/>
+    <g fill="none" stroke="#b7a45a" stroke-linecap="round">
+      <path d="M74 25a36 36 0 1 0 11 27" stroke-width="5.8"/>
+      <path d="M69 34a27 27 0 1 0 8 20" stroke-width="4.8"/>
+      <path d="M64 43a18 18 0 1 0 5 13" stroke-width="4"/>
+      <path d="M75 16v21c0 8-5 13-12 16" stroke-width="8"/>
+    </g>
+    <circle cx="51" cy="56" r="10" fill="#b7a45a"/>
+    <circle cx="51" cy="56" r="3.8" fill="#e35e44"/>
+  </g>
+
+  <text x="198" y="130" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" letter-spacing="-1">O DESVIO</text>
+  <text x="80" y="265" fill="#b7a45a" font-family="Courier New, monospace" font-size="22" font-weight="700" letter-spacing="4">A AGENDA DE MÚSICA EM PORTUGAL</text>
+
+  <text x="76" y="550" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="126" font-weight="800" letter-spacing="-7">Menos procura.</text>
+  <text x="76" y="682" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="126" font-weight="800" letter-spacing="-7">Mais música.</text>
+
+  <line x1="80" y1="795" x2="1000" y2="795" stroke="#f7f5f0" stroke-opacity=".18"/>
+  <text x="80" y="878" fill="#f7f5f0" fill-opacity=".72" font-family="Arial, Helvetica, sans-serif" font-size="36">Concertos, festivais e tudo</text>
+  <text x="80" y="928" fill="#f7f5f0" fill-opacity=".72" font-family="Arial, Helvetica, sans-serif" font-size="36">o que acontece em palco.</text>
+
+  <g transform="translate(80 1126)">
+    <rect width="920" height="126" rx="63" fill="#b7a45a"/>
+    <text x="50" y="80" fill="#182226" font-family="Arial, Helvetica, sans-serif" font-size="35" font-weight="800" letter-spacing="1">ODESVIO.PT</text>
+    <path d="M826 63h38m-17-17 17 17-17 17" fill="none" stroke="#182226" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
