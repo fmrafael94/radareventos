@@ -24,7 +24,7 @@ window.SOURCE_GROUPS = [
     ["Xceed","Noites e clubes","https://xceed.me/"], ["Eventbrite Portugal","Eventos locais","https://www.eventbrite.pt/"], ["See Tickets","Bilheteira","https://www.seetickets.com/pt"],
     ["Live Nation Portugal","Promotor","https://www.livenation.pt/"], ["Last Tour Portugal","Promotor","https://lasttour.org/pt-pt/"],
     ["Música no Coração","Promotor","https://www.musicanocoracao.pt/"], ["Sons em Trânsito","Promotor","https://sonsemtransito.com/"], ["UAU","Promotor","https://www.uau.pt/"],
-    ["Hell Xis Agency","Promotor underground","https://www.instagram.com/hellxis/"], ["Prime Artists","Promotor","https://www.primeartists.eu/"], ["Born to Resist Events & Booking","Promotor underground","https://www.instagram.com/born_to_resist_events_booking/"],
+    ["Hell Xis Agency","Promotor underground","https://www.instagram.com/hellxis/"], ["Prime Artists","Promotor","https://www.primeartists.eu/"], ["Born to Resist Events & Booking","Promotor underground · Instagram oficial","https://www.instagram.com/born_to_resist_events_booking/"],
     ["Milk Records","Loja, sala e promotora em Santarém","https://www.milkrecords.co/pages/contact"], ["Black Box Fest","Festival de metal em Guimarães","https://www.instagram.com/blackboxfest/"], ["Purgatory Metal Fest / Purga Productions","Festival underground em Almada","https://www.instagram.com/purgatorymetalfest/"], ["Butchery At Christmas Time / Neverlate","Festival death/grind na Covilhã","https://www.instagram.com/butcheryfestival/"]
   ]},
   { title:"Salas e agendas locais", sources:[

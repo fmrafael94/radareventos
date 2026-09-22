@@ -1032,7 +1032,7 @@ function renderHeroFeature(event) {
   if (!event) {
     heroFeature.href = "#featured-events";
     heroFeature.setAttribute("aria-label", "Explorar os próximos eventos");
-    heroFeature.innerHTML = '<p class="hero-feature-kicker">Em destaque</p><p class="hero-feature-loading">Ainda estamos a confirmar o evento em destaque.</p><span class="hero-feature-link">Explorar os próximos eventos <span aria-hidden="true">→</span></span>';
+    heroFeature.innerHTML = '<p class="hero-feature-kicker">Em destaque</p><p class="hero-feature-loading">Ainda estamos a confirmar o evento em destaque.</p><span class="hero-feature-link">Explorar os próximos eventos</span>';
     return;
   }
   const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
@@ -1044,7 +1044,7 @@ function renderHeroFeature(event) {
     </span>
     <div class="hero-feature-copy">
       <div><p class="hero-feature-kicker">Em destaque</p><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><h2 data-i18n-event-title>${escapeHtml(event.title)}</h2><p class="hero-feature-meta">${escapeHtml(event.city)} · ${escapeHtml(event.venue)} · ${escapeHtml(eventType(event))}</p></div>
-      <span class="hero-feature-link">Ver evento <span aria-hidden="true">↗</span></span>
+      <span class="hero-feature-link">Ver evento</span>
     </div>`;
   heroFeature.querySelector("img")?.addEventListener("error", errorEvent => {
     const poster = errorEvent.currentTarget.closest(".hero-feature-poster");

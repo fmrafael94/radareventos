@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-labelledby="title desc">
+  <title id="title">O Desvio — Pesquisa à tua maneira</title>
+  <desc id="desc">Terceiro slide do carrossel de apresentação do O Desvio.</desc>
+  <rect width="1080" height="1350" fill="#182226"/>
+
+  <g transform="translate(76 68)">
+    <rect width="102" height="102" rx="23" fill="#10191c"/>
+    <g fill="none" stroke="#b7a45a" stroke-linecap="round">
+      <path d="M74 25a36 36 0 1 0 11 27" stroke-width="5.8"/>
+      <path d="M69 34a27 27 0 1 0 8 20" stroke-width="4.8"/>
+      <path d="M64 43a18 18 0 1 0 5 13" stroke-width="4"/>
+      <path d="M75 16v21c0 8-5 13-12 16" stroke-width="8"/>
+    </g>
+    <circle cx="51" cy="56" r="10" fill="#b7a45a"/>
+    <circle cx="51" cy="56" r="3.8" fill="#e35e44"/>
+  </g>
+  <text x="198" y="130" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" letter-spacing="-1">O DESVIO</text>
+
+  <text x="80" y="295" fill="#b7a45a" font-family="Courier New, monospace" font-size="22" font-weight="700" letter-spacing="4">PESQUISA À TUA MANEIRA</text>
+  <text x="76" y="500" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="108" font-weight="800" letter-spacing="-6">Combina.</text>
+  <text x="76" y="610" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="108" font-weight="800" letter-spacing="-6">Filtra.</text>
+  <text x="76" y="720" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="108" font-weight="800" letter-spacing="-6">Encontra.</text>
+
+  <g font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">
+    <rect x="80" y="825" width="245" height="72" rx="36" fill="none" stroke="#b7a45a" stroke-width="2"/>
+    <text x="202" y="871" text-anchor="middle" fill="#f7f5f0">ARTISTA</text>
+    <rect x="343" y="825" width="245" height="72" rx="36" fill="none" stroke="#b7a45a" stroke-width="2"/>
+    <text x="465" y="871" text-anchor="middle" fill="#f7f5f0">SALA</text>
+    <rect x="606" y="825" width="394" height="72" rx="36" fill="none" stroke="#b7a45a" stroke-width="2"/>
+    <text x="803" y="871" text-anchor="middle" fill="#f7f5f0">DATA E HORA</text>
+    <rect x="80" y="919" width="285" height="72" rx="36" fill="none" stroke="#b7a45a" stroke-width="2"/>
+    <text x="222" y="965" text-anchor="middle" fill="#f7f5f0">GÉNERO</text>
+    <rect x="383" y="919" width="280" height="72" rx="36" fill="none" stroke="#b7a45a" stroke-width="2"/>
+    <text x="523" y="965" text-anchor="middle" fill="#f7f5f0">CIDADE</text>
+    <rect x="681" y="919" width="319" height="72" rx="36" fill="none" stroke="#b7a45a" stroke-width="2"/>
+    <text x="840" y="965" text-anchor="middle" fill="#f7f5f0">PREÇO</text>
+  </g>
+
+  <text x="80" y="1130" fill="#f7f5f0" fill-opacity=".72" font-family="Arial, Helvetica, sans-serif" font-size="34">Cruza os filtros que quiseres.</text>
+  <text x="80" y="1180" fill="#f7f5f0" fill-opacity=".72" font-family="Arial, Helvetica, sans-serif" font-size="34">Nós tratamos do resto.</text>
+  <text x="1000" y="1285" text-anchor="end" fill="#f7f5f0" fill-opacity=".45" font-family="Courier New, monospace" font-size="20">03 / 05</text>
+</svg>
