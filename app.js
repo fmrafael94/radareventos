@@ -32,8 +32,7 @@ const nearbyPrevious = document.querySelector("#nearby-previous");
 const nearbyNext = document.querySelector("#nearby-next");
 const featuredRail = document.querySelector("#featured-rail");
 const heroFeature = document.querySelector("#hero-feature");
-const heroSearch = document.querySelector("#hero-search");
-const heroSearchInput = document.querySelector("#hero-search-input");
+const heroHighlightId = "reign-fury-hardcore-fest-2026";
 const adminTabs = [...document.querySelectorAll("[data-admin-tab]")];
 let featuredAutoscroll;
 let featuredRefreshTimer;
@@ -1002,7 +1001,8 @@ function renderFeatured() {
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 4);
-  renderHeroFeature(featured[0]);
+  const editorialHighlight = EVENTS.find(event => event.id === heroHighlightId && isMainAgendaEvent(event) && isCurrentOrUpcoming(event, today) && event.availability !== "Cancelado");
+  renderHeroFeature(editorialHighlight || featured[0]);
   featuredRail.innerHTML = featured.length ? featured.map((event, index) => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     // On a phone the first two cards are already visible below the hero. Do
@@ -1030,16 +1030,21 @@ function renderFeatured() {
 function renderHeroFeature(event) {
   if (!heroFeature) return;
   if (!event) {
-    heroFeature.innerHTML = '<p class="hero-feature-kicker">A seguir</p><p class="hero-feature-loading">Ainda estamos a confirmar o próximo evento.</p><a class="hero-feature-link" href="#agenda">Explorar a agenda <span aria-hidden="true">→</span></a>';
+    heroFeature.href = "#featured-events";
+    heroFeature.setAttribute("aria-label", "Explorar os próximos eventos");
+    heroFeature.innerHTML = '<p class="hero-feature-kicker">Em destaque</p><p class="hero-feature-loading">Ainda estamos a confirmar o evento em destaque.</p><span class="hero-feature-link">Explorar os próximos eventos <span aria-hidden="true">→</span></span>';
     return;
   }
   const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
-  heroFeature.innerHTML = `<a class="hero-feature-poster${posterPresentationClass(event)}" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
+  heroFeature.href = eventUrl(event);
+  heroFeature.dataset.eventSource = "highlight";
+  heroFeature.setAttribute("aria-label", `Abrir ${event.title}`);
+  heroFeature.innerHTML = `<span class="hero-feature-poster${posterPresentationClass(event)}">
       <img src="${escapeHtml(posterUrl(event))}" alt="Cartaz oficial de ${escapeHtml(event.title)}" loading="eager" fetchpriority="high" decoding="async" />
-    </a>
+    </span>
     <div class="hero-feature-copy">
-      <div><p class="hero-feature-kicker">A seguir em ${escapeHtml(event.city)}</p><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><h2 data-i18n-event-title>${escapeHtml(event.title)}</h2><p class="hero-feature-meta">${escapeHtml(event.venue)} · ${escapeHtml(eventType(event))}</p></div>
-      <a class="hero-feature-link" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">Ver evento <span aria-hidden="true">↗</span></a>
+      <div><p class="hero-feature-kicker">Em destaque</p><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><h2 data-i18n-event-title>${escapeHtml(event.title)}</h2><p class="hero-feature-meta">${escapeHtml(event.city)} · ${escapeHtml(event.venue)} · ${escapeHtml(eventType(event))}</p></div>
+      <span class="hero-feature-link">Ver evento <span aria-hidden="true">↗</span></span>
     </div>`;
   heroFeature.querySelector("img")?.addEventListener("error", errorEvent => {
     const poster = errorEvent.currentTarget.closest(".hero-feature-poster");
@@ -1181,7 +1186,6 @@ function updateFilter(key, value) {
 function resetAgendaSelection() {
   Object.assign(state, { search: "", date: "", price: "", ticketPrice: [], genre: [], area: [], district: [], city: [], type: [], highlight: "", page: 1 });
   document.querySelector("#search").value = "";
-  if (heroSearchInput) heroSearchInput.value = "";
   dateSelect.value = "";
   priceSelect.value = "";
   document.querySelectorAll("[data-quick-pick]").forEach(button => button.setAttribute("aria-pressed", "false"));
@@ -1205,16 +1209,6 @@ document.querySelector("#search").addEventListener("input", event => {
     const query = String(event.target.value || "").trim();
     if (query.length >= 2) trackInteraction("search", { query, result_count: filteredEvents().length });
   }, 700);
-});
-heroSearch?.addEventListener("submit", event => {
-  event.preventDefault();
-  const query = String(heroSearchInput?.value || "").trim();
-  const agendaSearch = document.querySelector("#search");
-  agendaSearch.value = query;
-  updateFilter("search", query);
-  if (query.length >= 2) trackInteraction("search", { query, result_count: filteredEvents().length, source: "hero" });
-  document.querySelector("#agenda")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
-  agendaSearch.focus({ preventScroll:true });
 });
 featuredRail.addEventListener("click", event => {
   if (event.target.closest(".featured-copy a")) return;
@@ -1287,15 +1281,11 @@ function requestNearby() {
 nearbyButton.addEventListener("click", requestNearby);
 previousPage.addEventListener("click", () => { state.page -= 1; render(); });
 nextPage.addEventListener("click", () => { state.page += 1; render(); });
-agendaEmpty.querySelector("button").addEventListener("click", () => {
-  resetAgendaSelection();
-  render();
-});
 document.addEventListener("click", event => {
   const instagramLink = event.target.closest("[data-instagram-link]");
   if (instagramLink) trackInteraction("instagram_open", { placement: instagramLink.dataset.instagramLink || "unknown" });
   const eventLink = event.target.closest('a[href^="/evento/"]');
-  if (eventLink) trackInteraction("event_open", { event_id: decodeURIComponent(eventLink.pathname.split("/").pop() || ""), source: "agenda" });
+  if (eventLink) trackInteraction("event_open", { event_id: decodeURIComponent(eventLink.pathname.split("/").pop() || ""), source: eventLink.dataset.eventSource || "agenda" });
   const dayTab = event.target.closest("[data-festival-day]");
   if (dayTab) {
     const programme = dayTab.closest(".festival-program");

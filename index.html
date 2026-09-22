@@ -47,20 +47,11 @@
           <p class="kicker">A agenda de música em Portugal</p>
           <h1 id="home-title">Menos procura.<br /><em>Mais música.</em></h1>
           <p class="intro-description">Concertos, festivais e underground. Todo o país, numa só agenda.</p>
-          <form id="hero-search" class="hero-search" role="search">
-            <label for="hero-search-input">Procurar na agenda</label>
-            <div><input id="hero-search-input" type="search" placeholder="Artista, sala ou cidade" autocomplete="off" /><button type="submit">Pesquisar <span aria-hidden="true">→</span></button></div>
-          </form>
-          <nav class="hero-shortcuts" aria-label="Atalhos rápidos da agenda">
-            <button type="button" data-quick-pick="today">Hoje</button>
-            <button type="button" data-quick-pick="weekend">Este fim de semana</button>
-            <button type="button" data-quick-pick="free">Entrada livre</button>
-          </nav>
         </div>
-        <aside id="hero-feature" class="hero-feature" aria-live="polite" aria-label="Próximo evento em destaque">
-          <p class="hero-feature-kicker">A seguir</p>
-          <p class="hero-feature-loading">A confirmar o próximo evento…</p>
-        </aside>
+        <a id="hero-feature" class="hero-feature" href="/evento/reign-fury-hardcore-fest-2026" aria-live="polite" aria-label="Abrir Reign Of Fury Fest 2026">
+          <p class="hero-feature-kicker">Em destaque</p>
+          <p class="hero-feature-loading">A confirmar o evento em destaque…</p>
+        </a>
       </section>
 
       <section id="featured-events" class="featured-events" aria-labelledby="featured-title">
@@ -75,18 +66,11 @@
         <div id="featured-rail" class="featured-rail" aria-live="polite"></div>
       </section>
 
-      <section class="instagram-callout" aria-labelledby="instagram-title">
-        <div class="instagram-callout-copy">
-          <p class="kicker">No Instagram</p>
-          <h2 id="instagram-title">A agenda também passa por aqui.</h2>
-          <p>Novos anúncios, escolhas da semana e concertos que merecem um desvio — num formato fácil de guardar e partilhar.</p>
-          <a href="https://www.instagram.com/odesvio.pt/" target="_blank" rel="noopener" data-instagram-link="homepage">
-            <span>Seguir @odesvio.pt</span><span aria-hidden="true">↗</span>
-          </a>
-        </div>
+      <section class="instagram-callout" aria-label="Instagram do Desvio">
+        <p>Segue-nos no Instagram</p>
         <a class="instagram-callout-profile" href="https://www.instagram.com/odesvio.pt/" target="_blank" rel="noopener" data-instagram-link="homepage-profile" aria-label="Abrir o Instagram do Desvio, @odesvio.pt">
-          <img src="/brand/desvio-instagram-avatar.png?v=1" alt="" width="128" height="128" />
-          <span><strong>@odesvio.pt</strong><small>Música para guardar.</small></span>
+          <img src="/brand/desvio-instagram-avatar.png?v=1" alt="" width="56" height="56" />
+          <strong>@odesvio.pt</strong>
         </a>
       </section>
 
@@ -133,7 +117,7 @@
               <div id="city-menu" class="multi-select-menu" role="group" aria-label="Selecionar concelhos e cidades"></div>
             </div>
           </div>
-          <div class="filter-panel-actions"><button id="clear-filters" class="clear-button" type="button">Limpar seleção</button></div>
+          <div class="filter-panel-actions"><button id="clear-filters" class="clear-button" type="button">Limpar filtros</button></div>
           <div class="quick-picks" aria-label="Destaques rápidos">
             <span>Destaques</span>
             <button type="button" data-quick-pick="week">Próximos 7 dias</button>
@@ -149,7 +133,7 @@
         <div class="agenda-view-switch" role="group" aria-label="Modo de visualização"><button type="button" data-agenda-view="list" aria-pressed="true">Lista</button><button type="button" data-agenda-view="calendar" aria-pressed="false">Calendário</button></div>
         <div class="event-list-heading" aria-hidden="true"><span>Data</span><span>Evento</span><span>Formato</span><span>Bilhetes</span><span>Detalhes</span></div>
         <div id="event-list" class="event-list"></div>
-        <div id="agenda-empty" class="empty-state" hidden><p>Não encontrámos eventos com esta combinação.</p><button type="button">Limpar filtros</button></div>
+        <p id="agenda-empty" class="agenda-empty-note" role="status" hidden>Não encontrámos eventos com esta combinação.</p>
         <section id="calendar-view" class="calendar-view" aria-label="Calendário de eventos" hidden><header class="calendar-heading"><button id="calendar-previous" type="button" aria-label="Mês anterior">←</button><h3 id="calendar-label"></h3><button id="calendar-next" type="button" aria-label="Mês seguinte">→</button></header><div id="calendar-grid" class="calendar-grid"></div></section>
         <nav id="pagination" class="pagination" aria-label="Paginação de eventos" hidden>
           <button id="previous-page" type="button">← Anterior</button>

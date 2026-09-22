@@ -143,6 +143,17 @@ test("event pages expose the bilingual controls and English date metadata", asyn
   assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
 });
 
+test("WEB event route stays bound to its exact catalogue record", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/evento/web-pitch-black-equaleft"), { ASSETS: assets }, { waitUntil() {} });
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /<title>WEB \+ Pitch Black \+ Living Tales — Desvio<\/title>/);
+  assert.match(html, /"startDate":"2027-02-27"/);
+  assert.match(html, /"name":"Auditório CCOP"/);
+  assert.doesNotMatch(html, /Heavy Duty Fest/);
+  assert.doesNotMatch(html, /Equaleft/);
+});
+
 test("English mode translates event genres and descriptive titles without changing artist names", async () => {
   const context = {
     window: {},
@@ -211,6 +222,26 @@ test("public pages use the approved vinyl icon and current language bundle", asy
     assert.doesNotMatch(html, /desvio-mark\.svg/, `${file} still uses the simplified mark`);
     assert.match(html, /i18n\.js\?v=8/, `${file} must load the current language bundle`);
   }
+});
+
+test("homepage hero is informational and opens the editorial highlight", async () => {
+  const html = await readFile(new URL("index.html", root), "utf8");
+  const script = await readFile(new URL("app.js", root), "utf8");
+  const translations = await readFile(new URL("i18n.js", root), "utf8");
+  assert.doesNotMatch(html, /id="hero-search"|class="hero-shortcuts"/, "the informational hero must not contain search controls");
+  assert.match(html, /<a id="hero-feature"[^>]*href="\/evento\/reign-fury-hardcore-fest-2026"/, "the complete highlight must be a direct event link");
+  assert.match(script, /heroHighlightId = "reign-fury-hardcore-fest-2026"/, "Reign of Fury must be the current editorial highlight");
+  assert.match(script, /heroFeature\.href = eventUrl\(event\)/, "the complete rendered card must keep the event destination");
+  assert.match(translations, /"Em destaque":"Featured"/, "the new label must be translated in English");
+});
+
+test("clear filters only lives inside the filter panel", async () => {
+  const html = await readFile(new URL("index.html", root), "utf8");
+  const script = await readFile(new URL("app.js", root), "utf8");
+  assert.equal((html.match(/>Limpar filtros</g) || []).length, 1, "there must be a single clear-filters action");
+  assert.match(html, /<div id="filter-panel"[\s\S]*?<button id="clear-filters"[^>]*>Limpar filtros<\/button>[\s\S]*?<\/div>\s*<\/section>/, "clear filters must stay inside the filter panel");
+  assert.match(html, /<p id="agenda-empty" class="agenda-empty-note"[^>]*>Não encontrámos eventos com esta combinação\.<\/p>/, "the no-results feedback must be a quiet status line");
+  assert.doesNotMatch(script, /agendaEmpty\.querySelector\("button"\)/, "the removed standalone action must not keep a listener");
 });
 
 test("poster zoom keeps every artwork fully inside the viewport", async () => {
