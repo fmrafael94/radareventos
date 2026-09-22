@@ -1,5 +1,6 @@
 # Infrastructure and project-only files must never be served as public assets.
 .wrangler/
+.git
 .git/
 .github/
 .agents/
