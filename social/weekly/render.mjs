@@ -38,21 +38,10 @@ const logo = (dark = true, mark = c.gold) => `
   </g>`;
 
 const imageData = new Map();
-function mascot(kind, pose, x, y, width, rotate = 0) {
+function mascot(kind, pose, x, y, width, rotate = 0, flip = false) {
   const key = `${kind}/${String(pose).padStart(2, "0")}`;
   if (!imageData.has(key)) {
     const file = path.join(mascotRoot, kind, `pose-${String(pose).padStart(2, "0")}.png`);
-    imageData.set(key, fs.readFileSync(file).toString("base64"));
-  }
-  const cx = x + width / 2;
-  const cy = y + width / 2;
-  return `<image href="data:image/png;base64,${imageData.get(key)}" x="${x}" y="${y}" width="${width}" height="${width}" preserveAspectRatio="xMidYMid meet" transform="rotate(${rotate} ${cx} ${cy})"/>`;
-}
-
-function editorialMascot(asset, x, y, width, rotate = 0, flip = false) {
-  const key = `editorial/${asset}`;
-  if (!imageData.has(key)) {
-    const file = path.join(mascotRoot, "editorial", asset);
     imageData.set(key, fs.readFileSync(file).toString("base64"));
   }
   if (flip) {
@@ -87,7 +76,7 @@ function eventSlide(week, slide, number, total) {
       ${titleBlock(slide.title, { dark, x: textX, y: slide.titleY, fontSize: slide.fontSize, lineHeight: slide.lineHeight })}
       <text class="body" x="${textX + 2}" y="${metaY}" fill="${dark ? c.mutedDark : c.mutedLight}" font-size="31">${slide.venue}</text>
       <text class="mono" x="${textX + 2}" y="${metaY + 70}" fill="${dark ? c.coral : c.ink}" font-size="20">${slide.genres}</text>
-      ${editorialMascot(slide.asset, slide.x, slide.y, slide.size, slide.rotate || 0, slide.flip || false)}
+      ${mascot(week.mascot, slide.pose, slide.x, slide.y, slide.size, slide.rotate || 0, slide.flip || false)}
       ${footer(dark, number, total)}
     `,
   };
@@ -112,7 +101,7 @@ function tourSlide(week, slide, number, total) {
       <text class="body" x="630" y="932" fill="${c.mutedLight}" font-size="22">22h00 · c/ Fear The Lord</text>
       <text class="body" x="630" y="968" fill="${c.mutedLight}" font-size="22">+ Lost Grave</text>
       <text class="mono" x="630" y="1038" fill="${c.ink}" font-size="20">HARDCORE · IBERIA TOUR</text>
-      ${editorialMascot(slide.asset, -20, 570, 610, 0, true)}
+      ${mascot(week.mascot, slide.pose, 48, 610, 510, -2, true)}
       ${footer(false, number, total)}
     `,
   };
@@ -123,34 +112,30 @@ const weeks = [
     dir: "2026-09-28_2026-10-04",
     prefix: "odesvio-agenda-28set-04out",
     mascot: "vinyl",
-    coverAsset: "vinyl-cover.png",
-    recapAsset: "vinyl-recap.png",
     range: "28 SETEMBRO A 4 OUTUBRO",
     coverNote: "Seis destaques. Muitas mais escolhas na agenda.",
     slides: [
-      { background: c.cream, eyebrow: "28 SET · PORTO", title: ["Placebo"], titleY: 390, fontSize: 108, lineHeight: 96, venue: "Super Bock Arena · 20h00", genres: "ROCK · ALTERNATIVO", asset: "placebo.png", x: 392, y: 500, size: 650, rotate: 0 },
-      { background: c.gold, eyebrow: "30 SET · LISBOA", title: ["Blood Red", "Shoes"], textX: 560, titleY: 360, fontSize: 80, lineHeight: 78, venue: "República da Música · 20h00", genres: "ROCK · ALTERNATIVO", asset: "blood-red-shoes.png", x: 26, y: 520, size: 670, rotate: 0, flip: true },
-      { background: c.ink, eyebrow: "1 A 4 OUT · BARREIRO", title: ["OUT.FEST"], titleY: 390, fontSize: 104, lineHeight: 92, venue: "Vários espaços · programa online", genres: "EXPERIMENTAL · ELETRÓNICA · JAZZ", asset: "out-fest.png", x: 388, y: 500, size: 660, rotate: 0 },
-      { background: c.cream, eyebrow: "2 A 4 OUT · FARO", title: ["Faro", "Alternativo"], textX: 520, titleY: 350, fontSize: 76, lineHeight: 76, venue: "Passeio Ribeirinho · portas 20h30", genres: "METAL · ROCK · HARDCORE · PUNK", asset: "faro-alternativo.png", x: 30, y: 515, size: 650, rotate: 0, flip: true },
-      { background: c.gold, eyebrow: "3 OUT · PAREDES", title: ["MXGPU"], titleY: 390, fontSize: 112, lineHeight: 96, venue: "Centro Cultural de Paredes · 21h30", genres: "ELETRÓNICA · DANCE", asset: "mxgpu.png", x: 400, y: 505, size: 650, rotate: 0 },
-      { background: c.ink, eyebrow: "4 OUT · LISBOA", title: ["Evanescence"], textX: 475, titleY: 390, fontSize: 70, lineHeight: 78, venue: "MEO Arena · 20h00", genres: "ROCK · METAL", asset: "evanescence.png", x: 28, y: 505, size: 670, rotate: 0, flip: true },
+      { background: c.cream, eyebrow: "28 SET · PORTO", title: ["Placebo"], titleY: 390, fontSize: 108, lineHeight: 96, venue: "Super Bock Arena · 20h00", genres: "ROCK · ALTERNATIVO", pose: 1, x: 410, y: 505, size: 635, rotate: 1 },
+      { background: c.gold, eyebrow: "30 SET · LISBOA", title: ["Blood Red", "Shoes"], textX: 560, titleY: 360, fontSize: 80, lineHeight: 78, venue: "República da Música · 20h00", genres: "ROCK · ALTERNATIVO", pose: 7, x: 16, y: 500, size: 675, rotate: -2, flip: true },
+      { background: c.ink, eyebrow: "1 A 4 OUT · BARREIRO", title: ["OUT.FEST"], titleY: 390, fontSize: 104, lineHeight: 92, venue: "Vários espaços · programa online", genres: "EXPERIMENTAL · ELETRÓNICA · JAZZ", pose: 4, x: 410, y: 490, size: 650, rotate: 2 },
+      { background: c.cream, eyebrow: "2 A 4 OUT · FARO", title: ["Faro", "Alternativo"], textX: 520, titleY: 350, fontSize: 76, lineHeight: 76, venue: "Passeio Ribeirinho · portas 20h30", genres: "METAL · ROCK · HARDCORE · PUNK", pose: 6, x: 20, y: 500, size: 660, rotate: -2, flip: true },
+      { background: c.gold, eyebrow: "3 OUT · PAREDES", title: ["MXGPU"], titleY: 390, fontSize: 112, lineHeight: 96, venue: "Centro Cultural de Paredes · 21h30", genres: "ELETRÓNICA · DANCE", pose: 2, x: 425, y: 515, size: 625, rotate: 1 },
+      { background: c.ink, eyebrow: "4 OUT · LISBOA", title: ["Evanescence"], textX: 475, titleY: 390, fontSize: 70, lineHeight: 78, venue: "MEO Arena · 20h00", genres: "ROCK · METAL", pose: 5, x: 24, y: 500, size: 650, rotate: -1, flip: true },
     ],
   },
   {
     dir: "2026-10-05_2026-10-11",
     prefix: "odesvio-agenda-05out-11out",
     mascot: "guitar",
-    coverAsset: "guitar-cover.png",
-    recapAsset: "guitar-recap.png",
     range: "5 A 11 OUTUBRO",
     coverNote: "Seis destaques. Muitas mais escolhas na agenda.",
     slides: [
-      { background: c.cream, eyebrow: "7 OUT · PORTO", title: ["Grant-Lee", "Phillips"], titleY: 350, fontSize: 92, lineHeight: 88, venue: "Casa da Música · 21h30", genres: "FOLK · ROCK", asset: "grant-lee-phillips.png", x: 400, y: 500, size: 660, rotate: 0 },
-      { background: c.gold, eyebrow: "8 OUT · FARO", title: ["Rui Massena"], textX: 515, titleY: 390, fontSize: 76, lineHeight: 80, venue: "Teatro das Figuras · 21h30", genres: "PIANO · NEOCLÁSSICA", asset: "rui-massena.png", x: 10, y: 520, size: 700, rotate: 0, flip: true },
-      { background: c.ink, eyebrow: "9 OUT · BRAGA", title: ["Midori", "Hirano"], titleY: 350, fontSize: 96, lineHeight: 90, venue: "gnration · 21h30", genres: "ELETRÓNICA · AMBIENT", asset: "midori-hirano.png", x: 390, y: 500, size: 670, rotate: 0 },
-      { kind: "tour", background: c.cream, eyebrow: "9–10 OUT · LISBOA + PORTO", title: ["Fatal Move", "Portugal tour"], asset: "fatal-move-outta-spite-nopath.png" },
-      { background: c.gold, eyebrow: "10 OUT · LISBOA", title: ["Dire Straits", "Legacy"], titleY: 350, fontSize: 86, lineHeight: 84, venue: "Sagres Campo Pequeno", genres: "ROCK · CLASSIC ROCK", asset: "dire-straits-legacy.png", x: 400, y: 500, size: 660, rotate: 0 },
-      { background: c.ink, eyebrow: "10 OUT · VISEU", title: ["Luís Lapa"], textX: 560, titleY: 390, fontSize: 82, lineHeight: 86, venue: "Teatro Viriato · 21h30", genres: "CANÇÃO DE AUTOR · MÚSICA PORTUGUESA", asset: "luis-lapa.png", x: 20, y: 520, size: 670, rotate: 0, flip: true },
+      { background: c.cream, eyebrow: "7 OUT · PORTO", title: ["Grant-Lee", "Phillips"], titleY: 350, fontSize: 92, lineHeight: 88, venue: "Casa da Música · 21h30", genres: "FOLK · ROCK", pose: 2, x: 405, y: 500, size: 650, rotate: 1 },
+      { background: c.gold, eyebrow: "8 OUT · FARO", title: ["Rui Massena"], textX: 515, titleY: 390, fontSize: 76, lineHeight: 80, venue: "Teatro das Figuras · 21h30", genres: "PIANO · NEOCLÁSSICA", pose: 3, x: 15, y: 500, size: 670, rotate: -2 },
+      { background: c.ink, eyebrow: "9 OUT · BRAGA", title: ["Midori", "Hirano"], titleY: 350, fontSize: 96, lineHeight: 90, venue: "gnration · 21h30", genres: "ELETRÓNICA · AMBIENT", pose: 4, x: 395, y: 505, size: 660, rotate: 2 },
+      { kind: "tour", background: c.cream, eyebrow: "9–10 OUT · LISBOA + PORTO", title: ["Fatal Move", "Portugal tour"], pose: 5 },
+      { background: c.gold, eyebrow: "10 OUT · LISBOA", title: ["Dire Straits", "Legacy"], titleY: 350, fontSize: 86, lineHeight: 84, venue: "Sagres Campo Pequeno", genres: "ROCK · CLASSIC ROCK", pose: 8, x: 400, y: 500, size: 660, rotate: 1 },
+      { background: c.ink, eyebrow: "10 OUT · VISEU", title: ["Luís Lapa"], textX: 560, titleY: 390, fontSize: 82, lineHeight: 86, venue: "Teatro Viriato · 21h30", genres: "CANÇÃO DE AUTOR · MÚSICA PORTUGUESA", pose: 6, x: 20, y: 505, size: 660, rotate: -1, flip: true },
     ],
   },
 ];
@@ -164,7 +149,7 @@ function coverSlide(week, total) {
       <text class="mono" x="76" y="226" fill="${c.gold}" font-size="23">${week.range}</text>
       ${titleBlock(["A semana", "toca assim."], { dark: true, y: 390, fontSize: 104, lineHeight: 100 })}
       <text class="body" x="78" y="630" fill="${c.mutedDark}" font-size="32">${week.coverNote}</text>
-      ${editorialMascot(week.coverAsset, 390, 545, 675, 0)}
+      ${mascot(week.mascot, 1, 405, 555, 650, 1, week.mascot === "guitar")}
       ${footer(true, 1, total)}
     `,
   };
@@ -186,7 +171,7 @@ function summarySlide(week, total) {
       ${titleBlock(["A semana", "num relance."], { dark, y: 350, fontSize: 84, lineHeight: 82 })}
       <rect x="76" y="400" width="650" height="2" fill="${c.gold}" opacity=".7"/>
       ${rows}
-      ${editorialMascot(week.recapAsset, 625, 740, 445, 0)}
+      ${mascot(week.mascot, 8, 625, 735, 445, -1)}
       ${footer(true, total, total)}
     `,
   };
