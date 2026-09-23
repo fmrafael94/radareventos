@@ -24,11 +24,11 @@ window.SOURCE_GROUPS = [
     ["Xceed","Noites e clubes","https://xceed.me/"], ["Eventbrite Portugal","Eventos locais","https://www.eventbrite.pt/"], ["See Tickets","Bilheteira","https://www.seetickets.com/pt"],
     ["Live Nation Portugal","Promotor","https://www.livenation.pt/"], ["Last Tour Portugal","Promotor","https://lasttour.org/pt-pt/"],
     ["Música no Coração","Promotor","https://www.musicanocoracao.pt/"], ["Sons em Trânsito","Promotor","https://sonsemtransito.com/"], ["UAU","Promotor","https://www.uau.pt/"],
-    ["Hell Xis Agency","Promotor underground","https://www.instagram.com/hellxis/"], ["Prime Artists","Promotor","https://www.primeartists.eu/"], ["Born to Resist Events & Booking","Promotor underground · Instagram oficial","https://www.instagram.com/born_to_resist_events_booking/"],
+    ["Hell Xis Agency","Promotor underground","https://www.instagram.com/hellxis/"], ["Prime Artists","Promotor","https://www.primeartists.eu/"], ["Born to Resist Events & Booking","Promotor underground · Instagram oficial","https://www.instagram.com/born_to_resist_events_booking/"], ["Sportswear Bookings","Promotor underground · Instagram oficial","https://www.instagram.com/sportswear.bookings/"], ["Associação Cultural Marginalia","Promotora cultural · Instagram oficial","https://www.instagram.com/associacaomarginalia/"], ["Bilha D’Aço","Festival underground · Instagram oficial","https://www.instagram.com/bilhadaco/"],
     ["Milk Records","Loja, sala e promotora em Santarém","https://www.milkrecords.co/pages/contact"], ["Black Box Fest","Festival de metal em Guimarães","https://www.instagram.com/blackboxfest/"], ["Purgatory Metal Fest / Purga Productions","Festival underground em Almada","https://www.instagram.com/purgatorymetalfest/"], ["Butchery At Christmas Time / Neverlate","Festival death/grind na Covilhã","https://www.instagram.com/butcheryfestival/"]
   ]},
   { title:"Salas e agendas locais", sources:[
-    ["RCA Club","Lisboa","https://www.rcaclub.com/agenda/"], ["Hard Club","Porto","https://www.hardclubporto.com/"],
+    ["RCA Club","Lisboa","https://www.rcaclub.com/agenda/"], ["LAV — Lisboa ao Vivo","Lisboa","https://lisboaaovivo.com/"], ["Hard Club","Porto","https://www.hardclubporto.com/"],
     ["Casa da Música","Porto","https://casadamusica.com/agenda/"], ["CCB","Lisboa","https://www.ccb.pt/eventos/"],
     ["Teatro Aveirense","Aveiro","https://www.teatroaveirense.pt/"], ["Theatro Circo","Braga","https://www.theatrocirco.com/"],
     ["Teatro das Figuras","Faro","https://www.teatrodasfiguras.pt/"], ["Teatro Micaelense","Ponta Delgada","https://www.teatromicaelense.pt/agenda/musica/"],
