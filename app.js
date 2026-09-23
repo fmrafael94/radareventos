@@ -32,7 +32,17 @@ const nearbyPrevious = document.querySelector("#nearby-previous");
 const nearbyNext = document.querySelector("#nearby-next");
 const featuredRail = document.querySelector("#featured-rail");
 const heroFeature = document.querySelector("#hero-feature");
-const heroHighlightId = "reign-fury-hardcore-fest-2026";
+// Editorial sequence for the homepage highlight. The first event whose final
+// day has not passed stays in place, so the card never changes midway through
+// a festival and only advances after the featured event has taken place.
+const heroHighlightIds = [
+  "reign-fury-hardcore-fest-2026",
+  "faro-alternativo-2026",
+  "fatal-move-santo-tirso",
+  "black-box-fest-2026",
+  "semibreve-2026",
+  "patrimonios-de-peso-2026"
+];
 const adminTabs = [...document.querySelectorAll("[data-admin-tab]")];
 let featuredAutoscroll;
 let featuredRefreshTimer;
@@ -1001,7 +1011,9 @@ function renderFeatured() {
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 4);
-  const editorialHighlight = EVENTS.find(event => event.id === heroHighlightId && isMainAgendaEvent(event) && isCurrentOrUpcoming(event, today) && event.availability !== "Cancelado");
+  const editorialHighlight = heroHighlightIds
+    .map(id => EVENTS.find(event => event.id === id))
+    .find(event => event && isMainAgendaEvent(event) && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && event.availability !== "Cancelado");
   renderHeroFeature(editorialHighlight || featured[0]);
   featuredRail.innerHTML = featured.length ? featured.map((event, index) => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);

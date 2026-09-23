@@ -230,7 +230,8 @@ test("homepage hero is informational and opens the editorial highlight", async (
   const translations = await readFile(new URL("i18n.js", root), "utf8");
   assert.doesNotMatch(html, /id="hero-search"|class="hero-shortcuts"/, "the informational hero must not contain search controls");
   assert.match(html, /<a id="hero-feature"[^>]*href="\/evento\/reign-fury-hardcore-fest-2026"/, "the complete highlight must be a direct event link");
-  assert.match(script, /heroHighlightId = "reign-fury-hardcore-fest-2026"/, "Reign of Fury must be the current editorial highlight");
+  assert.match(script, /const heroHighlightIds = \[[\s\S]*?"reign-fury-hardcore-fest-2026"[\s\S]*?"patrimonios-de-peso-2026"[\s\S]*?\];/, "the homepage must keep the approved chronological editorial rotation");
+  assert.match(script, /heroHighlightIds[\s\S]*?\.find\(event => event &&[\s\S]*?isCurrentOrUpcoming\(event, today\)/, "the highlight must only advance after the current event has ended");
   assert.match(script, /heroFeature\.href = eventUrl\(event\)/, "the complete rendered card must keep the event destination");
   assert.match(translations, /"Em destaque":"Featured"/, "the new label must be translated in English");
 });
