@@ -113,7 +113,7 @@ const weeks = [
     prefix: "odesvio-agenda-28set-04out",
     mascot: "vinyl",
     range: "28 SETEMBRO A 4 OUTUBRO",
-    coverNote: "Seis destaques. Muitas mais escolhas na agenda.",
+    coverNote: ["Seis destaques.", "O resto está na agenda."],
     slides: [
       { background: c.cream, eyebrow: "28 SET · PORTO", title: ["Placebo"], titleY: 390, fontSize: 108, lineHeight: 96, venue: "Super Bock Arena · 20h00", genres: "ROCK · ALTERNATIVO", pose: 1, x: 410, y: 505, size: 635, rotate: 1 },
       { background: c.gold, eyebrow: "30 SET · LISBOA", title: ["Blood Red", "Shoes"], textX: 560, titleY: 360, fontSize: 80, lineHeight: 78, venue: "República da Música · 20h00", genres: "ROCK · ALTERNATIVO", pose: 7, x: 16, y: 500, size: 675, rotate: -2, flip: true },
@@ -128,7 +128,7 @@ const weeks = [
     prefix: "odesvio-agenda-05out-11out",
     mascot: "guitar",
     range: "5 A 11 OUTUBRO",
-    coverNote: "Seis destaques. Muitas mais escolhas na agenda.",
+    coverNote: ["Seis destaques.", "O resto está na agenda."],
     slides: [
       { background: c.cream, eyebrow: "7 OUT · PORTO", title: ["Grant-Lee", "Phillips"], titleY: 350, fontSize: 92, lineHeight: 88, venue: "Casa da Música · 21h30", genres: "FOLK · ROCK", pose: 2, x: 405, y: 500, size: 650, rotate: 1 },
       { background: c.gold, eyebrow: "8 OUT · FARO", title: ["Rui Massena"], textX: 515, titleY: 390, fontSize: 76, lineHeight: 80, venue: "Teatro das Figuras · 21h30", genres: "PIANO · NEOCLÁSSICA", pose: 3, x: 15, y: 500, size: 670, rotate: -2 },
@@ -138,17 +138,70 @@ const weeks = [
       { background: c.ink, eyebrow: "10 OUT · VISEU", title: ["Luís Lapa"], textX: 560, titleY: 390, fontSize: 82, lineHeight: 86, venue: "Teatro Viriato · 21h30", genres: "CANÇÃO DE AUTOR · MÚSICA PORTUGUESA", pose: 6, x: 20, y: 505, size: 660, rotate: -1, flip: true },
     ],
   },
+  {
+    dir: "2026-10-12_2026-10-18",
+    prefix: "odesvio-agenda-12out-18out",
+    mascot: "vinyl",
+    range: "12 A 18 OUTUBRO",
+    coverTitle: ["O mapa", "virou cartaz."],
+    coverNote: ["Cinema, peso e canção.", "Seis paragens no mapa."],
+    summaryTitle: ["Tudo num", "só mapa."],
+    slides: [
+      { background: c.cream, eyebrow: "13 OUT · VISEU", title: ["Nanook", "o Esquimó"], titleY: 350, fontSize: 82, lineHeight: 80, venue: "Teatro Viriato · cine-concerto", genres: "CINEMA · MÚSICA CONTEMPORÂNEA", pose: 2, x: 410, y: 505, size: 640, rotate: 1 },
+      { background: c.gold, eyebrow: "16–17 OUT · GUIMARÃES", title: ["Black Box", "Fest 2026"], textX: 545, titleY: 350, fontSize: 76, lineHeight: 76, venue: "Sede dos Trovadores do Cano", genres: "METAL · HARDCORE · PUNK", pose: 7, x: 10, y: 500, size: 665, rotate: -2, flip: true },
+      { background: c.ink, eyebrow: "16–17 OUT · ALMADA", title: ["Purgatory", "Fest 2026"], titleY: 350, fontSize: 78, lineHeight: 78, venue: "Hollywood Spot · Estrelas do Feijó", genres: "METAL · HARDCORE · PUNK", pose: 4, x: 405, y: 505, size: 650, rotate: 2 },
+      { background: c.cream, eyebrow: "17 OUT · BRAGA", title: ["Joana Sá"], textX: 555, titleY: 390, fontSize: 84, lineHeight: 84, venue: "gnration · 18h00", genres: "EXPERIMENTAL · PIANO", pose: 6, x: 18, y: 505, size: 660, rotate: -2, flip: true },
+      { background: c.gold, eyebrow: "17–18 OUT · FARO", title: ["Pedro", "Abrunhosa"], titleY: 350, fontSize: 82, lineHeight: 80, venue: "Teatro das Figuras · 21h30", genres: "POP · ROCK · MÚSICA PORTUGUESA", pose: 2, x: 420, y: 510, size: 630, rotate: 1 },
+      { background: c.ink, eyebrow: "17 OUT · FAMALICÃO", title: ["Samuel Úria", "Cine-concerto"], textX: 500, titleY: 350, fontSize: 68, lineHeight: 70, venue: "Casa das Artes · 21h45", genres: "INDIE · BANDA SONORA", pose: 5, x: 10, y: 505, size: 655, rotate: -1, flip: true },
+    ],
+  },
+  {
+    dir: "2026-10-19_2026-10-25",
+    prefix: "odesvio-agenda-19out-25out",
+    mascot: "guitar",
+    range: "19 A 25 OUTUBRO",
+    coverTitle: ["Muda a cidade.", "Muda o som."],
+    coverNote: ["Braga, Lisboa e Porto.", "Seis formas de ouvir."],
+    summaryTitle: ["Seis noites.", "Um calendário."],
+    slides: [
+      { background: c.cream, eyebrow: "22–25 OUT · BRAGA", title: ["Semibreve", "2026"], titleY: 350, fontSize: 88, lineHeight: 84, venue: "Vários espaços · programa online", genres: "ELETRÓNICA · EXPERIMENTAL · AV", pose: 2, x: 405, y: 500, size: 650, rotate: 1 },
+      { background: c.gold, eyebrow: "22 OUT · LISBOA", title: ["Laura", "Pausini"], textX: 570, titleY: 350, fontSize: 82, lineHeight: 80, venue: "MEO Arena · 21h00", genres: "POP", pose: 3, x: 10, y: 500, size: 670, rotate: -2 },
+      { background: c.ink, eyebrow: "22 OUT · LISBOA", title: ["Myrath"], titleY: 390, fontSize: 108, lineHeight: 96, venue: "República da Música · 20h00", genres: "METAL · METAL PROGRESSIVO", pose: 4, x: 405, y: 500, size: 650, rotate: 2 },
+      { background: c.cream, eyebrow: "23 OUT · LISBOA", title: ["Suffocation", "+ Ingested"], textX: 505, titleY: 350, fontSize: 70, lineHeight: 72, venue: "Lisbon Stage · Music Station", genres: "DEATH METAL · METAL", pose: 5, x: 12, y: 510, size: 650, rotate: -2, flip: true },
+      { background: c.gold, eyebrow: "24 OUT · PORTO", title: ["Rita", "Redshoes"], titleY: 350, fontSize: 84, lineHeight: 82, venue: "Casa da Música · 21h30", genres: "POP · INDIE", pose: 8, x: 405, y: 505, size: 650, rotate: 1 },
+      { background: c.ink, eyebrow: "24 OUT · LISBOA", title: ["Jungle"], textX: 565, titleY: 390, fontSize: 106, lineHeight: 96, venue: "MEO Arena · 20h00", genres: "POP · SOUL · FUNK", pose: 6, x: 20, y: 505, size: 650, rotate: -1, flip: true },
+    ],
+  },
+  {
+    dir: "2026-10-26_2026-11-01",
+    prefix: "odesvio-agenda-26out-01nov",
+    mascot: "vinyl",
+    range: "26 OUTUBRO A 1 NOVEMBRO",
+    coverTitle: ["Outubro fecha", "em palco."],
+    coverNote: ["Pop, metal e interior.", "Tudo no mesmo mapa."],
+    summaryTitle: ["Fecha o mês", "sem silêncio."],
+    slides: [
+      { background: c.cream, eyebrow: "27 OUT · LISBOA", title: ["Anastacia"], titleY: 390, fontSize: 100, lineHeight: 92, venue: "Sagres Campo Pequeno · 21h00", genres: "POP", pose: 2, x: 410, y: 505, size: 640, rotate: 1 },
+      { background: c.gold, eyebrow: "30 OUT · BRAGA", title: ["Travo"], textX: 575, titleY: 390, fontSize: 112, lineHeight: 96, venue: "gnration · 21h30", genres: "EXPERIMENTAL · ELETRÓNICA", pose: 7, x: 8, y: 500, size: 665, rotate: -2, flip: true },
+      { background: c.ink, eyebrow: "30–31 OUT · FOZ CÔA", title: ["Patrimónios", "de Peso"], titleY: 350, fontSize: 78, lineHeight: 78, venue: "Expocoa · entrada livre", genres: "METAL · ROCK", pose: 4, x: 405, y: 500, size: 650, rotate: 2 },
+      { background: c.cream, eyebrow: "31 OUT · PORTO", title: ["Moonspell", "+ Nu:n"], textX: 565, titleY: 350, fontSize: 80, lineHeight: 80, venue: "Hard Club · 21h00", genres: "METAL · GOTHIC", pose: 6, x: 18, y: 505, size: 660, rotate: -2, flip: true },
+      { background: c.gold, eyebrow: "31 OUT · PAREDES", title: ["Bia Ferreira", "Amefrica"], titleY: 350, fontSize: 80, lineHeight: 80, venue: "Centro Cultural de Paredes · 21h30", genres: "SOUL · WORLD · MÚSICA BRASILEIRA", pose: 2, x: 420, y: 510, size: 630, rotate: 1 },
+      { background: c.ink, eyebrow: "31 OUT · VISEU", title: ["Lágrimas", "no Mar"], textX: 560, titleY: 350, fontSize: 84, lineHeight: 82, venue: "Teatro Viriato", genres: "CANÇÃO DE AUTOR · MÚSICA BRASILEIRA", pose: 5, x: 10, y: 505, size: 655, rotate: -1, flip: true },
+    ],
+  },
 ];
 
 function coverSlide(week, total) {
+  const coverTitle = week.coverTitle || ["A semana", "toca assim."];
+  const coverNote = Array.isArray(week.coverNote) ? week.coverNote : [week.coverNote];
   return {
     file: `${week.prefix}-01.png`,
     body: `
       <rect width="1080" height="1350" fill="${c.ink}"/>
       ${logo(true)}
       <text class="mono" x="76" y="226" fill="${c.gold}" font-size="23">${week.range}</text>
-      ${titleBlock(["A semana", "toca assim."], { dark: true, y: 390, fontSize: 104, lineHeight: 100 })}
-      <text class="body" x="78" y="630" fill="${c.mutedDark}" font-size="32">${week.coverNote}</text>
+      ${titleBlock(coverTitle, { dark: true, y: 390, fontSize: 104, lineHeight: 100 })}
+      <text class="body" x="78" y="630" fill="${c.mutedDark}" font-size="32">${coverNote.map((line, index) => `<tspan x="78"${index ? ' dy="44"' : ""}>${line}</tspan>`).join("")}</text>
       ${mascot(week.mascot, 1, 405, 555, 650, 1, week.mascot === "guitar")}
       ${footer(true, 1, total)}
     `,
@@ -157,6 +210,7 @@ function coverSlide(week, total) {
 
 function summarySlide(week, total) {
   const dark = true;
+  const summaryTitle = week.summaryTitle || ["A semana", "num relance."];
   const rows = week.slides.map((slide, index) => {
     const date = slide.eyebrow.split(" · ")[0];
     const title = slide.title.join(" ").replace(/ \+$/, "");
@@ -168,7 +222,7 @@ function summarySlide(week, total) {
       <rect width="1080" height="1350" fill="${c.ink}"/>
       ${logo(true)}
       <text class="mono" x="76" y="226" fill="${c.gold}" font-size="23">GUARDA AS DATAS</text>
-      ${titleBlock(["A semana", "num relance."], { dark, y: 350, fontSize: 84, lineHeight: 82 })}
+      ${titleBlock(summaryTitle, { dark, y: 350, fontSize: 84, lineHeight: 82 })}
       <rect x="76" y="400" width="650" height="2" fill="${c.gold}" opacity=".7"/>
       ${rows}
       ${mascot(week.mascot, 8, 625, 735, 445, -1)}
