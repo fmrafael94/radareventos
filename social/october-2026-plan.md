@@ -26,7 +26,7 @@ Ainda não estão agendadas as restantes publicações abaixo.
 
 Âncora: Faro Alternativo.
 
-Seleção: Faro Alternativo · Festival BIG BANG LX · Fado & Jazz em Lagos · Radiografia #9 em Braga · Nazareth em Lisboa · A Voz do Rock em Viseu.
+Seleção: Faro Alternativo · Festival BIG BANG LX · Fado & Jazz em Lagos · Radiografia #9 em Braga · Nazareth em Lisboa · Insert Coin To Continue no Porto.
 
 Abertura proposta:
 
@@ -34,7 +34,7 @@ Abertura proposta:
 
 ### Domingo, 4 outubro · agenda de 5 a 11 outubro
 
-Seleção: Grant-Lee Phillips no Porto · Rui Massena em Faro · Midori Hirano em Braga · Fatal Move em Lisboa e Santo Tirso · Dire Straits Legacy em Lisboa · Luís Lapa em Viseu.
+Seleção: Grant-Lee Phillips no Porto · Rui Massena em Faro · Midori Hirano em Braga · Fatal Move em Lisboa e Santo Tirso · Dire Straits Legacy em Lisboa · Mike Stern Band em Lisboa.
 
 Abertura proposta:
 
@@ -52,7 +52,7 @@ Abertura proposta:
 
 ### Domingo, 11 outubro · agenda de 12 a 18 outubro
 
-Seleção: Nanook em Viseu · Black Box Fest em Guimarães · Purgatory Fest em Almada · Joana Sá em Braga · Pedro Abrunhosa em Faro · Samuel Úria em Famalicão · For The Glory em Lisboa.
+Seleção: For The Glory em Lisboa · Black Box Fest em Guimarães · Purgatory Fest em Almada · Joana Sá em Braga · Pedro Abrunhosa em Faro · Samuel Úria em Famalicão.
 
 Abertura proposta:
 
@@ -88,7 +88,7 @@ Abertura proposta:
 
 ### Domingo, 25 outubro · agenda de 26 outubro a 1 novembro
 
-Seleção: Anastacia em Lisboa · Carmen em Lisboa · Travo em Braga · Patrimónios de Peso em Vila Nova de Foz Côa · Moonspell no Porto · Bia Ferreira em Paredes · Lágrimas no Mar em Viseu · Ex-Easter Island Head em Braga.
+Seleção: Anastacia em Lisboa · Carmen em Lisboa · Travo em Braga · Patrimónios de Peso em Vila Nova de Foz Côa · Moonspell no Porto · Bia Ferreira em Paredes · Sul no CCB · Ex-Easter Island Head em Braga.
 
 Abertura proposta:
 
@@ -98,7 +98,7 @@ Abertura proposta:
 
 Âncora: Patrimónios de Peso.
 
-Seleção: Patrimónios de Peso em Vila Nova de Foz Côa · Moonspell no Porto · Travo em Braga · Bia Ferreira em Paredes · Lágrimas no Mar em Viseu · Carmen em Lisboa · Ex-Easter Island Head em Braga.
+Seleção: Patrimónios de Peso em Vila Nova de Foz Côa · Moonspell no Porto · Travo em Braga · Bia Ferreira em Paredes · Carmen em Lisboa · Ex-Easter Island Head em Braga.
 
 Abertura proposta:
 
@@ -114,4 +114,3 @@ O destaque só avança depois do último dia do evento atual:
 4. Black Box Fest · até 17 outubro
 5. Semibreve · até 25 outubro
 6. Patrimónios de Peso · até 31 outubro
-
