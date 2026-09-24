@@ -39,7 +39,15 @@ export function posterPublicationHoldIds(source) {
     const ids = JSON.parse(literal);
     return new Set(Array.isArray(ids) ? ids.filter(id => typeof id === "string") : []);
   } catch {
-    return new Set();
+    // Editorial notes are allowed inside the hold list. JSON.parse rejects
+    // those comments, so fall back to the quoted ids instead of silently
+    // publishing every held event through direct routes and the sitemap.
+    const ids = [...literal.matchAll(/"((?:\\.|[^"\\])*)"/g)]
+      .map(([, value]) => {
+        try { return JSON.parse(`"${value}"`); } catch { return ""; }
+      })
+      .filter(Boolean);
+    return new Set(ids);
   }
 }
 const cacheVersion = value => {

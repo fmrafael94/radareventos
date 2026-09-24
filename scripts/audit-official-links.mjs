@@ -7,7 +7,7 @@
  * A page being reachable is not proof that tickets are available. Any result
  * needs an editor's review against the official page before it is published.
  */
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { access, readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import vm from "node:vm";
 
@@ -90,9 +90,22 @@ for (const event of events) {
   const poster = posters[event.id];
   // Newer editorial entries keep the verified poster next to the event data;
   // older ones are still served by the homepage's officialPosters map.
-  const posterUrl = usableUrl(event.image) || usableUrl(Array.isArray(poster) ? poster[0] : "");
+  const posterValue = event.image || (Array.isArray(poster) ? poster[0] : "");
+  const posterUrl = usableUrl(posterValue);
+  let hasLocalPoster = false;
+  if (!posterUrl && typeof posterValue === "string" && posterValue.startsWith("/")) {
+    const localPath = path.resolve(root, posterValue.slice(1));
+    if (localPath.startsWith(`${root}${path.sep}`)) {
+      try {
+        await access(localPath);
+        hasLocalPoster = true;
+      } catch {
+        hasLocalPoster = false;
+      }
+    }
+  }
   if (posterUrl) targets.push({ id: event.id, title: event.title, kind: "Cartaz", url: posterUrl });
-  else if (!event.seriesId) {
+  else if (!hasLocalPoster && !event.seriesId) {
     missingOfficialPosters.push({
       id: event.id,
       title: event.title,

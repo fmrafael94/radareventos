@@ -135,7 +135,7 @@ const weeks = [
       { background: c.ink, eyebrow: "9 OUT · BRAGA", title: ["Midori", "Hirano"], titleY: 350, fontSize: 96, lineHeight: 90, venue: "gnration · 21h30", genres: "ELETRÓNICA · AMBIENT", pose: 4, x: 395, y: 505, size: 660, rotate: 2 },
       { kind: "tour", background: c.cream, eyebrow: "9–10 OUT · LISBOA + PORTO", title: ["Fatal Move", "Portugal tour"], pose: 5 },
       { background: c.gold, eyebrow: "10 OUT · LISBOA", title: ["Dire Straits", "Legacy"], titleY: 350, fontSize: 86, lineHeight: 84, venue: "Sagres Campo Pequeno", genres: "ROCK · CLASSIC ROCK", pose: 8, x: 400, y: 500, size: 660, rotate: 1 },
-      { background: c.ink, eyebrow: "10 OUT · VISEU", title: ["Luís Lapa"], textX: 560, titleY: 390, fontSize: 82, lineHeight: 86, venue: "Teatro Viriato · 21h30", genres: "CANÇÃO DE AUTOR · MÚSICA PORTUGUESA", pose: 6, x: 20, y: 505, size: 660, rotate: -1, flip: true },
+      { background: c.ink, eyebrow: "8 OUT · LISBOA", title: ["Mike Stern", "Band"], textX: 560, titleY: 350, fontSize: 78, lineHeight: 82, venue: "CCB · Grande Auditório · 20h00", genres: "JAZZ · FUSION", pose: 6, x: 20, y: 505, size: 660, rotate: -1, flip: true },
     ],
   },
   {
@@ -147,7 +147,7 @@ const weeks = [
     coverNote: ["Cinema, peso e canção.", "Seis paragens no mapa."],
     summaryTitle: ["Tudo num", "só mapa."],
     slides: [
-      { background: c.cream, eyebrow: "13 OUT · VISEU", title: ["Nanook", "o Esquimó"], titleY: 350, fontSize: 82, lineHeight: 80, venue: "Teatro Viriato · cine-concerto", genres: "CINEMA · MÚSICA CONTEMPORÂNEA", pose: 2, x: 410, y: 505, size: 640, rotate: 1 },
+      { background: c.cream, eyebrow: "17 OUT · LISBOA", title: ["For The Glory", "+ convidados"], titleY: 350, fontSize: 76, lineHeight: 78, venue: "RCA Club · 20h00", genres: "HARDCORE · FORMAÇÃO ORIGINAL", pose: 2, x: 410, y: 505, size: 640, rotate: 1 },
       { background: c.gold, eyebrow: "16–17 OUT · GUIMARÃES", title: ["Black Box", "Fest 2026"], textX: 545, titleY: 350, fontSize: 76, lineHeight: 76, venue: "Sede dos Trovadores do Cano", genres: "METAL · HARDCORE · PUNK", pose: 7, x: 10, y: 500, size: 665, rotate: -2, flip: true },
       { background: c.ink, eyebrow: "16–17 OUT · ALMADA", title: ["Purgatory", "Fest 2026"], titleY: 350, fontSize: 78, lineHeight: 78, venue: "Hollywood Spot · Estrelas do Feijó", genres: "METAL · HARDCORE · PUNK", pose: 4, x: 405, y: 505, size: 650, rotate: 2 },
       { background: c.cream, eyebrow: "17 OUT · BRAGA", title: ["Joana Sá"], textX: 555, titleY: 390, fontSize: 84, lineHeight: 84, venue: "gnration · 18h00", genres: "EXPERIMENTAL · PIANO", pose: 6, x: 18, y: 505, size: 660, rotate: -2, flip: true },
@@ -184,9 +184,9 @@ const weeks = [
       { background: c.cream, eyebrow: "27 OUT · LISBOA", title: ["Anastacia"], titleY: 390, fontSize: 100, lineHeight: 92, venue: "Sagres Campo Pequeno · 21h00", genres: "POP", pose: 2, x: 410, y: 505, size: 640, rotate: 1 },
       { background: c.gold, eyebrow: "30 OUT · BRAGA", title: ["Travo"], textX: 575, titleY: 390, fontSize: 112, lineHeight: 96, venue: "gnration · 21h30", genres: "EXPERIMENTAL · ELETRÓNICA", pose: 7, x: 8, y: 500, size: 665, rotate: -2, flip: true },
       { background: c.ink, eyebrow: "30–31 OUT · FOZ CÔA", title: ["Patrimónios", "de Peso"], titleY: 350, fontSize: 78, lineHeight: 78, venue: "Expocoa · entrada livre", genres: "METAL · ROCK", pose: 4, x: 405, y: 500, size: 650, rotate: 2 },
-      { background: c.cream, eyebrow: "31 OUT · PORTO", title: ["Moonspell", "+ Nu:n"], textX: 565, titleY: 350, fontSize: 80, lineHeight: 80, venue: "Hard Club · 21h00", genres: "METAL · GOTHIC", pose: 6, x: 18, y: 505, size: 660, rotate: -2, flip: true },
+      { background: c.cream, eyebrow: "31 OUT · PORTO", title: ["Moonspell", "+ NÜN"], textX: 565, titleY: 350, fontSize: 80, lineHeight: 80, venue: "Hard Club · 21h00", genres: "METAL · GOTHIC", pose: 6, x: 18, y: 505, size: 660, rotate: -2, flip: true },
       { background: c.gold, eyebrow: "31 OUT · PAREDES", title: ["Bia Ferreira", "Amefrica"], titleY: 350, fontSize: 80, lineHeight: 80, venue: "Centro Cultural de Paredes · 21h30", genres: "SOUL · WORLD · MÚSICA BRASILEIRA", pose: 2, x: 420, y: 510, size: 630, rotate: 1 },
-      { background: c.ink, eyebrow: "31 OUT · VISEU", title: ["Lágrimas", "no Mar"], textX: 560, titleY: 350, fontSize: 84, lineHeight: 82, venue: "Teatro Viriato", genres: "CANÇÃO DE AUTOR · MÚSICA BRASILEIRA", pose: 5, x: 10, y: 505, size: 655, rotate: -1, flip: true },
+      { background: c.ink, eyebrow: "30 OUT · LISBOA", title: ["Sul", "Vol. 2"], textX: 560, titleY: 350, fontSize: 88, lineHeight: 84, venue: "CCB · Pequeno Auditório · 20h00", genres: "FADO · JAZZ · INSTRUMENTAL", pose: 5, x: 10, y: 505, size: 655, rotate: -1, flip: true },
     ],
   },
 ];
