@@ -219,7 +219,7 @@ function render(event, poster) {
       <p class="event-meta"><span class="event-meta-date">${escapeHtml(compactDate)}</span><span class="event-meta-place">${escapeHtml(event.venue)}, ${escapeHtml(event.city)}</span></p>
       <section class="share-panel" aria-label="Partilhar evento">
         <div class="share-copy"><div class="share-brand" aria-hidden="true"><img src="/brand/logo-icon.png?v=2" alt="" width="32" height="32" /><span>O Desvio</span></div><p class="event-eyebrow">Partilhar</p><h2>Leva este concerto contigo.</h2><p>Escolhe a aplicação no menu de partilha do teu telemóvel.</p></div>
-        <div class="share-actions"><button type="button" data-share>Partilhar evento</button></div>
+        <div class="share-actions"><button type="button" data-share><svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg><span>Partilhar evento</span></button></div>
         <p class="share-status" aria-live="polite"></p>
       </section>
     </aside>
