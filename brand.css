@@ -40,7 +40,7 @@
 .event-page{--brand-page-line:rgba(24,34,38,.17);background:radial-gradient(circle at 82% 11%,rgba(183,164,90,.16),transparent 26rem),radial-gradient(circle at 5% 68%,rgba(227,94,68,.08),transparent 29rem),var(--brand-cream)}
 .event-page .event-eyebrow,.event-page .event-meta-date,.event-page .event-section-kicker{color:#8a7734}
 .event-page .event-view h1,.event-page .event-not-found h1,.event-page .festival-day-panel strong{color:var(--brand-ink)}
-.event-page .event-ticket,.event-page .event-route,.event-page .event-source,.event-page .event-calendar,.event-page .share-actions>*{border-color:var(--brand-ink);color:var(--brand-cream);background:var(--brand-ink)}
+.event-page .event-ticket,.event-page .event-route,.event-page .event-source,.event-page .event-calendar{border-color:var(--brand-ink);color:var(--brand-cream);background:var(--brand-ink)}
 .event-page .event-route,.event-page .event-source,.event-page .event-calendar,.event-page .event-ticket.muted{color:var(--brand-ink);background:transparent}
 .event-page .festival-tabs button[aria-selected="true"]{border-color:var(--brand-ink);color:var(--brand-cream);background:var(--brand-ink)}
 .event-page :focus-visible,.landing-page :focus-visible,.legal-page :focus-visible,.not-found-page :focus-visible{outline-color:var(--brand-gold)}
