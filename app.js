@@ -1521,6 +1521,21 @@ function openCorrectionFromUrl() {
 
 openCorrectionFromUrl();
 
+function openContributionFromUrl() {
+  const url = new URL(location.href);
+  const contribution = url.searchParams.get("participar");
+  if (!contribution) return;
+  const kind = contribution === "promotora" ? "promoter" : contribution === "evento" ? "suggestion" : "";
+  if (!kind) return;
+  setFeedbackMode(kind);
+  configureTurnstile();
+  feedbackDialog.showModal();
+  url.searchParams.delete("participar");
+  history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+openContributionFromUrl();
+
 // Community suggestions only arrive here after the private review area has
 // confirmed a direct official source. The bundled list remains the fast,
 // free-to-serve catalogue; D1 adds newly approved records without exposing a
