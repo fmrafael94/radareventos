@@ -13,6 +13,7 @@ test("builds useful location, time, price and genre pages", () => {
   const paths = new Set(routes.map(route => route.path));
   for (const path of [
     "/concertos",
+    "/esta-semana",
     "/concertos/lisboa",
     "/concertos/porto",
     "/concertos-este-fim-de-semana",
@@ -23,6 +24,16 @@ test("builds useful location, time, price and genre pages", () => {
     "/concertos/distrito/lisboa"
   ]) assert.ok(paths.has(path), `missing ${path}`);
   assert.equal(routes.length, paths.size, "landing routes must be unique");
+});
+
+test("serves the permanent current-week landing page", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/esta-semana"), { ASSETS: assets }, { waitUntil() {} });
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /<h1>Música ao vivo esta semana<\/h1>/);
+  assert.match(html, /rel="canonical" href="https:\/\/odesvio\.pt\/esta-semana"/);
+  assert.match(html, /de segunda a domingo/);
+  assert.match(html, /href="\/evento\//);
 });
 
 test("only publishes current main events in landing pages", () => {
@@ -78,8 +89,22 @@ test("sitemap contains landing pages and event pages", async () => {
   const xml = await response.text();
   assert.equal(response.status, 200);
   assert.match(xml, /https:\/\/odesvio\.pt\/concertos\/lisboa/);
+  assert.match(xml, /https:\/\/odesvio\.pt\/esta-semana/);
+  assert.match(xml, /https:\/\/odesvio\.pt\/parceiros/);
   assert.match(xml, /https:\/\/odesvio\.pt\/metal\/portugal/);
   assert.match(xml, /https:\/\/odesvio\.pt\/evento\//);
+});
+
+test("serves the partner hub and opens the existing contribution flow", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/parceiros"), { ASSETS: assets }, { waitUntil() {} });
+  const html = await response.text();
+  const app = await readFile(new URL("app.js", root), "utf8");
+  assert.equal(response.status, 200);
+  assert.match(html, /A tua agenda, sem trabalho a dobrar/);
+  assert.match(html, /\?participar=evento/);
+  assert.match(html, /brand\/agenda-no-desvio\.svg/);
+  assert.match(app, /function openContributionFromUrl\(\)/);
+  assert.match(app, /contribution === "promotora" \? "promoter"/);
 });
 
 test("unknown event returns the branded no-store 404 page", async () => {
@@ -138,7 +163,7 @@ test("event pages expose the bilingual controls and English date metadata", asyn
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-lang-toggle/);
-  assert.match(html, /src="\/i18n\.js\?v=8"/);
+  assert.match(html, /src="\/i18n\.js\?v=9"/);
   assert.match(html, /23 September/);
   assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
 });
@@ -220,7 +245,7 @@ test("public pages use the approved vinyl icon and current language bundle", asy
     const html = await readFile(new URL(file, root), "utf8");
     assert.match(html, /logo-icon\.png\?v=2/, `${file} must use the approved vinyl icon`);
     assert.doesNotMatch(html, /desvio-mark\.svg/, `${file} still uses the simplified mark`);
-    assert.match(html, /i18n\.js\?v=8/, `${file} must load the current language bundle`);
+    assert.match(html, /i18n\.js\?v=9/, `${file} must load the current language bundle`);
   }
 });
 

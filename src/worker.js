@@ -361,6 +361,20 @@ const weekendRange = today => {
   return [friday.toISOString().slice(0, 10), sunday.toISOString().slice(0, 10)];
 };
 
+const weekRange = today => {
+  const date = new Date(`${today}T12:00:00Z`);
+  const weekday = date.getUTCDay();
+  // The weekly agenda is published on Sunday evening for the week beginning
+  // the following morning. On every other day it represents the current
+  // Monday-to-Sunday window.
+  const daysFromMonday = weekday === 0 ? -1 : weekday - 1;
+  const monday = new Date(date);
+  monday.setUTCDate(date.getUTCDate() - daysFromMonday);
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+  return [monday.toISOString().slice(0, 10), sunday.toISOString().slice(0, 10)];
+};
+
 const routeEntry = (path, label, kind, value = "") => ({ path, label, kind, value });
 
 export function landingRoutes(source, today = "0000-00-00", excluded = new Set()) {
@@ -372,6 +386,7 @@ export function landingRoutes(source, today = "0000-00-00", excluded = new Set()
   const years = [...new Set(events.filter(event => event.type === "Festival").map(event => event.date.slice(0, 4)))].sort();
   const routes = [
     routeEntry("/concertos", "Concertos em Portugal", "all"),
+    routeEntry("/esta-semana", "Música ao vivo esta semana", "week"),
     routeEntry("/concertos-este-fim-de-semana", "Concertos este fim de semana", "weekend"),
     routeEntry("/concertos-gratis", "Concertos grátis", "free"),
     ...years.map(year => routeEntry(`/festivais/${year}`, `Festivais em Portugal em ${year}`, "festival", year)),
@@ -396,8 +411,10 @@ function resolveLanding(source, pathname, today, excluded = new Set()) {
   if (!route) return null;
   const allEvents = publicEventRecords(source, today, excluded);
   const [weekendStart, weekendEnd] = weekendRange(today);
+  const [weekStart, weekEnd] = weekRange(today);
   const [city, genre] = route.value.split("\u0000");
   const events = allEvents.filter(event => {
+    if (route.kind === "week") return event.date <= weekEnd && (event.endDate || event.date) >= weekStart;
     if (route.kind === "weekend") return event.date <= weekendEnd && (event.endDate || event.date) >= weekendStart;
     if (route.kind === "free") return isFreeEvent(event);
     if (route.kind === "festival") return event.type === "Festival" && event.date.startsWith(`${route.value}-`);
@@ -413,13 +430,14 @@ function resolveLanding(source, pathname, today, excluded = new Set()) {
 
 const landingDescription = landing => {
   const count = landing.events.length;
+  if (landing.kind === "week") return `${count} concertos, festivais e eventos de música ao vivo de segunda a domingo em Portugal, com cartazes e ligações oficiais.`;
   if (landing.kind === "weekend") return `${count} concertos e eventos de música ao vivo para este fim de semana em Portugal, com datas, salas, cartazes e ligações oficiais.`;
   if (landing.kind === "free") return `${count} concertos e eventos de música com entrada livre em Portugal, confirmados em fontes oficiais.`;
   return `${count} eventos em agenda: ${landing.label}. Datas, salas, cartazes, bilhetes e fontes oficiais no Desvio.`;
 };
 
 function landingNavigation(routes, activePath) {
-  const priority = ["/concertos", "/concertos-este-fim-de-semana", "/concertos-gratis", "/concertos/lisboa", "/concertos/porto", "/metal/portugal", "/rock/portugal", "/jazz/portugal"];
+  const priority = ["/esta-semana", "/concertos", "/concertos-este-fim-de-semana", "/concertos-gratis", "/concertos/lisboa", "/concertos/porto", "/metal/portugal", "/rock/portugal", "/jazz/portugal"];
   return priority.map(path => routes.find(route => route.path === path)).filter(route => route && route.path !== activePath)
     .map(route => `<a href="${escapeHtml(route.path)}">${escapeHtml(route.label)}</a>`).join("");
 }
@@ -533,7 +551,7 @@ async function sitemap(request, env) {
     const archived = await archivedEventIds(env);
     const urls = [...new Set(ids)].filter(id => !archived.has(id)).map(id => `<url><loc>${escapeXml(`${origin}/evento/${encodeURIComponent(id)}`)}</loc></url>`).join("");
     const landingUrls = landingRoutes(source, today, archived).map(route => `<url><loc>${escapeXml(`${origin}${route.path}`)}</loc></url>`).join("");
-    return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(`${origin}/`)}</loc></url>${landingUrls}${urls}</urlset>`, {
+    return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(`${origin}/`)}</loc></url><url><loc>${escapeXml(`${origin}/parceiros`)}</loc></url>${landingUrls}${urls}</urlset>`, {
       headers: { "Content-Type": "application/xml; charset=UTF-8", "Cache-Control": "public, max-age=3600" }
     });
   } catch {
@@ -697,7 +715,13 @@ export default {
       const response = await sitemap(request, env);
       return secureResponse(request.method === "HEAD" ? new Response(null, { status: response.status, headers: response.headers }) : response);
     }
+    if (["/parceiros", "/parceiros/"].includes(pathname) && ["GET", "HEAD"].includes(request.method)) {
+      const html = await assetText(request, env, "/parceiros.html");
+      const response = new Response(request.method === "HEAD" ? null : html, { headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "public, max-age=300" } });
+      return secureResponse(response);
+    }
     const isLandingPath = pathname === "/concertos"
+      || pathname === "/esta-semana"
       || pathname === "/concertos-este-fim-de-semana"
       || pathname === "/concertos-gratis"
       || /^\/festivais\/\d{4}\/?$/.test(pathname)

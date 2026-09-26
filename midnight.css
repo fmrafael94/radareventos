@@ -683,3 +683,16 @@ footer nav a { font-size:14px; line-height:1.45; }
 .filter-panel .quick-picks { margin-top:13px; padding-top:13px; border-top:1px solid #c6cbc3; }
 @media (max-width:1100px) { .filter-panel .filter-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:700px) { .filter-panel .filter-grid,.filter-panel .location-bar { grid-template-columns:repeat(2,minmax(0,1fr)); }.location-bar-heading { flex-wrap:wrap; gap:8px; }.location-bar-heading small { width:100%; white-space:normal; }.filter-panel-actions { justify-content:flex-start; }.nearby-button { min-height:42px; } }
+
+/* Reserve the final card geometry before the catalogue script runs. This
+   prevents the next sections from jumping when the featured rail is filled. */
+.featured-rail[aria-busy="true"] { min-height:0; opacity:1; background:none; animation:none; }
+.featured-card-placeholder { pointer-events:none; }
+.featured-card-placeholder .featured-poster { background:linear-gradient(100deg,#e2e6dc 20%,#eef0e9 38%,#e2e6dc 58%) 0 0/220% 100%!important; animation:desvio-shimmer 1.2s ease-in-out infinite; }
+.featured-placeholder-copy { display:grid; gap:8px; padding:11px 4px 3px; }
+.featured-placeholder-copy i { display:block; height:9px; border-radius:999px; background:#dde2d8; }
+.featured-placeholder-copy i:nth-child(1) { width:48%; }
+.featured-placeholder-copy i:nth-child(2) { width:84%; height:15px; }
+.featured-placeholder-copy i:nth-child(3) { width:62%; }
+@media (min-width:1200px) { .featured-rail { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media (prefers-reduced-motion:reduce) { .featured-card-placeholder .featured-poster { animation:none; } }
