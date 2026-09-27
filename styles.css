@@ -37,10 +37,11 @@ footer { display:flex; justify-content:space-between; max-width:1120px; margin:0
 .site-footer p { justify-self:end; max-width:300px; color:var(--muted); text-align:right; line-height:1.55; }
 .site-footer .report-link { display:block; margin:4px 0 0 auto; }
 @media (max-width:820px) {
-  .site-footer { grid-template-columns:1fr; gap:18px; }
-  .site-footer nav { justify-content:flex-start; }
-  .site-footer p { justify-self:start; max-width:none; text-align:left; }
-  .site-footer .report-link { margin-left:0; }
+  .site-footer { grid-template-columns:1fr; justify-items:center; gap:18px; text-align:center; }
+  .site-footer .footer-brand { justify-content:center; }
+  .site-footer nav { justify-content:center; flex-wrap:wrap; }
+  .site-footer p { justify-self:center; max-width:none; text-align:center; }
+  .site-footer .report-link { margin-inline:auto; }
 }
 
 /* Compact custom menus keep long genre/city lists inside the filter panel. */
