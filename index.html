@@ -13,8 +13,11 @@
     <meta property="og:title" content="Agenda de concertos e festivais em Portugal | Desvio" />
     <meta property="og:description" content="Encontra concertos, festivais e música ao vivo em Portugal — por cidade, data, género e bilhetes." />
     <meta property="og:url" content="https://odesvio.pt/" />
-    <meta property="og:image" content="https://odesvio.pt/brand/logo-icon.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="https://odesvio.pt/brand/og-desvio.png?v=1" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Desvio — Menos procura. Mais música." />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Agenda de concertos e festivais em Portugal | Desvio" />
     <meta name="twitter:description" content="Encontra concertos, festivais e música ao vivo em Portugal — por cidade, data, género e bilhetes." />
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Desvio","url":"https://odesvio.pt/","inLanguage":"pt-PT","description":"Agenda de concertos, festivais e música ao vivo em Portugal."}</script>
@@ -28,17 +31,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=3" />
-    <link rel="stylesheet" href="immersive.css?v=2" />
+    <link rel="stylesheet" href="styles.css?v=5" />
     <link rel="stylesheet" href="midnight.css?v=5" />
-    <link rel="stylesheet" href="brand.css?v=15" />
+    <link rel="stylesheet" href="brand.css?v=17" />
   </head>
   <body class="home-page">
     <a class="skip-link" href="#agenda">Saltar para a agenda</a>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Desvio — Menos procura. Mais música. Voltar ao início"><img class="brand-logo" src="/brand/logo-icon.png?v=2" alt="" width="34" height="34" /><span class="brand-wordmark"><small>O</small> DESVIO</span></a>
       <nav class="primary-nav" aria-label="Navegação principal"><a href="#agenda">Agenda</a><a href="/festivais/2026">Festivais</a><a href="/metal/portugal">Underground</a><a class="admin-tab" data-admin-tab href="/painel" hidden>Admin</a></nav>
-      <div class="header-actions"><a class="mobile-admin-tab" data-admin-tab href="/painel" hidden>Admin</a><a class="instagram-header-link" href="https://www.instagram.com/odesvio.pt/" target="_blank" rel="noopener" data-instagram-link="header" aria-label="Instagram @odesvio.pt"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="3.8"></circle><circle class="instagram-dot" cx="17.4" cy="6.7" r="1"></circle></svg></a><button class="language-toggle" type="button" data-lang-toggle>EN</button><button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Completa a agenda <span class="submit-link-arrow" aria-hidden="true">→</span></button></div>
+      <div class="header-actions"><a class="mobile-admin-tab" data-admin-tab href="/painel" hidden>Admin</a><a class="instagram-header-link" href="https://www.instagram.com/odesvio.pt/" target="_blank" rel="noopener" data-instagram-link="header" aria-label="Instagram @odesvio.pt"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="3.8"></circle><circle class="instagram-dot" cx="17.4" cy="6.7" r="1"></circle></svg></a><button class="language-toggle" type="button" data-lang-toggle>EN</button><button class="submit-link feedback-open" type="button" data-feedback-kind="suggestion">Adicionar ou corrigir <span class="submit-link-arrow" aria-hidden="true">→</span></button></div>
     </header>
 
     <main id="top" class="shell">
@@ -125,11 +127,12 @@
           <div class="filter-panel-actions"><button id="clear-filters" class="clear-button" type="button">Limpar filtros</button></div>
           <div class="quick-picks" aria-label="Destaques rápidos">
             <span>Destaques</span>
-            <button type="button" data-quick-pick="week">Próximos 7 dias</button>
             <button type="button" data-quick-pick="free">Entrada livre</button>
-            <button type="button" data-quick-pick="festival">Festivais</button>
             <button type="button" data-quick-pick="underground">Underground</button>
-            <button type="button" data-quick-pick="sold">Esgotados</button>
+            <button type="button" data-quick-pick="festival">Festivais</button>
+            <button type="button" data-quick-pick="porto">Porto</button>
+            <button type="button" data-quick-pick="lisboa">Lisboa</button>
+            <button type="button" data-quick-pick="week">Próximos 7 dias</button>
           </div>
         </div>
       </section>
@@ -189,30 +192,31 @@
           <button class="feedback-type-choice" type="button" data-feedback-choice="promoter" aria-pressed="false"><b>Adicionar página de promotora</b><small>Uma promotora, sala ou projeto com agenda pública.</small></button>
         </div>
         <div id="feedback-fields" hidden>
+        <p class="feedback-step-note"><b>Começa pelo link oficial.</b> Se tiveres pouco tempo, deixa a fonte e preenche apenas o que souberes.</p>
+        <label><span id="feedback-official-label">Link oficial</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" required /></label>
         <div class="feedback-grid">
-          <label><span>O teu nome</span><input name="name" type="text" maxlength="80" autocomplete="name" required /></label>
-          <label><span>Email <small>para respondermos</small></span><input name="email" type="email" maxlength="254" autocomplete="email" required /></label>
+          <label><span>O teu nome <small>opcional</small></span><input name="name" type="text" maxlength="80" autocomplete="name" /></label>
+          <label><span>Email <small>opcional · para respondermos</small></span><input name="email" type="email" maxlength="254" autocomplete="email" /></label>
         </div>
-        <label id="feedback-event-field"><span id="feedback-name-label">Evento</span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" required /></label>
+        <label id="feedback-event-field"><span id="feedback-name-label">Evento <small>opcional</small></span><input id="feedback-event-name" name="eventName" type="text" maxlength="180" placeholder="Artista, festival ou nome do evento" /></label>
         <div id="feedback-event-details" class="feedback-grid">
-          <label><span>Data</span><input name="eventDate" type="date" required /></label>
-          <label><span>Cidade / concelho</span><input name="city" type="text" maxlength="100" required /></label>
+          <label><span>Data <small>opcional</small></span><input name="eventDate" type="date" /></label>
+          <label><span>Cidade / concelho <small>opcional</small></span><input name="city" type="text" maxlength="100" /></label>
         </div>
         <div id="feedback-promoter-details" class="feedback-promoter-details" hidden>
           <div class="feedback-grid"><label><span>Cidade / área</span><input name="promoterLocation" type="text" maxlength="100" placeholder="Ex.: Lisboa / Grande Lisboa" /></label><label><span>Géneros</span><input name="genres" type="text" maxlength="180" placeholder="Ex.: eletrónica, hip-hop, rock" /></label></div>
           <label><span>Instagram</span><input name="instagramUrl" type="url" maxlength="1000" placeholder="https://instagram.com/..." inputmode="url" /></label>
           <label><span>Página da agenda</span><input name="agendaUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
         </div>
-        <label><span id="feedback-official-label">Link oficial</span><input name="officialUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" required /></label>
         <fieldset id="feedback-poster-field" class="poster-contribution">
           <legend>Cartaz oficial</legend>
-          <p>Obrigatório: deixa o link do cartaz ou envia a imagem encontrada numa fonte oficial.</p>
+          <p>Opcional: deixa o link do cartaz ou envia a imagem encontrada numa fonte oficial.</p>
           <div class="feedback-grid">
             <label><span>Link do cartaz</span><input name="posterUrl" type="url" maxlength="1000" placeholder="https://" inputmode="url" /></label>
             <label><span>Enviar imagem</span><input name="posterFile" type="file" accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG ou WebP · otimizada automaticamente para até 2 MB</small></label>
           </div>
         </fieldset>
-        <label><span id="feedback-message-label">O que devemos adicionar?</span><textarea name="message" rows="4" maxlength="2500" placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante." required></textarea></label>
+        <label><span id="feedback-message-label">O que devemos adicionar? <small>opcional</small></span><textarea name="message" rows="4" maxlength="2500" placeholder="Cartaz, bilheteira, horário, artistas, entrada livre ou outra informação relevante."></textarea></label>
         <label class="feedback-trap" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off" /></label>
         <label class="feedback-consent"><input name="privacyAcknowledged" type="checkbox" required /><span>Li a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e compreendo que estes dados serão usados apenas para analisar este pedido.</span></label>
         <div id="turnstile-wrap" class="turnstile-wrap" hidden aria-live="polite"></div>
@@ -221,10 +225,10 @@
         </div>
       </form>
     </dialog>
-    <script src="i18n.js?v=9"></script>
-    <script src="events.js"></script>
-    <script src="sources.js"></script>
-    <script src="app.js?v=6"></script>
+    <script src="i18n.js?v=10"></script>
+    <script src="events.js?v=20260927"></script>
+    <script src="sources.js?v=20260927"></script>
+    <script src="app.js?v=7"></script>
     <!-- Cloudflare Web Analytics -->
     <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"44d10bbe8f0042b8b602b3e78be2cc7e"}'></script>
   </body>

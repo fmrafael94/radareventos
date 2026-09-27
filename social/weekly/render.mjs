@@ -95,11 +95,11 @@ function tourSlide(week, slide, number, total) {
       <circle cx="590" cy="535" r="11" fill="${c.coral}"/><circle cx="590" cy="825" r="11" fill="${c.coral}"/>
       <text class="mono" x="630" y="546" fill="${c.goldDark}" font-size="23">9 OUT · LISBOA</text>
       <text class="body" x="630" y="600" fill="${c.ink}" font-size="29" font-weight="700">Village Underground</text>
-      <text class="body" x="630" y="641" fill="${c.mutedLight}" font-size="24">20h00 · c/ Outta Spite + NoPath</text>
-      <text class="mono" x="630" y="836" fill="${c.goldDark}" font-size="23">10 OUT · PORTO</text>
+      <text class="body" x="630" y="641" fill="${c.mutedLight}" font-size="24">20h00 · Fatal Move · Outta Spite · NoPath</text>
+      <text class="mono" x="630" y="836" fill="${c.goldDark}" font-size="23">10 OUT · SANTO TIRSO</text>
       <text class="body" x="630" y="890" fill="${c.ink}" font-size="29" font-weight="700">Carpe Diem · Santo Tirso</text>
-      <text class="body" x="630" y="932" fill="${c.mutedLight}" font-size="22">22h00 · c/ Fear The Lord</text>
-      <text class="body" x="630" y="968" fill="${c.mutedLight}" font-size="22">+ Lost Grave</text>
+      <text class="body" x="630" y="932" fill="${c.mutedLight}" font-size="22">22h00 · Fatal Move · Fear The Lord</text>
+      <text class="body" x="630" y="968" fill="${c.mutedLight}" font-size="22">Lost Grave</text>
       <text class="mono" x="630" y="1038" fill="${c.ink}" font-size="20">HARDCORE · IBERIA TOUR</text>
       ${mascot(week.mascot, slide.pose, 48, 610, 510, -2, true)}
       ${footer(false, number, total)}
@@ -133,7 +133,7 @@ const weeks = [
       { background: c.cream, eyebrow: "7 OUT · PORTO", title: ["Grant-Lee", "Phillips"], titleY: 350, fontSize: 92, lineHeight: 88, venue: "Casa da Música · 21h30", genres: "FOLK · ROCK", pose: 2, x: 405, y: 500, size: 650, rotate: 1 },
       { background: c.gold, eyebrow: "8 OUT · FARO", title: ["Rui Massena"], textX: 515, titleY: 390, fontSize: 76, lineHeight: 80, venue: "Teatro das Figuras · 21h30", genres: "PIANO · NEOCLÁSSICA", pose: 3, x: 15, y: 500, size: 670, rotate: -2 },
       { background: c.ink, eyebrow: "9 OUT · BRAGA", title: ["Midori", "Hirano"], titleY: 350, fontSize: 96, lineHeight: 90, venue: "gnration · 21h30", genres: "ELETRÓNICA · AMBIENT", pose: 4, x: 395, y: 505, size: 660, rotate: 2 },
-      { kind: "tour", background: c.cream, eyebrow: "9–10 OUT · LISBOA + PORTO", title: ["Fatal Move", "Portugal tour"], pose: 5 },
+      { kind: "tour", background: c.cream, eyebrow: "9–10 OUT · LISBOA + SANTO TIRSO", title: ["Fatal Move", "Portugal tour"], pose: 5 },
       { background: c.gold, eyebrow: "10 OUT · LISBOA", title: ["Dire Straits", "Legacy"], titleY: 350, fontSize: 86, lineHeight: 84, venue: "Sagres Campo Pequeno", genres: "ROCK · CLASSIC ROCK", pose: 8, x: 400, y: 500, size: 660, rotate: 1 },
       { background: c.ink, eyebrow: "8 OUT · LISBOA", title: ["Mike Stern", "Band"], textX: 560, titleY: 350, fontSize: 78, lineHeight: 82, venue: "CCB · Grande Auditório · 20h00", genres: "JAZZ · FUSION", pose: 6, x: 20, y: 505, size: 660, rotate: -1, flip: true },
     ],
@@ -147,7 +147,7 @@ const weeks = [
     coverNote: ["Cinema, peso e canção.", "Seis paragens no mapa."],
     summaryTitle: ["Tudo num", "só mapa."],
     slides: [
-      { background: c.cream, eyebrow: "17 OUT · LISBOA", title: ["For The Glory", "+ convidados"], titleY: 350, fontSize: 76, lineHeight: 78, venue: "RCA Club · 20h00", genres: "HARDCORE · FORMAÇÃO ORIGINAL", pose: 2, x: 410, y: 505, size: 640, rotate: 1 },
+      { background: c.cream, eyebrow: "17 OUT · LISBOA", title: ["For The Glory", "Fear The Lord", "Sunny Slam"], titleY: 320, fontSize: 66, lineHeight: 67, venue: "RCA Club · 20h00", genres: "HARDCORE · FORMAÇÃO ORIGINAL", pose: 2, x: 410, y: 540, size: 610, rotate: 1 },
       { background: c.gold, eyebrow: "16–17 OUT · GUIMARÃES", title: ["Black Box", "Fest 2026"], textX: 545, titleY: 350, fontSize: 76, lineHeight: 76, venue: "Sede dos Trovadores do Cano", genres: "METAL · HARDCORE · PUNK", pose: 7, x: 10, y: 500, size: 665, rotate: -2, flip: true },
       { background: c.ink, eyebrow: "16–17 OUT · ALMADA", title: ["Purgatory", "Fest 2026"], titleY: 350, fontSize: 78, lineHeight: 78, venue: "Hollywood Spot · Estrelas do Feijó", genres: "METAL · HARDCORE · PUNK", pose: 4, x: 405, y: 505, size: 650, rotate: 2 },
       { background: c.cream, eyebrow: "17 OUT · BRAGA", title: ["Joana Sá"], textX: 555, titleY: 390, fontSize: 84, lineHeight: 84, venue: "gnration · 18h00", genres: "EXPERIMENTAL · PIANO", pose: 6, x: 18, y: 505, size: 660, rotate: -2, flip: true },
@@ -167,7 +167,7 @@ const weeks = [
       { background: c.cream, eyebrow: "22–25 OUT · BRAGA", title: ["Semibreve", "2026"], titleY: 350, fontSize: 88, lineHeight: 84, venue: "Vários espaços · programa online", genres: "ELETRÓNICA · EXPERIMENTAL · AV", pose: 2, x: 405, y: 500, size: 650, rotate: 1 },
       { background: c.gold, eyebrow: "22 OUT · LISBOA", title: ["Laura", "Pausini"], textX: 570, titleY: 350, fontSize: 82, lineHeight: 80, venue: "MEO Arena · 21h00", genres: "POP", pose: 3, x: 10, y: 500, size: 670, rotate: -2 },
       { background: c.ink, eyebrow: "22 OUT · LISBOA", title: ["Myrath"], titleY: 390, fontSize: 108, lineHeight: 96, venue: "República da Música · 20h00", genres: "METAL · METAL PROGRESSIVO", pose: 4, x: 405, y: 500, size: 650, rotate: 2 },
-      { background: c.cream, eyebrow: "23 OUT · LISBOA", title: ["Suffocation", "+ Ingested"], textX: 505, titleY: 350, fontSize: 70, lineHeight: 72, venue: "Lisbon Stage · Music Station", genres: "DEATH METAL · METAL", pose: 5, x: 12, y: 510, size: 650, rotate: -2, flip: true },
+      { background: c.cream, eyebrow: "23 OUT · LISBOA", title: ["Suffocation", "Ingested", "Undeath · Eternal"], textX: 500, titleY: 315, fontSize: 58, lineHeight: 61, venue: "Lisbon Stage · Music Station", genres: "DEATH METAL · METAL", pose: 5, x: 12, y: 545, size: 620, rotate: -2, flip: true },
       { background: c.gold, eyebrow: "24 OUT · PORTO", title: ["Rita", "Redshoes"], titleY: 350, fontSize: 84, lineHeight: 82, venue: "Casa da Música · 21h30", genres: "POP · INDIE", pose: 8, x: 405, y: 505, size: 650, rotate: 1 },
       { background: c.ink, eyebrow: "24 OUT · LISBOA", title: ["Jungle"], textX: 565, titleY: 390, fontSize: 106, lineHeight: 96, venue: "MEO Arena · 20h00", genres: "POP · SOUL · FUNK", pose: 6, x: 20, y: 505, size: 650, rotate: -1, flip: true },
     ],
@@ -232,6 +232,9 @@ function summarySlide(week, total) {
 }
 
 for (const week of weeks) {
+  for (const slide of week.slides) {
+    if (/\bconvidad[oa]s?\b/i.test(slide.title.join(" "))) throw new Error(`A agenda não pode esconder bandas em "${slide.title.join(" ")}".`);
+  }
   const outDir = path.join(here, week.dir);
   fs.mkdirSync(outDir, { recursive: true });
   const total = week.slides.length + 2;

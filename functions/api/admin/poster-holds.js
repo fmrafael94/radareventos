@@ -25,6 +25,16 @@ const holdIds = source => {
   }
 };
 
+const editorialStatuses = source => {
+  const literal = source.match(/window\.EVENT_EDITORIAL_STATUS\s*=\s*(\{[\s\S]*?\});/i)?.[1];
+  try {
+    const statuses = JSON.parse(literal || "{}");
+    return statuses && typeof statuses === "object" && !Array.isArray(statuses) ? statuses : {};
+  } catch {
+    return {};
+  }
+};
+
 const eventLiteral = (source, id) => {
   const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return source.match(new RegExp(`\\{\\s*id:\\s*"${escaped}"[\\s\\S]*?\\}(?=,|\\))`))?.[0] || "";
@@ -102,6 +112,7 @@ async function publicationIssues(context) {
   const appSource = await assetText(context.request, context.env, "/app.js");
   const all = catalogue(source);
   const holds = new Set(holdIds(source));
+  const statuses = editorialStatuses(source);
   await ensureEventStore(context.env.EVENT_RADAR_DB);
   const { results = [] } = await context.env.EVENT_RADAR_DB.prepare("SELECT event_id, patch_json, source_url, updated_at FROM event_overrides").all();
   const overrides = new Map(results.flatMap(row => {
@@ -115,13 +126,15 @@ async function publicationIssues(context) {
   return all.flatMap(event => {
     const override = overrides.get(event.id);
     const held = holds.has(event.id);
+    const editorialStatus = statuses[event.id] || (held ? { status: "missing_poster", reason: "Cartaz oficial em falta" } : null);
     if (override?.patch?.publicationStatus === "archived") return [];
+    if (["archived_source", "expired_unresolved"].includes(editorialStatus?.status)) return [];
     const values = valuesFor(event, override?.patch, appSource, source, held);
     // The static hold is a safety net, not a permanent ban. Once the complete
     // override is saved it must leave this list and become public.
     const publication = { items: publicationChecklist(values), ready: publishingReady(values) };
     const stillHeld = held && override?.patch?.publicationStatus !== "published";
-    return stillHeld || !publication.ready ? [{ ...event, values, publication, held: stillHeld }] : [];
+    return stillHeld || !publication.ready ? [{ ...event, values, publication, held: stillHeld, editorialStatus }] : [];
   });
 }
 

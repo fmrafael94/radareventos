@@ -88,17 +88,10 @@ export async function onRequestPost(context) {
     return json({ message: "Confirma o endereço de email." }, 400);
   }
   if (kind === "suggestion") {
-    if (!senderName || !email || !eventName || !eventDate || !city || !officialUrl || !submittedMessage) {
-      return json({ message: "Preenche todos os campos obrigatórios para sugerir um evento." }, 400);
-    }
-    if (!posterUrl && !hasPosterFile) {
-      return json({ message: "Inclui o link do cartaz ou envia uma imagem oficial." }, 400);
-    }
+    if (!officialUrl) return json({ message: "Deixa um link oficial para podermos confirmar o evento." }, 400);
   }
   if (kind === "promoter") {
-    if (!senderName || !email || !eventName || !promoterLocation || !genres || !officialUrl || !instagramUrl || !agendaUrl || !submittedMessage) {
-      return json({ message: "Preenche todos os campos para adicionar uma página ao Desvio." }, 400);
-    }
+    if (!officialUrl && !instagramUrl && !agendaUrl) return json({ message: "Deixa o site, Instagram ou página da agenda para podermos confirmar a fonte." }, 400);
   }
 
   const token = field("cf-turnstile-response", 2048);

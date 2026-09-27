@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "timezone": "Europe/Lisbon",
+  "posts": [
+    {
+      "id": "weekly-2026-09-28",
+      "kind": "weekly",
+      "publishAt": "2026-09-27T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekly/2026-09-28_2026-10-04/caption.txt",
+      "feed": ["social/weekly/2026-09-28_2026-10-04/odesvio-agenda-28set-04out-single.png"],
+      "stories": [{"file":"social/weekly/2026-09-28_2026-10-04/stories/odesvio-agenda-28set-04out-single-story.png","link":"https://odesvio.pt/esta-semana"}],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekend-2026-09-30",
+      "kind": "weekend",
+      "publishAt": "2026-09-30T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekend-features/2026-09-30-faro-alternativo/caption-new.txt",
+      "feed": [
+        "social/weekend-features/2026-09-30-faro-alternativo/odesvio-fim-de-semana-editorial-02-04out-01.png",
+        "social/weekend-features/2026-09-30-faro-alternativo/odesvio-fim-de-semana-editorial-02-04out-02.png",
+        "social/weekend-features/2026-09-30-faro-alternativo/odesvio-fim-de-semana-editorial-02-04out-03.png",
+        "social/weekend-features/2026-09-30-faro-alternativo/odesvio-fim-de-semana-editorial-02-04out-04.png",
+        "social/weekend-features/2026-09-30-faro-alternativo/odesvio-fim-de-semana-editorial-02-04out-05.png"
+      ],
+      "stories": [
+        {"file":"social/weekend-features/2026-09-30-faro-alternativo/stories/odesvio-fim-de-semana-editorial-02-04out-01-story.png","link":"https://odesvio.pt/esta-semana"},
+        {"file":"social/weekend-features/2026-09-30-faro-alternativo/stories/odesvio-fim-de-semana-editorial-02-04out-02-story.png","link":"https://odesvio.pt/evento/faro-alternativo-2026"},
+        {"file":"social/weekend-features/2026-09-30-faro-alternativo/stories/odesvio-fim-de-semana-editorial-02-04out-03-story.png","link":"https://odesvio.pt/evento/ccb-big-bang"},
+        {"file":"social/weekend-features/2026-09-30-faro-alternativo/stories/odesvio-fim-de-semana-editorial-02-04out-04-story.png","link":"https://odesvio.pt/evento/nazareth"},
+        {"file":"social/weekend-features/2026-09-30-faro-alternativo/stories/odesvio-fim-de-semana-editorial-02-04out-05-story.png","link":"https://odesvio.pt/evento/evanescence"}
+      ],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "giveaway-for-the-glory",
+      "kind": "giveaway",
+      "publishAt": "2026-10-01T18:00:00+01:00",
+      "state": "needs_replacement",
+      "caption": "social/giveaway/2026-10-for-the-glory/caption-draft.txt",
+      "feed": [
+        "social/giveaway/2026-10-for-the-glory/odesvio-giveaway-for-the-glory-01.png",
+        "social/giveaway/2026-10-for-the-glory/odesvio-giveaway-for-the-glory-02.png",
+        "social/giveaway/2026-10-for-the-glory/odesvio-giveaway-for-the-glory-03.png",
+        "social/giveaway/2026-10-for-the-glory/odesvio-giveaway-for-the-glory-04.png"
+      ],
+      "stories": [
+        {"file":"social/giveaway/2026-10-for-the-glory/stories/odesvio-giveaway-for-the-glory-01-story.png","link":"https://odesvio.pt/evento/for-the-glory"},
+        {"file":"social/giveaway/2026-10-for-the-glory/stories/odesvio-giveaway-for-the-glory-02-story.png","link":"https://odesvio.pt/evento/for-the-glory"},
+        {"file":"social/giveaway/2026-10-for-the-glory/stories/odesvio-giveaway-for-the-glory-03-story.png","link":"https://odesvio.pt/evento/for-the-glory"},
+        {"file":"social/giveaway/2026-10-for-the-glory/stories/odesvio-giveaway-for-the-glory-04-story.png","link":"https://odesvio.pt/evento/for-the-glory"}
+      ],
+      "meta": {"verifiedAt":null,"postId":null}
+    },
+    {
+      "id": "weekly-2026-10-05",
+      "kind": "weekly",
+      "publishAt": "2026-10-04T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekly/2026-10-05_2026-10-11/caption.txt",
+      "feed": ["social/weekly/2026-10-05_2026-10-11/odesvio-agenda-05out-11out-single.png"],
+      "stories": [{"file":"social/weekly/2026-10-05_2026-10-11/stories/odesvio-agenda-05out-11out-single-story.png","link":"https://odesvio.pt/esta-semana"}],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekend-2026-10-07",
+      "kind": "weekend",
+      "publishAt": "2026-10-07T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekend-features/2026-10-07-fatal-move/caption-new.txt",
+      "feed": [
+        "social/weekend-features/2026-10-07-fatal-move/odesvio-fim-de-semana-editorial-09-11out-01.png",
+        "social/weekend-features/2026-10-07-fatal-move/odesvio-fim-de-semana-editorial-09-11out-02.png",
+        "social/weekend-features/2026-10-07-fatal-move/odesvio-fim-de-semana-editorial-09-11out-03.png",
+        "social/weekend-features/2026-10-07-fatal-move/odesvio-fim-de-semana-editorial-09-11out-04.png",
+        "social/weekend-features/2026-10-07-fatal-move/odesvio-fim-de-semana-editorial-09-11out-05.png"
+      ],
+      "stories": [
+        {"file":"social/weekend-features/2026-10-07-fatal-move/stories/odesvio-fim-de-semana-editorial-09-11out-01-story.png","link":"https://odesvio.pt/esta-semana"},
+        {"file":"social/weekend-features/2026-10-07-fatal-move/stories/odesvio-fim-de-semana-editorial-09-11out-02-story.png","link":"https://odesvio.pt/evento/vul-fatal-move"},
+        {"file":"social/weekend-features/2026-10-07-fatal-move/stories/odesvio-fim-de-semana-editorial-09-11out-03-story.png","link":"https://odesvio.pt/evento/rui-veloso-porto"},
+        {"file":"social/weekend-features/2026-10-07-fatal-move/stories/odesvio-fim-de-semana-editorial-09-11out-04-story.png","link":"https://odesvio.pt/evento/ccb-handel"},
+        {"file":"social/weekend-features/2026-10-07-fatal-move/stories/odesvio-fim-de-semana-editorial-09-11out-05-story.png","link":"https://odesvio.pt/evento/ezhel-lisboa-2026"}
+      ],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekly-2026-10-12",
+      "kind": "weekly",
+      "publishAt": "2026-10-11T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekly/2026-10-12_2026-10-18/caption.txt",
+      "feed": ["social/weekly/2026-10-12_2026-10-18/odesvio-agenda-12out-18out-single.png"],
+      "stories": [{"file":"social/weekly/2026-10-12_2026-10-18/stories/odesvio-agenda-12out-18out-single-story.png","link":"https://odesvio.pt/esta-semana"}],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekend-2026-10-14",
+      "kind": "weekend",
+      "publishAt": "2026-10-14T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekend-features/2026-10-14-black-box/caption-new.txt",
+      "feed": [
+        "social/weekend-features/2026-10-14-black-box/odesvio-fim-de-semana-editorial-16-18out-01.png",
+        "social/weekend-features/2026-10-14-black-box/odesvio-fim-de-semana-editorial-16-18out-02.png",
+        "social/weekend-features/2026-10-14-black-box/odesvio-fim-de-semana-editorial-16-18out-03.png",
+        "social/weekend-features/2026-10-14-black-box/odesvio-fim-de-semana-editorial-16-18out-04.png",
+        "social/weekend-features/2026-10-14-black-box/odesvio-fim-de-semana-editorial-16-18out-05.png"
+      ],
+      "stories": [
+        {"file":"social/weekend-features/2026-10-14-black-box/stories/odesvio-fim-de-semana-editorial-16-18out-01-story.png","link":"https://odesvio.pt/esta-semana"},
+        {"file":"social/weekend-features/2026-10-14-black-box/stories/odesvio-fim-de-semana-editorial-16-18out-02-story.png","link":"https://odesvio.pt/evento/figuras-pedro-abrunhosa"},
+        {"file":"social/weekend-features/2026-10-14-black-box/stories/odesvio-fim-de-semana-editorial-16-18out-03-story.png","link":"https://odesvio.pt/evento/for-the-glory"},
+        {"file":"social/weekend-features/2026-10-14-black-box/stories/odesvio-fim-de-semana-editorial-16-18out-04-story.png","link":"https://odesvio.pt/evento/black-box-fest-2026"},
+        {"file":"social/weekend-features/2026-10-14-black-box/stories/odesvio-fim-de-semana-editorial-16-18out-05-story.png","link":"https://odesvio.pt/evento/purgatory-fest-2026"}
+      ],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekly-2026-10-19",
+      "kind": "weekly",
+      "publishAt": "2026-10-18T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekly/2026-10-19_2026-10-25/caption.txt",
+      "feed": ["social/weekly/2026-10-19_2026-10-25/odesvio-agenda-19out-25out-single.png"],
+      "stories": [{"file":"social/weekly/2026-10-19_2026-10-25/stories/odesvio-agenda-19out-25out-single-story.png","link":"https://odesvio.pt/esta-semana"}],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekend-2026-10-21",
+      "kind": "weekend",
+      "publishAt": "2026-10-21T18:30:00+01:00",
+      "state": "scheduled",
+      "caption": "social/weekend-features/2026-10-21-semibreve/caption-new.txt",
+      "feed": [
+        "social/weekend-features/2026-10-21-semibreve/odesvio-fim-de-semana-editorial-23-25out-01.png",
+        "social/weekend-features/2026-10-21-semibreve/odesvio-fim-de-semana-editorial-23-25out-02.png",
+        "social/weekend-features/2026-10-21-semibreve/odesvio-fim-de-semana-editorial-23-25out-03.png",
+        "social/weekend-features/2026-10-21-semibreve/odesvio-fim-de-semana-editorial-23-25out-04.png",
+        "social/weekend-features/2026-10-21-semibreve/odesvio-fim-de-semana-editorial-23-25out-05.png"
+      ],
+      "stories": [
+        {"file":"social/weekend-features/2026-10-21-semibreve/stories/odesvio-fim-de-semana-editorial-23-25out-01-story.png","link":"https://odesvio.pt/esta-semana"},
+        {"file":"social/weekend-features/2026-10-21-semibreve/stories/odesvio-fim-de-semana-editorial-23-25out-02-story.png","link":"https://odesvio.pt/evento/semibreve-2026"},
+        {"file":"social/weekend-features/2026-10-21-semibreve/stories/odesvio-fim-de-semana-editorial-23-25out-03-story.png","link":"https://odesvio.pt/evento/suffocation-lisboa"},
+        {"file":"social/weekend-features/2026-10-21-semibreve/stories/odesvio-fim-de-semana-editorial-23-25out-04-story.png","link":"https://odesvio.pt/evento/casamusica-rita-redshoes"},
+        {"file":"social/weekend-features/2026-10-21-semibreve/stories/odesvio-fim-de-semana-editorial-23-25out-05-story.png","link":"https://odesvio.pt/evento/jungle"}
+      ],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekly-2026-10-26",
+      "kind": "weekly",
+      "publishAt": "2026-10-25T18:30:00+00:00",
+      "state": "scheduled",
+      "caption": "social/weekly/2026-10-26_2026-11-01/caption.txt",
+      "feed": ["social/weekly/2026-10-26_2026-11-01/odesvio-agenda-26out-01nov-single.png"],
+      "stories": [{"file":"social/weekly/2026-10-26_2026-11-01/stories/odesvio-agenda-26out-01nov-single-story.png","link":"https://odesvio.pt/esta-semana"}],
+      "meta": {"verifiedAt":"2026-09-27","postId":null}
+    },
+    {
+      "id": "weekend-2026-10-28",
+      "kind": "weekend",
+      "publishAt": "2026-10-28T18:30:00+00:00",
+      "state": "approved",
+      "caption": "social/weekend-features/2026-10-28-patrimonios/caption-new.txt",
+      "feed": [
+        "social/weekend-features/2026-10-28-patrimonios/odesvio-fim-de-semana-editorial-30out-01nov-01.png",
+        "social/weekend-features/2026-10-28-patrimonios/odesvio-fim-de-semana-editorial-30out-01nov-02.png",
+        "social/weekend-features/2026-10-28-patrimonios/odesvio-fim-de-semana-editorial-30out-01nov-03.png",
+        "social/weekend-features/2026-10-28-patrimonios/odesvio-fim-de-semana-editorial-30out-01nov-04.png",
+        "social/weekend-features/2026-10-28-patrimonios/odesvio-fim-de-semana-editorial-30out-01nov-05.png"
+      ],
+      "stories": [
+        {"file":"social/weekend-features/2026-10-28-patrimonios/stories/odesvio-fim-de-semana-editorial-30out-01nov-01-story.png","link":"https://odesvio.pt/esta-semana"},
+        {"file":"social/weekend-features/2026-10-28-patrimonios/stories/odesvio-fim-de-semana-editorial-30out-01nov-02-story.png","link":"https://odesvio.pt/evento/paredes-bia-ferreira"},
+        {"file":"social/weekend-features/2026-10-28-patrimonios/stories/odesvio-fim-de-semana-editorial-30out-01nov-03-story.png","link":"https://odesvio.pt/evento/patrimonios-de-peso-2026"},
+        {"file":"social/weekend-features/2026-10-28-patrimonios/stories/odesvio-fim-de-semana-editorial-30out-01nov-04-story.png","link":"https://odesvio.pt/evento/moonspell-porto-2026"},
+        {"file":"social/weekend-features/2026-10-28-patrimonios/stories/odesvio-fim-de-semana-editorial-30out-01nov-05-story.png","link":"https://odesvio.pt/evento/no-candy-tonight-portimao"}
+      ],
+      "meta": {"verifiedAt":null,"postId":null}
+    }
+  ]
+}

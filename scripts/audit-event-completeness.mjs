@@ -12,6 +12,10 @@ const posterLiteral = appSource.match(/const officialPosters = \{[\s\S]*?\n\};/)
 const mappedPosters = posterLiteral ? vm.runInNewContext(`(${posterLiteral})`) : {};
 const events = context.window.EVENTS || [];
 const posterPublicationHolds = new Set(context.window.POSTER_PUBLICATION_HOLDS || []);
+const editorialStatus = context.window.EVENT_EDITORIAL_STATUS || {};
+const today = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Europe/Lisbon", year: "numeric", month: "2-digit", day: "2-digit"
+}).format(new Date());
 const childrenFor = event => events.filter(item => item.seriesId === event.id);
 const issues = {
   noSource: [],
@@ -20,6 +24,7 @@ const issues = {
   posterPending: [],
   noProgramme: []
 };
+const editorialQueue = { actionable: [], expired: [], archived: [], dateUnverified: [] };
 
 for (const event of events) {
   if (!event.sourceUrl) issues.noSource.push(event.id);
@@ -33,9 +38,27 @@ for (const event of events) {
   }
 }
 
+for (const id of posterPublicationHolds) {
+  const event = events.find(item => item.id === id);
+  const status = editorialStatus[id]?.status || "missing_poster";
+  const row = {
+    id,
+    title: event?.title || id,
+    date: event?.date || "",
+    status,
+    reason: editorialStatus[id]?.reason || "Cartaz oficial em falta"
+  };
+  if (status === "archived_source") editorialQueue.archived.push(row);
+  else if (status === "date_unverified") editorialQueue.dateUnverified.push(row);
+  else if (status === "expired_unresolved" || (event?.endDate || event?.date || "") < today) editorialQueue.expired.push(row);
+  else editorialQueue.actionable.push(row);
+}
+
 console.log(JSON.stringify({
   events: events.length,
   mainEvents: events.filter(event => !event.seriesId).length,
+  today,
+  editorialQueue,
   ...Object.fromEntries(Object.entries(issues).map(([key, value]) => [key, { count: value.length, ids: value }]))
 }, null, 2));
 

@@ -163,7 +163,7 @@ test("event pages expose the bilingual controls and English date metadata", asyn
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-lang-toggle/);
-  assert.match(html, /src="\/i18n\.js\?v=9"/);
+  assert.match(html, /src="\/i18n\.js\?v=10"/);
   assert.match(html, /23 September/);
   assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
 });
@@ -245,7 +245,7 @@ test("public pages use the approved vinyl icon and current language bundle", asy
     const html = await readFile(new URL(file, root), "utf8");
     assert.match(html, /logo-icon\.png\?v=2/, `${file} must use the approved vinyl icon`);
     assert.doesNotMatch(html, /desvio-mark\.svg/, `${file} still uses the simplified mark`);
-    assert.match(html, /i18n\.js\?v=9/, `${file} must load the current language bundle`);
+    assert.match(html, /i18n\.js\?v=10/, `${file} must load the current language bundle`);
   }
 });
 
@@ -257,8 +257,24 @@ test("homepage hero is informational and opens the editorial highlight", async (
   assert.match(html, /<a id="hero-feature"[^>]*href="\/evento\/reign-fury-hardcore-fest-2026"/, "the complete highlight must be a direct event link");
   assert.match(script, /const heroHighlightIds = \[[\s\S]*?"reign-fury-hardcore-fest-2026"[\s\S]*?"patrimonios-de-peso-2026"[\s\S]*?\];/, "the homepage must keep the approved chronological editorial rotation");
   assert.match(script, /heroHighlightIds[\s\S]*?\.find\(event => event &&[\s\S]*?isCurrentOrUpcoming\(event, today\)/, "the highlight must only advance after the current event has ended");
+  assert.match(script, /function selectHeroHighlight[\s\S]*?repetitionPenalty[\s\S]*?event\.city === previous\.city[\s\S]*?event\.district === previous\.district/, "the automatic highlight fallback must balance geography after the editorial rotation");
   assert.match(script, /heroFeature\.href = eventUrl\(event\)/, "the complete rendered card must keep the event destination");
   assert.match(translations, /"Em destaque":"Featured"/, "the new label must be translated in English");
+});
+
+test("homepage exposes a complete share card and the compact contribution path", async () => {
+  const html = await readFile(new URL("index.html", root), "utf8");
+  assert.match(html, /<meta property="og:image" content="https:\/\/odesvio\.pt\/brand\/og-desvio\.png\?v=1"/);
+  assert.match(html, /<meta property="og:image:width" content="1200"/);
+  assert.match(html, /<meta property="og:image:height" content="630"/);
+  assert.match(html, /data-feedback-kind="suggestion">Adicionar ou corrigir/);
+  assert.match(html, /brand\.css\?v=17/, "the homepage must invalidate the previous mobile layout cache");
+});
+
+test("event verification notice is bilingual", async () => {
+  const script = await readFile(new URL("event.js", root), "utf8");
+  assert.match(script, /siteLocale\.startsWith\("en"\) \? "Confirmed on" : "Confirmado em"/);
+  assert.match(script, /Always confirm times and availability with the official source\./);
 });
 
 test("clear filters only lives inside the filter panel", async () => {
@@ -268,6 +284,20 @@ test("clear filters only lives inside the filter panel", async () => {
   assert.match(html, /<div id="filter-panel"[\s\S]*?<button id="clear-filters"[^>]*>Limpar filtros<\/button>[\s\S]*?<\/div>\s*<\/section>/, "clear filters must stay inside the filter panel");
   assert.match(html, /<p id="agenda-empty" class="agenda-empty-note"[^>]*>Não encontrámos eventos com esta combinação\.<\/p>/, "the no-results feedback must be a quiet status line");
   assert.doesNotMatch(script, /agendaEmpty\.querySelector\("button"\)/, "the removed standalone action must not keep a listener");
+});
+
+test("every agenda filter has quick search and the approved highlights", async () => {
+  const html = await readFile(new URL("index.html", root), "utf8");
+  const script = await readFile(new URL("app.js", root), "utf8");
+  const translations = await readFile(new URL("i18n.js", root), "utf8");
+  assert.match(script, /function setupFilterMenuSearch\(menu, optionSelector, label\)/, "filter menus must share the quick-search control");
+  assert.match(script, /\[dateSelect, priceSelect\]\.forEach\(setupCustomSelect\)/, "date and admission filters must use searchable menus");
+  assert.equal((script.match(/setupMultiFilter\(/g) || []).length, 7, "all six multi-select filters must use searchable menus");
+  const picks = [...html.matchAll(/data-quick-pick="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(picks, ["free", "underground", "festival", "porto", "lisboa", "week"], "quick highlights must follow the approved order");
+  assert.match(script, /state\.highlight === "porto"[\s\S]*?item\.city\) === "porto"/, "Porto must filter the actual event city");
+  assert.match(script, /state\.highlight === "lisboa"[\s\S]*?item\.city\) === "lisboa"/, "Lisboa must filter the actual event city");
+  assert.match(translations, /"Pesquisa rápida":"Quick search"/, "quick search must be translated in English");
 });
 
 test("poster zoom keeps every artwork fully inside the viewport", async () => {

@@ -21,13 +21,15 @@ function captions(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) return captions(full);
-    return entry.isFile() && entry.name.endsWith("caption.txt") ? [full] : [];
+    return entry.isFile() && /^caption(?:-[a-z0-9-]+)?\.txt$/i.test(entry.name) ? [full] : [];
   });
 }
 
 const files = captions(socialRoot).sort();
 const rows = files.flatMap(file => fs.readFileSync(file, "utf8").split(/\r?\n/).flatMap((line, index) => {
-  if (!eventLine.test(line)) return [];
+  // A date-only line in a giveaway (for example "17 OUT · 20:00") is not an
+  // event listing. Require at least date, act/title and venue/source columns.
+  if (!eventLine.test(line) || (line.match(/·/g) || []).length < 2) return [];
   const handles = [...new Set(line.match(handlePattern) || [])];
   const lower = line.toLocaleLowerCase("pt-PT");
   const expected = registry.filter(entry =>
@@ -49,12 +51,24 @@ const rows = files.flatMap(file => fs.readFileSync(file, "utf8").split(/\r?\n/).
 
 const missing = rows.filter(row => !row.hasHandle);
 const missingKnown = rows.filter(row => row.missingExpectedHandles.length > 0);
+const knownHandles = new Set(registry.map(entry => String(entry.handle || "").toLocaleLowerCase("pt-PT")));
+const unknownHandles = [...new Set(rows.flatMap(row => row.handles)
+  .filter(handle => !knownHandles.has(handle.toLocaleLowerCase("pt-PT"))))].sort();
+const invalidRegistry = registry.filter(entry =>
+  !entry.entity || !Array.isArray(entry.aliases) || !entry.aliases.length ||
+  !/^@[a-z0-9._]+$/i.test(entry.handle || "") ||
+  !/^https:\/\/www\.instagram\.com\/[a-z0-9._]+\/$/i.test(entry.profile || "") ||
+  !Array.isArray(entry.roles) || !entry.roles.length ||
+  !/^\d{4}-\d{2}-\d{2}$/.test(entry.verifiedAt || "")
+);
 const report = {
   generatedAt: new Date().toISOString(),
   captions: files.length,
   eventLines: rows.length,
   linesWithoutAnyHandle: missing.length,
   linesMissingKnownHandles: missingKnown.length,
+  unknownHandles,
+  invalidRegistry,
   missing,
   missingKnown,
   rows,
@@ -67,8 +81,10 @@ console.log(JSON.stringify({
   eventLines: report.eventLines,
   linesWithoutAnyHandle: report.linesWithoutAnyHandle,
   linesMissingKnownHandles: report.linesMissingKnownHandles,
+  unknownHandles: report.unknownHandles,
+  invalidRegistry: report.invalidRegistry,
   missing: report.missing,
   missingKnown: report.missingKnown,
 }, null, 2));
 
-if (missing.length || missingKnown.length) process.exitCode = 1;
+if (missing.length || missingKnown.length || invalidRegistry.length) process.exitCode = 1;

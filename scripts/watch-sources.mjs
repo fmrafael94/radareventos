@@ -84,21 +84,45 @@ const worker = async () => {
 await Promise.all(Array.from({ length: Math.min(4, selected.length) }, worker));
 const reportDirectory = path.join(root, "reports");
 await mkdir(reportDirectory, { recursive: true });
-await writeFile(path.join(reportDirectory, "source-watch.json"), `${JSON.stringify({ generatedAt: new Date().toISOString(), coverage: { checked: results.length, knownSources: allSources.length }, results }, null, 2)}\n`);
-const attention = results.filter(result => !result.ok);
+const reportPath = path.join(reportDirectory, "source-watch.json");
+let previous = {};
+try {
+  const saved = JSON.parse(await readFile(reportPath, "utf8"));
+  previous = Object.fromEntries((saved.results || []).map(item => [item.url, item]));
+} catch { /* First run has no baseline. */ }
+const enriched = results.map(result => {
+  const earlier = previous[result.url];
+  const changed = Boolean(result.ok && result.fingerprint && earlier?.fingerprint && earlier.fingerprint !== result.fingerprint);
+  const blocked = [401, 403, 429].includes(result.status) || ["timeout", "fetch failed"].includes(result.error);
+  const missing = [404, 410].includes(result.status);
+  return { ...result, changed, blocked, missing };
+});
+const changed = enriched.filter(result => result.changed);
+const missing = enriched.filter(result => result.missing);
+const blocked = enriched.filter(result => result.blocked);
+const report = {
+  generatedAt: new Date().toISOString(),
+  coverage: { checked: enriched.length, knownSources: allSources.length },
+  summary: { healthy: enriched.filter(result => result.ok).length, changed: changed.length, missing: missing.length, blocked: blocked.length },
+  results: enriched
+};
+await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 const lines = [
   "# Desvio — ronda diária de fontes",
   "",
-  `- Fontes verificadas: ${results.length} de ${allSources.length}`,
-  `- Fontes que precisam de atenção: ${attention.length}`,
+  `- Fontes verificadas: ${enriched.length} de ${allSources.length}`,
+  `- Alterações reais a rever: ${changed.length}`,
+  `- Páginas removidas: ${missing.length}`,
+  `- Bloqueios técnicos sem alerta editorial: ${blocked.length}`,
   "",
-  "> Esta ronda assinala fontes cuja página mudou desde a última verificação. Não cria nem publica eventos automaticamente.",
+  "> 403, 429, timeouts e bloqueios anti-bot ficam no relatório técnico, mas não são tratados como cancelamentos nem como falhas editoriais.",
   ""
 ];
+const attention = [...changed, ...missing];
 if (attention.length) {
-  lines.push("## Fontes a rever", "", "| Fonte | Área | Resultado | Link |", "| --- | --- | --- | --- |");
-  for (const item of attention) lines.push(`| ${item.name} | ${item.focus} | ${item.status || item.error || "sem resposta"} | ${item.url} |`);
-} else lines.push("Todas as fontes deste lote responderam.");
+  lines.push("## Fontes a rever editorialmente", "", "| Fonte | Área | Resultado | Link |", "| --- | --- | --- | --- |");
+  for (const item of attention) lines.push(`| ${item.name} | ${item.focus} | ${item.changed ? "metadados alterados" : item.status || "removida"} | ${item.url} |`);
+} else lines.push("Nenhuma fonte apresentou uma alteração editorial acionável.");
 const output = lines.join("\n");
 if (process.env.GITHUB_STEP_SUMMARY) await writeFile(process.env.GITHUB_STEP_SUMMARY, `${output}\n`, { flag: "a" });
 console.log(output);

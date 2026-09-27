@@ -802,6 +802,14 @@ export default {
       const response = await notFoundPage(request, env);
       return secureResponse(request.method === "HEAD" ? new Response(null, { status: 404, headers: response.headers }) : response);
     }
+    if (["GET", "HEAD"].includes(request.method) && assetResponse.ok) {
+      const headers = new Headers(assetResponse.headers);
+      const versioned = url.searchParams.has("v");
+      const isStaticAsset = /\.(?:css|js|mjs|png|jpe?g|webp|svg|ico|woff2?)$/i.test(pathname);
+      if (versioned && isStaticAsset) headers.set("Cache-Control", "public, max-age=31536000, immutable");
+      else if (/\.(?:png|jpe?g|webp|svg|ico|woff2?)$/i.test(pathname)) headers.set("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+      return secureResponse(new Response(assetResponse.body, { status: assetResponse.status, statusText: assetResponse.statusText, headers }));
+    }
     return secureResponse(assetResponse);
   },
   async scheduled(_controller, env, executionCtx) {

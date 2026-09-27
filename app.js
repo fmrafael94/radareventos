@@ -595,7 +595,7 @@ const officialEventPages = {
   ,"fever-fado-chiado": ["https://feverup.com/m/67022/en?seasonal=p06e4dp", "https://feverup.com/m/67022/en?seasonal=p06e4dp", "Fever — página oficial do evento"]
   ,"faro-alternativo-2026": ["https://www.facebook.com/faroalternativofest/", null, "Faro Alternativo Fest — página oficial"]
   ,"vialonga-fest-2026": ["https://www.facebook.com/vialongafest/", null, "Vialonga Fest — página oficial"]
-  ,"viseu-rock-fest-2026": ["https://www.facebook.com/viseurockfest/", null, "Viseu Rockfest — página oficial"]
+  ,"viseu-rock-fest-2026": ["https://www.ticketline.pt/pt/evento/viseu-rockfest-11-edicao-104946", "https://www.ticketline.pt/pt/evento/viseu-rockfest-11-edicao-104946", "Rocha Produções / Ticketline — evento oficial"]
   ,"colapso-fest-2026": ["https://www.facebook.com/ColapsoFest/", null, "Metalpunk Coimbra Fest — página oficial"]
   ,"black-box-fest-2026": ["https://www.facebook.com/BlackBoxFest/", "https://forms.gle/gfpRyg8mkNbDNSqv7", "Black Box Fest — página oficial"]
   ,"heavy-duty-fest-2026": ["https://www.facebook.com/HeavyDutyFest/", null, "Heavy Duty Fest — página oficial"]
@@ -656,7 +656,7 @@ const auditedEventDetails = {
   "leiria-orquestra-jazz": { tickets: "Bilheteira oficial ainda não localizada" }
   ,"faro-alternativo-2026": { tickets: "Informação e bilhetes para a edição 2026 por confirmar", availability: "Por confirmar" }
   ,"vialonga-fest-2026": { time: "17:00", venue: "Sociedade Recreativa da Granja", tickets: "Entrada livre · recolha solidária para a Kausa Animal", availability: "Entrada livre", lineup: "Lesados · Endless 2.0 · Dalai Lume · Last Piss Before Death · Faemine · Cobra ao Pescoço · Chaos Addiction · Vasco Rodrigues" }
-  ,"viseu-rock-fest-2026": { tickets: "Informação e bilhetes por confirmar", availability: "Por confirmar" }
+  ,"viseu-rock-fest-2026": { time:"Portas 15:30 · concertos 17:00", tickets:"20 € pré-venda · 25 € no dia", availability:"Disponível", lineup:"Schirenc Plays Pungent Stench · Acid Mammoth · Máquina. · Miss Lava · Aneuma · Travo · Grievance · João Pedro e os Almendras · Overhated · Domination", verifiedAt:"2026-09-26", salesCheckedAt:"2026-09-26" }
   ,"colapso-fest-2026": { time: "Portas 17:00 · concertos 18:00", tickets: "Pré-venda 17,50 € · 20 € no dia", availability: "Disponível", lineup: "Hetta · Soul of Anubis · Pledge · Dokuga · Lord of Confusion · So Dead" }
   ,"black-box-fest-2026": { venue: "Sede dos Trovadores do Cano", tickets: "Pré-venda online", availability: "Disponível", lineup: "Cutterred Flesh · Totengott · Booby Trap · Warside · The Small Hours · Vomitous Iniquity · Viledög · Putrid Offal · Xerión · Sonneillon · Square · Nojo · Armatilha" }
   ,"heavy-duty-fest-2026": { tickets: "35 € pré-venda · 40 € no dia", availability: "Disponível", lineup: "Medieval Steel · Elixir · Tarantula · Venator · Wicked Leather · Toxik Attack" }
@@ -712,6 +712,37 @@ EVENTS.forEach(event => {
   }
 });
 
+function setupFilterMenuSearch(menu, optionSelector, label) {
+  const searchWrap = document.createElement("div");
+  searchWrap.className = "filter-option-search";
+  const search = document.createElement("input");
+  const translatedLabel = window.DESVIO_I18N?.t?.(label) || label;
+  const translatedSearch = window.DESVIO_I18N?.t?.("Pesquisa rápida") || "Pesquisa rápida";
+  search.type = "search";
+  search.autocomplete = "off";
+  search.spellcheck = false;
+  search.placeholder = translatedSearch;
+  search.setAttribute("aria-label", `${translatedSearch}: ${translatedLabel}`);
+  searchWrap.append(search);
+  menu.append(searchWrap);
+  const apply = () => {
+    const query = searchableText(search.value.trim());
+    menu.querySelectorAll(optionSelector).forEach(option => {
+      option.hidden = Boolean(query) && !searchableText(option.textContent).includes(query);
+    });
+  };
+  search.addEventListener("input", apply);
+  return {
+    reset() {
+      search.value = "";
+      apply();
+    },
+    focus() {
+      window.requestAnimationFrame(() => search.focus({ preventScroll: true }));
+    }
+  };
+}
+
 function setupCustomSelect(select) {
   const wrapper = document.createElement("div");
   wrapper.className = "custom-select";
@@ -723,11 +754,13 @@ function setupCustomSelect(select) {
   const menu = document.createElement("div");
   menu.className = "custom-select-menu";
   menu.setAttribute("role", "listbox");
+  const menuLabel = select.closest("label")?.querySelector(":scope > span")?.textContent?.trim() || "Filtro";
+  const menuSearch = setupFilterMenuSearch(menu, ".custom-select-option", menuLabel);
   const sync = () => {
     const current = [...select.options].find(option => option.value === select.value) || select.options[0];
     trigger.textContent = current.textContent;
     trigger.classList.toggle("has-value", Boolean(select.value));
-    [...menu.children].forEach(option => option.setAttribute("aria-selected", option.dataset.value === select.value ? "true" : "false"));
+    menu.querySelectorAll(".custom-select-option").forEach(option => option.setAttribute("aria-selected", option.dataset.value === select.value ? "true" : "false"));
   };
   [...select.options].forEach(option => {
     const item = document.createElement("button");
@@ -750,6 +783,10 @@ function setupCustomSelect(select) {
     document.querySelectorAll(".custom-select.open").forEach(other => other.classList.remove("open"));
     wrapper.classList.toggle("open", open);
     trigger.setAttribute("aria-expanded", String(open));
+    if (open) {
+      menuSearch.reset();
+      menuSearch.focus();
+    }
   });
   select.addEventListener("change", sync);
   wrapper.append(trigger, menu);
@@ -762,14 +799,17 @@ function setupCustomSelect(select) {
 const multiFilterSync = [];
 function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => {}) {
   let availableValues = unique(values);
+  const menuLabel = button.querySelector("span")?.textContent?.trim() || "Filtro";
+  const menuSearch = setupFilterMenuSearch(menu, ".multi-select-option", menuLabel);
   const sync = () => {
     const selected = state[key];
     button.querySelector("strong").textContent = selected.length ? `${selected.length} selecionado${selected.length === 1 ? "" : "s"}` : allLabel;
     button.classList.toggle("has-value", Boolean(selected.length));
-    [...menu.children].forEach(option => option.setAttribute("aria-pressed", String(selected.includes(option.dataset.value))));
+    menu.querySelectorAll(".multi-select-option").forEach(option => option.setAttribute("aria-pressed", String(selected.includes(option.dataset.value))));
   };
   const rebuild = () => {
-    menu.innerHTML = "";
+    menu.querySelectorAll(".multi-select-option").forEach(option => option.remove());
+    menuSearch.reset();
     availableValues.forEach(value => {
       const option = document.createElement("button");
       option.type = "button";
@@ -794,6 +834,10 @@ function setupMultiFilter(button, menu, values, key, allLabel, onChange = () => 
     document.querySelectorAll(".multi-select-menu.open").forEach(other => other.classList.remove("open"));
     menu.classList.toggle("open", open);
     button.setAttribute("aria-expanded", String(open));
+    if (open) {
+      menuSearch.reset();
+      menuSearch.focus();
+    }
   });
   multiFilterSync.push(sync);
   rebuild();
@@ -882,6 +926,39 @@ const shiftedIso = days => {
   return localIso(date);
 };
 const isCurrentOrUpcoming = (event, today = shiftedIso(0)) => eventLastDate(event) >= today;
+function selectHeroHighlight(today = shiftedIso(0)) {
+  const editorialHighlight = heroHighlightIds
+    .map(id => EVENTS.find(event => event.id === id))
+    .find(event => event && isMainAgendaEvent(event) && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && event.availability !== "Cancelado");
+  if (editorialHighlight) return editorialHighlight;
+
+  // Once the approved sequence has finished, keep the same rule: one event
+  // remains highlighted until its final day. Among future candidates, favour
+  // proximity while gently avoiding the same city, district, format and main
+  // genre as the previous editorial highlight.
+  const previous = heroHighlightIds
+    .map(id => EVENTS.find(event => event.id === id))
+    .filter(event => event && eventLastDate(event) < today)
+    .at(-1);
+  const dayNumber = value => Math.round(eventDate(value).getTime() / 86400000);
+  const candidates = EVENTS
+    .filter(event => isMainAgendaEvent(event) && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today))
+    .filter(event => event.availability !== "Cancelado")
+    .map(event => {
+      const daysAway = Math.max(0, dayNumber(event.date) - dayNumber(today));
+      const isLiveNow = event.date <= today && eventLastDate(event) >= today;
+      const sharedGenre = previous && (event.genres || []).some(genre => (previous.genres || []).includes(genre));
+      const repetitionPenalty = previous
+        ? (event.city === previous.city ? 30 : 0) +
+          (event.district === previous.district ? 16 : 0) +
+          (event.type === previous.type ? 6 : 0) +
+          (sharedGenre ? 5 : 0)
+        : 0;
+      return { event, score: (isLiveNow ? -1000 : daysAway * 10) + repetitionPenalty };
+    })
+    .sort((a, b) => a.score - b.score || a.event.date.localeCompare(b.event.date) || a.event.title.localeCompare(b.event.title, "pt"));
+  return candidates[0]?.event;
+}
 const dateFilterRange = value => {
   if (!value) return null;
   const today = shiftedIso(0);
@@ -929,6 +1006,8 @@ const matchesHighlight = event => !state.highlight ||
   (state.highlight === "free" && isFreeEvent(event)) ||
   (state.highlight === "festival" && eventType(event) === "Festival") ||
   (state.highlight === "underground" && isUnderground(event)) ||
+  (state.highlight === "porto" && [event, ...festivalChildren(event)].some(item => searchableText(item.city) === "porto")) ||
+  (state.highlight === "lisboa" && [event, ...festivalChildren(event)].some(item => searchableText(item.city) === "lisboa")) ||
   (state.highlight === "sold" && availabilityLabel(event) === "Esgotado");
 const hasOfficialPoster = event => Boolean(event.image && event.posterSourceUrl);
 const posterCacheVersion = value => {
@@ -1012,10 +1091,7 @@ function renderFeatured() {
     .filter(event => event.availability !== "Cancelado")
     .sort((a, b) => a.date.localeCompare(b.date) || Number(portraitPosterIds.has(b.id)) - Number(portraitPosterIds.has(a.id)) || a.title.localeCompare(b.title, "pt"))
     .slice(0, 4);
-  const editorialHighlight = heroHighlightIds
-    .map(id => EVENTS.find(event => event.id === id))
-    .find(event => event && isMainAgendaEvent(event) && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && event.availability !== "Cancelado");
-  renderHeroFeature(editorialHighlight || featured[0]);
+  renderHeroFeature(selectHeroHighlight(today) || featured[0]);
   featuredRail.innerHTML = featured.length ? featured.map((event, index) => {
     const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
     // On a phone the first two cards are already visible below the hero. Do
@@ -1048,7 +1124,7 @@ function renderHeroFeature(event) {
     heroFeature.innerHTML = '<p class="hero-feature-kicker">Em destaque</p><p class="hero-feature-loading">Ainda estamos a confirmar o evento em destaque.</p><span class="hero-feature-link">Explorar os próximos eventos</span>';
     return;
   }
-  const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
+  const date = compactNearbyDate(event);
   heroFeature.href = eventUrl(event);
   heroFeature.dataset.eventSource = "highlight";
   heroFeature.setAttribute("aria-label", `Abrir ${event.title}`);
@@ -1263,12 +1339,19 @@ nearbyPrevious?.addEventListener("click", () => moveNearby(-1));
 nearbyNext?.addEventListener("click", () => moveNearby(1));
 nearbyRail.addEventListener("scroll", syncNearbyControls, { passive: true });
 function requestNearby() {
+  const openManualLocation = message => {
+    nearbyHint.textContent = `${message} Escolhe um distrito abaixo.`;
+    filterPanel.hidden = false;
+    filterToggle.setAttribute("aria-expanded", "true");
+    syncFilterToggle();
+    window.setTimeout(() => document.querySelector("#district-filter")?.focus(), 0);
+  };
   if (!navigator.geolocation) {
-    nearbyHint.textContent = "Localização não disponível neste browser.";
+    openManualLocation("Localização não disponível neste browser.");
     return;
   }
   if (!window.isSecureContext) {
-    nearbyHint.textContent = "A localização só funciona numa ligação segura.";
+    openManualLocation("A localização só funciona numa ligação segura.");
     return;
   }
   nearbyButton.disabled = true;
@@ -1283,11 +1366,12 @@ function requestNearby() {
     renderNearby(coords.latitude, coords.longitude, area);
     nearbyButton.disabled = false;
   }, error => {
-    nearbyHint.textContent = error?.code === 1
+    const message = error?.code === 1
       ? "Autoriza a localização no browser para ver eventos perto de ti."
       : error?.code === 3
         ? "A localização demorou demasiado. Tenta novamente."
         : "Não foi possível determinar a tua localização. Tenta novamente.";
+    openManualLocation(message);
     nearbyButton.disabled = false;
   }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 3600000 });
 }
@@ -1340,18 +1424,17 @@ function setFeedbackMode(kind, eventId = "", eventTitle = "") {
   feedbackPromoterDetails.hidden = !promoter;
   feedbackPosterField.hidden = promoter;
   feedbackForm.elements.posterUrl.setCustomValidity("");
-  ["name", "email", "officialUrl", "message"].forEach(name => {
-    feedbackForm.elements[name].required = !correction;
+  ["name", "email", "message", "eventDate", "city", "promoterLocation", "genres", "instagramUrl", "agendaUrl"].forEach(name => {
+    feedbackForm.elements[name].required = false;
   });
-  ["eventDate", "city"].forEach(name => { feedbackForm.elements[name].required = !correction && !promoter; });
-  ["promoterLocation", "genres", "instagramUrl", "agendaUrl"].forEach(name => { feedbackForm.elements[name].required = promoter; });
-  feedbackEventName.required = !correction;
+  feedbackForm.elements.officialUrl.required = !correction;
+  feedbackEventName.required = false;
   feedbackTitle.textContent = correction ? "Corrigir esta informação." : promoter ? "Adicionar uma página." : "Sugerir um evento.";
   feedbackContext.textContent = correction
     ? `Vais corrigir: ${eventTitle}. Indica o que mudou e deixa uma fonte oficial que o confirme.`
     : promoter
       ? "Ajuda-nos a encontrar a tua agenda. A página será sempre confirmada por uma pessoa antes de entrar nas fontes do Desvio."
-      : "Preenche todos os dados e inclui uma fonte oficial. A sugestão será sempre revista antes de aparecer na agenda.";
+      : "Cola primeiro a fonte oficial. Os restantes dados são opcionais e ajudam-nos a tratar o evento mais depressa.";
   feedbackNameLabel.textContent = promoter ? "Nome da promotora, sala ou projeto" : "Evento";
   feedbackEventName.placeholder = promoter ? "Ex.: Nome da promotora ou sala" : "Artista, festival ou nome do evento";
   feedbackOfficialLabel.textContent = promoter ? "Site oficial" : "Link oficial";
@@ -1465,9 +1548,7 @@ feedbackForm.addEventListener("submit", async event => {
   const suggestion = feedbackKind.value === "suggestion";
   const posterUrl = String(feedbackForm.elements.posterUrl.value || "").trim();
   const posterFile = feedbackForm.elements.posterFile.files?.[0];
-  feedbackForm.elements.posterUrl.setCustomValidity(suggestion && !posterUrl && !posterFile
-    ? "Inclui o link do cartaz ou envia uma imagem oficial."
-    : "");
+  feedbackForm.elements.posterUrl.setCustomValidity("");
   if (!feedbackForm.reportValidity()) return;
   const data = new FormData(feedbackForm);
   const submittedPosterFile = data.get("posterFile");
