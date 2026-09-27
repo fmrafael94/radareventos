@@ -274,6 +274,8 @@ footer nav a { color:var(--muted); font:500 9px "DM Mono",monospace; text-decora
 .feedback-intro p:last-child { max-width:470px; margin:12px 0 0; color:#526158; font-size:12px; line-height:1.5; }
 .feedback-close { position:absolute; z-index:2; top:12px; right:14px; width:35px; height:35px; border:1px solid rgba(35,51,42,.18); border-radius:50%; color:#233329; background:rgba(247,245,240,.78); font-size:25px; line-height:1; cursor:pointer; }
 .feedback-dialog form { display:grid; gap:14px; padding-top:20px; padding-bottom:28px; }
+.feedback-step-note { margin:0; padding:12px 14px; border-left:3px solid #b7a45a; color:#536057; background:rgba(183,164,90,.1); font:500 12px/1.5 "DM Sans",Arial,sans-serif; }
+.feedback-step-note b { color:#182226; }
 .feedback-type-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 .feedback-type-choice { display:grid; gap:5px; min-height:118px; padding:15px; border:1px solid #c8cec5; border-radius:9px; color:#182226; background:#f7f5f0; text-align:left; cursor:pointer; transition:transform .15s,background .15s,border-color .15s; }
 .feedback-type-choice:hover,.feedback-type-choice:focus-visible { border-color:#8a7734; background:#eee8cf; outline:0; transform:translateY(-2px); }
@@ -681,5 +683,21 @@ footer nav a { font-size:14px; line-height:1.45; }
 .filter-panel .location-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:16px; padding-top:15px; }
 .location-bar-heading { display:flex; grid-column:1/-1; align-items:center; gap:12px; min-width:0; }.location-bar-heading>span { color:#637268; font:600 12px "DM Mono",monospace; letter-spacing:.08em; text-transform:uppercase; }.nearby-button { min-height:40px; padding:0 13px; border:1px solid #b7a45a!important; border-radius:9px; color:#182226; background:#f7f5f0; font:700 13px "DM Sans",Arial,sans-serif; cursor:pointer; }.nearby-button:hover:not(:disabled) { background:#eee8cf; }.nearby-button:disabled { opacity:.62; cursor:wait; }.location-bar-heading small { overflow:hidden; color:#667268; font-size:12px; text-overflow:ellipsis; white-space:nowrap; }.filter-panel-actions { display:flex; justify-content:flex-end; margin-top:9px; }.filter-panel-actions .clear-button { min-height:auto; padding:6px 0; font-size:13px; }
 .filter-panel .quick-picks { margin-top:13px; padding-top:13px; border-top:1px solid #c6cbc3; }
+.filter-option-search { background:#f7f5f0; }
+.filter-option-search input { border-color:#cbd4c7; color:#182226; background-color:#f7f5f0; }
+.filter-option-search input::placeholder { color:#6d7b70; }
 @media (max-width:1100px) { .filter-panel .filter-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:700px) { .filter-panel .filter-grid,.filter-panel .location-bar { grid-template-columns:repeat(2,minmax(0,1fr)); }.location-bar-heading { flex-wrap:wrap; gap:8px; }.location-bar-heading small { width:100%; white-space:normal; }.filter-panel-actions { justify-content:flex-start; }.nearby-button { min-height:42px; } }
+
+/* Reserve the final card geometry before the catalogue script runs. This
+   prevents the next sections from jumping when the featured rail is filled. */
+.featured-rail[aria-busy="true"] { min-height:0; opacity:1; background:none; animation:none; }
+.featured-card-placeholder { pointer-events:none; }
+.featured-card-placeholder .featured-poster { background:linear-gradient(100deg,#e2e6dc 20%,#eef0e9 38%,#e2e6dc 58%) 0 0/220% 100%!important; animation:desvio-shimmer 1.2s ease-in-out infinite; }
+.featured-placeholder-copy { display:grid; gap:8px; padding:11px 4px 3px; }
+.featured-placeholder-copy i { display:block; height:9px; border-radius:999px; background:#dde2d8; }
+.featured-placeholder-copy i:nth-child(1) { width:48%; }
+.featured-placeholder-copy i:nth-child(2) { width:84%; height:15px; }
+.featured-placeholder-copy i:nth-child(3) { width:62%; }
+@media (min-width:1200px) { .featured-rail { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media (prefers-reduced-motion:reduce) { .featured-card-placeholder .featured-poster { animation:none; } }

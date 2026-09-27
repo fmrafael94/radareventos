@@ -1,0 +1,17 @@
+{
+  "name": "odesvio",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Agenda independente de música ao vivo em Portugal.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "npm run test:site && npm run audit:events && npm run audit:social",
+    "test:site": "node --test scripts/test-seo-pages.mjs && node scripts/test-admin-routes.mjs",
+    "audit:events": "node scripts/audit-event-schema.mjs && node scripts/audit-event-duplicates.mjs && node scripts/audit-event-date-evidence.mjs && node scripts/audit-event-completeness.mjs && node scripts/audit-public-posters.mjs",
+    "audit:social": "node scripts/audit-social-assets.mjs && node scripts/audit-social-handles.mjs && node scripts/audit-social-manifest.mjs",
+    "audit:all": "npm test"
+  }
+}

@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: daily-source-watch
+  cancel-in-progress: true
+
 jobs:
   watch:
     runs-on: ubuntu-latest
@@ -18,10 +22,11 @@ jobs:
         with:
           # Pin the current LTS line: scheduled jobs should not change runtime
           # behaviour merely because GitHub updates ubuntu-latest.
-          node-version: 20
+          node-version: 22
       - name: Fazer ronda das fontes conhecidas
         run: node scripts/watch-sources.mjs
       - name: Enviar fontes a explorar para o admin
+        continue-on-error: true
         env:
           AUDIT_INGEST_URL: ${{ secrets.DESVIO_AUDIT_INGEST_URL }}
           AUDIT_INGEST_TOKEN: ${{ secrets.DESVIO_AUDIT_INGEST_TOKEN }}
@@ -36,6 +41,8 @@ jobs:
             --header "Content-Type: application/json" \
             --data-binary @-
       - name: Guardar fila de pesquisa
+        if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: daily-source-watch

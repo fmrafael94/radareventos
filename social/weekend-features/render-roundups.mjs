@@ -183,7 +183,7 @@ const features = [
     coverLines: ["Eletrónica, death metal,", "piano, pop e jazz."],
     events: [
       { eyebrow: "22–25 OUT · BRAGA", title: ["Semibreve", "2026"], details: ["Vários espaços", "Programa online"], promoter: "ELETRÓNICA · EXPERIMENTAL · AUDIOVISUAL", mascotY: 600, rotate: -3 },
-      { eyebrow: "23 OUT · LISBOA", title: ["Suffocation", "+ Ingested"], details: ["Lisbon Stage · Music Station", "c/ Undeath + Eternal"], promoter: "DEATH METAL · METAL", mascotY: 610, rotate: -2 },
+      { eyebrow: "23 OUT · LISBOA", title: ["Suffocation · Ingested", "Undeath · Eternal"], details: ["Lisbon Stage · Music Station"], promoter: "DEATH METAL · METAL", titleSize: 55, mascotY: 610, rotate: -2 },
       { eyebrow: "23 OUT · LISBOA", title: ["Joana Gama"], details: ["CCB · Luís de Freitas Branco", "20h00"], promoter: "CONTEMPORÂNEA · PIANO", mascotY: 620, rotate: 2 },
       { eyebrow: "24 OUT · PORTO", title: ["Rita", "Redshoes"], details: ["Casa da Música · Sala 2", "21h30"], promoter: "POP · INDIE", mascotY: 590, rotate: 3 },
       { eyebrow: "24 OUT · LISBOA", title: ["Jungle"], details: ["MEO Arena", "20h00"], promoter: "EVENTO DE @EVERYTHINGISNEWPT", mascotY: 610, rotate: -3 },

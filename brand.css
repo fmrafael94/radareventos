@@ -226,19 +226,31 @@
   .home-page .featured-rail{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:580px){
-  .home-page .site-header{gap:10px}
-  .home-page .header-actions{gap:5px}
-  .home-page .submit-link{max-width:92px;white-space:normal;line-height:1.15;text-align:right}
-  .home-page .intro{gap:20px}
-  .hero-feature{grid-template-columns:1fr;grid-template-rows:auto auto;gap:12px;padding:11px}
-  .hero-feature-poster,.hero-feature-poster img{min-height:0;aspect-ratio:16/10}
+  .home-page .shell{width:100%;max-width:100%;padding-inline:14px;overflow:hidden}
+  .home-page .site-header{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .home-page .brand{min-width:0}
+  .home-page .brand-wordmark{font-size:13px}
+  .home-page .header-actions{min-width:0;gap:5px}
+  .home-page .instagram-header-link{width:32px;height:32px}
+  .home-page .language-toggle{min-width:34px;min-height:32px;padding:0 6px}
+  .home-page .submit-link{max-width:70px;padding:0;border:0;font-size:10px!important;line-height:1.1;text-align:right;white-space:normal}
+  .home-page .submit-link-arrow{display:none!important}
+  .home-page .intro{width:auto;max-width:100%;min-width:0;gap:20px}
+  .home-page .intro-copy,.hero-feature,.hero-feature-poster,.hero-feature-copy{width:auto;max-width:100%;min-width:0}
+  .hero-feature{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;gap:12px;padding:11px;overflow:hidden}
+  .hero-feature-poster,.hero-feature-poster img{min-width:0;min-height:0;aspect-ratio:16/10}
   .hero-feature-copy{min-height:0;padding:3px 4px 4px;text-align:center}
+  .hero-feature h2,.hero-feature .hero-feature-meta{max-width:100%!important;overflow-wrap:anywhere}
   .hero-feature .hero-feature-kicker,.hero-feature time,.hero-feature h2,.hero-feature .hero-feature-meta{margin-right:auto!important;margin-left:auto!important}
   .hero-feature .hero-feature-link{margin-top:6px}
   .home-page .featured-rail{display:flex;grid-template-columns:none;gap:13px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
   .home-page .featured-card{flex:0 0 74%;scroll-snap-align:start}
   .home-page .featured-poster{aspect-ratio:4/5}
   .home-page .browse-panel{padding:19px 14px}
+}
+@media(max-width:420px){
+  .home-page .language-toggle{display:none}
+  .home-page .submit-link{display:inline-flex;max-width:82px;flex:0 1 auto}
 }
 
 /* The full agenda should feel like a calm continuation of the page, not a

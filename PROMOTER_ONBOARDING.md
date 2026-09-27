@@ -44,3 +44,15 @@ Antes de preparar a resposta:
 ## Primeiro contacto iniciado pelo Desvio
 
 Se ainda não houver resposta ou interesse confirmado, não sobrecarregar o primeiro email com o guia. Apresentar o projeto e perguntar qual é o melhor processo de colaboração. O bloco educativo entra na primeira resposta seguinte, depois de o contacto responder.
+
+## Fluxo depois da publicação
+
+1. convidar a promotora ou sala como colaboradora apenas nos posts principais em que tenha participação editorial clara;
+2. depois de o post ficar público, enviar uma mensagem curta com o respetivo link e o link público do evento;
+3. usar `https://odesvio.pt/parceiros` como guia único para submissões, correções e integração do selo;
+4. dar prioridade a alterações de data, sala, cancelamento e cartaz;
+5. nunca prometer publicação antes da confirmação editorial.
+
+Mensagem curta depois da publicação:
+
+> Olá novamente, [nome]. Já está publicado no Desvio: [link do evento]. O destaque nas redes está aqui: [link do post]. Se houver alguma alteração de cartaz, data ou sala, podes corrigi-la diretamente através da página do evento ou em https://odesvio.pt/parceiros. Obrigado!

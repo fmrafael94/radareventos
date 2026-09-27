@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#182226"/>
+  <rect x="64" y="58" width="1072" height="514" rx="34" fill="none" stroke="#b7a45a" stroke-opacity=".32"/>
+  <g transform="translate(92 86)">
+    <circle cx="49" cy="49" r="48" fill="#0d171b"/>
+    <g transform="translate(13 9) scale(.72)" fill="none" stroke="#b7a45a" stroke-linecap="round">
+      <path d="M93 31a45 45 0 1 0 13 31" stroke-width="7"/>
+      <path d="M87 42a33 33 0 1 0 9 23" stroke-width="6"/>
+      <path d="M81 52a21 21 0 1 0 6 15" stroke-width="5"/>
+      <path d="M94 20v25c0 10-6 15-15 19" stroke-width="10"/>
+    </g>
+    <circle cx="51" cy="51" r="7" fill="#b7a45a"/>
+    <circle cx="51" cy="51" r="2.8" fill="#e35e44"/>
+    <text x="124" y="63" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="800" letter-spacing="-1">O DESVIO</text>
+  </g>
+  <text x="94" y="300" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="800" letter-spacing="-4">Menos procura.</text>
+  <text x="94" y="382" fill="#f7f5f0" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="800" letter-spacing="-4">Mais música.</text>
+  <text x="98" y="460" fill="#bdc5c2" font-family="Arial, Helvetica, sans-serif" font-size="29">Concertos, festivais e underground. Todo o país, numa só agenda.</text>
+  <text x="98" y="524" fill="#b7a45a" font-family="Menlo, Monaco, monospace" font-size="24" font-weight="700" letter-spacing="2">ODESVIO.PT</text>
+  <circle cx="1086" cy="508" r="12" fill="#e35e44"/>
+</svg>

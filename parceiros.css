@@ -1,0 +1,21 @@
+.partner-page main { width:min(100% - 40px,980px); }
+.partner-hero { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:48px; align-items:end; }
+.partner-hero h1 { max-width:700px; }
+.partner-intro { max-width:620px; margin:20px 0 0; color:#536158; font-size:18px; line-height:1.55; }
+.partner-actions { display:grid; gap:10px; }
+.partner-action { display:flex; min-height:54px; align-items:center; justify-content:space-between; padding:0 18px; border:1px solid #182226; border-radius:12px; color:#182226; background:#f7f5f0; font-weight:700; text-decoration:none; }
+.partner-action:first-child { color:#f7f5f0; background:#182226; }
+.partner-action:hover,.partner-action:focus-visible { border-color:#b7a45a; color:#8a7734; }
+.partner-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:58px; }
+.partner-card { padding:24px; border:1px solid rgba(24,34,38,.16); border-radius:16px; background:rgba(255,255,255,.35); }
+.partner-card span { color:#8a7734; font:600 11px "DM Mono",monospace; letter-spacing:.08em; }
+.partner-card h2 { margin:13px 0 8px; font-size:25px; }
+.partner-card p { margin:0; font-size:14px; }
+.partner-badge { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,380px); gap:40px; align-items:center; margin-top:58px; padding:32px; border-radius:18px; color:#f7f5f0; background:#182226; }
+.partner-badge h2 { margin-top:0; color:#f7f5f0; }
+.partner-badge p { color:#cbd0cc; }
+.partner-badge-preview { display:grid; gap:14px; justify-items:center; }
+.partner-badge-preview img { width:min(100%,320px); height:auto; }
+.partner-badge-preview a { color:#eee8cf; font-size:13px; text-underline-offset:4px; }
+.partner-code { width:100%; min-height:76px; padding:12px; border:1px solid #566064; border-radius:9px; color:#d8ddd9; background:#11181b; font:11px/1.5 "DM Mono",monospace; resize:none; }
+@media(max-width:760px){.partner-page main{width:min(100% - 30px,980px);margin-top:42px}.partner-hero,.partner-badge{grid-template-columns:1fr;gap:28px}.partner-grid{grid-template-columns:1fr;margin-top:38px}.partner-badge{margin-top:38px;padding:24px 19px}.partner-intro{font-size:16px}}

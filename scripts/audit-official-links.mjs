@@ -83,9 +83,10 @@ const posters = readOfficialPosters(appSource);
 const targets = [];
 const missingOfficialPosters = [];
 for (const event of events) {
+  const eventMeta = { date: event.date || "", endDate: event.endDate || "", publicationStatus: event.publicationStatus || "published" };
   for (const [kind, value] of [["Página oficial", event.sourceUrl], ["Bilheteira", event.ticketUrl]]) {
     const url = usableUrl(value);
-    if (url) targets.push({ id: event.id, title: event.title, kind, url });
+    if (url) targets.push({ id: event.id, title: event.title, kind, url, ...eventMeta });
   }
   const poster = posters[event.id];
   // Newer editorial entries keep the verified poster next to the event data;
@@ -104,7 +105,7 @@ for (const event of events) {
       }
     }
   }
-  if (posterUrl) targets.push({ id: event.id, title: event.title, kind: "Cartaz", url: posterUrl });
+  if (posterUrl) targets.push({ id: event.id, title: event.title, kind: "Cartaz", url: posterUrl, ...eventMeta });
   else if (!hasLocalPoster && !event.seriesId) {
     missingOfficialPosters.push({
       id: event.id,
@@ -134,11 +135,18 @@ const worker = async () => {
 await Promise.all(Array.from({ length: Math.min(5, selected.length) }, worker));
 
 const failures = results.filter(result => !result.ok);
+const technicalBlocks = failures.filter(result =>
+  [401, 403, 429].includes(result.status) || ["timeout", "fetch failed"].includes(result.error)
+);
+const actionableFailures = failures.filter(result => !technicalBlocks.includes(result) &&
+  result.publicationStatus === "published" && (result.endDate || result.date || "") >= now.toISOString().slice(0, 10)
+);
 const report = {
   generatedAt: now.toISOString(),
   mode,
   coverage: { checked: results.length, knownTargets: unique.length },
-  editorialQueue: { missingOfficialPosters },
+  summary: { actionableFailures: actionableFailures.length, technicalBlocks: technicalBlocks.length, otherHistoricalFailures: failures.length - actionableFailures.length - technicalBlocks.length },
+  editorialQueue: { missingOfficialPosters, actionableFailures },
   results
 };
 const reportDirectory = path.join(root, "reports");
@@ -150,17 +158,18 @@ const summary = [
   "",
   `- Execução: ${report.generatedAt}`,
   `- Links diretos verificados: ${report.coverage.checked} de ${report.coverage.knownTargets}`,
-  `- Com atenção necessária: ${failures.length}`,
+  `- Falhas editoriais acionáveis: ${actionableFailures.length}`,
+  `- Bloqueios técnicos sem alarme: ${technicalBlocks.length}`,
   `- Cartazes oficiais ainda pendentes: ${missingOfficialPosters.length}`,
   "",
-  "> Esta verificação só confirma se uma página responde. Não altera eventos, preços, cartazes ou disponibilidade; todas essas decisões continuam a exigir revisão humana e uma fonte oficial.",
+  "> 403, 429, timeouts e bloqueios de rede são registados sem transformar um problema técnico num cancelamento ou alerta editorial.",
   ""
 ];
-if (failures.length) {
+if (actionableFailures.length) {
   summary.push("## Links a rever", "", "| Evento | Tipo | Resultado | Link |", "| --- | --- | --- | --- |");
-  for (const result of failures) summary.push(`| ${result.title} | ${result.kind} | ${result.status || result.error || "sem resposta"} | ${result.url} |`);
+  for (const result of actionableFailures) summary.push(`| ${result.title} | ${result.kind} | ${result.status || result.error || "sem resposta"} | ${result.url} |`);
 } else {
-  summary.push("Nenhum link deste lote ficou inacessível.");
+  summary.push("Nenhum evento público futuro perdeu uma fonte essencial nesta ronda.");
 }
 if (missingOfficialPosters.length) {
   summary.push("", "## Cartazes oficiais pendentes", "", "| Evento | Data | Fonte a rever |", "| --- | --- | --- |");
@@ -169,3 +178,7 @@ if (missingOfficialPosters.length) {
 const text = summary.join("\n");
 if (process.env.GITHUB_STEP_SUMMARY) await writeFile(process.env.GITHUB_STEP_SUMMARY, `${text}\n`, { flag: "a" });
 console.log(text);
+// Only a real regression on a public future event should turn the workflow
+// red (and therefore send a GitHub notification). Anti-bot and network blocks
+// remain visible in the report without creating false alarms.
+if (actionableFailures.length) process.exitCode = 1;
