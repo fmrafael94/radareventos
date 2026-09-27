@@ -27,6 +27,7 @@ const sets = [
   ["weekly/2026-10-12_2026-10-18", "odesvio-agenda-12out-18out", 8],
   ["weekly/2026-10-19_2026-10-25", "odesvio-agenda-19out-25out", 8],
   ["weekly/2026-10-26_2026-11-01", "odesvio-agenda-26out-01nov", 8],
+  ["weekly/2026-10-26_2026-11-01", "odesvio-agenda-26out-01nov-single", 1],
 ];
 
 const chrome = index => Buffer.from(`<svg width="1080" height="1920" xmlns="http://www.w3.org/2000/svg">
