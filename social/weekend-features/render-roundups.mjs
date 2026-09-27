@@ -201,7 +201,7 @@ const features = [
     events: [
       { eyebrow: "30 OUT · BRAGA", title: ["Travo"], details: ["gnration", "21h30"], promoter: "EXPERIMENTAL · ELETRÓNICA", mascotY: 600, rotate: -3 },
       { eyebrow: "30–31 OUT · FOZ CÔA", title: ["Patrimónios", "de Peso"], details: ["Expocoa", "Entrada livre"], promoter: "METAL · ROCK", mascotY: 610, rotate: -2 },
-      { eyebrow: "31 OUT · PORTO", title: ["Moonspell", "+ NÜN"], details: ["Hard Club", "Portas 20h30 · início 21h00"], promoter: "INVICTA HALLOWEEN", mascotY: 620, rotate: 2 },
+      { eyebrow: "31 OUT · PORTO", title: ["Moonspell", "+ NÜN"], details: ["Hard Club", "Portas 20h00 · início 21h00"], promoter: "INVICTA HALLOWEEN · ESGOTADO", mascotY: 620, rotate: 2 },
       { eyebrow: "31 OUT · PAREDES", title: ["Bia Ferreira", "Amefrica"], titleSize: 66, details: ["Centro Cultural de Paredes", "21h30"], promoter: "SOUL · WORLD · MÚSICA BRASILEIRA", mascotY: 590, rotate: 3 },
       { eyebrow: "1 NOV · BRAGA", title: ["Ex-Easter", "Island Head"], details: ["gnration · Blackbox", "18h00"], promoter: "EXPERIMENTAL · GUITARRAS PREPARADAS", mascotY: 610, rotate: -3 },
       { eyebrow: "28 OUT–1 NOV · LISBOA", title: ["Carmen", "de Bizet"], titleSize: 70, details: ["CCB · Grande Auditório", "Várias sessões"], promoter: "ÓPERA · CLÁSSICA", mascotY: 620, rotate: -4 },

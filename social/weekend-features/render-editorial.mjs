@@ -108,11 +108,11 @@ const posts = [
     mascotFlips: [false, false, false, false, false],
     events: [
       { date: "17–18 OUT · FARO", title: "Pedro Abrunhosa", venue: "Teatro das Figuras", promoter: "TOUR INVERBO · POP · ROCK", poster: path.join(posterRoot, "pedro-abrunhosa.jpg") },
-      { date: "17 OUT · LISBOA", title: "For The Glory · Fear The Lord · Sunny Slam", titleLines: ["For The Glory · Fear The Lord", "Sunny Slam"], venue: "RCA Club · 20h00", promoter: "EVENTO DE @HELLXIS", poster: path.join(root, "social/giveaway/2026-10-for-the-glory/for-the-glory-official-poster.jpg") },
+      { date: "17 OUT · LISBOA", title: "For The Glory · Fear The Lord · Sunny Slam", titleLines: ["For The Glory · Fear The Lord", "Sunny Slam"], venue: "República da Música · 20h00", promoter: "EVENTO DE @HELLXIS", poster: path.join(root, "social/giveaway/2026-10-for-the-glory/for-the-glory-official-poster.jpg") },
       { date: "16–17 OUT · GUIMARÃES", title: "Black Box Fest 2026", venue: "Sede dos Trovadores do Cano", promoter: "EVENTO DE @BLACKBOXFEST", poster: path.join(root, "social/editorial-redesign/black-box-instagram.jpg") },
       { date: "16–17 OUT · ALMADA", title: "Purgatory Fest 2026", venue: "Hollywood Spot · Feijó", promoter: "EVENTO DE @PURGATORYMETALFEST", poster: path.join(root, "social/editorial-redesign/purgatory-official.webp") },
     ],
-    caption: `O fim de semana entra no pit, mas primeiro passa pelo Algarve: pop português, dois festivais pesados e um regresso para cantar em coro.\n\n17–18 OUT · Pedro Abrunhosa · Teatro das Figuras · Faro\n16–17 OUT · Black Box Fest 2026 · Sede dos Trovadores do Cano · Guimarães · evento de @blackboxfest\n16–17 OUT · Purgatory Fest 2026 · Hollywood Spot · Feijó, Almada · evento de @purgatorymetalfest\n17 OUT · @forthegloryhc + @ftlband + @sunny_slam · @rcaclublx · Lisboa · evento de @hellxis\n\nDesliza para veres os cartazes oficiais, guarda o post e confirma horários, bilhetes e fontes em odesvio.pt.\n\nMenos procura. Mais música.\n\n#odesvio #concertosportugal #fimdesemana #hardcore #metal #musicaportuguesa #musicaaovivo`,
+    caption: `O fim de semana entra no pit, mas primeiro passa pelo Algarve: pop português, dois festivais pesados e um regresso para cantar em coro.\n\n17–18 OUT · @pedroabrunhosa · @teatrodasfiguras · Faro · evento de @sonsemtransito\n16–17 OUT · Black Box Fest 2026 · Sede dos Trovadores do Cano · Guimarães · evento de @blackboxfest\n16–17 OUT · Purgatory Fest 2026 · Hollywood Spot · Feijó, Almada · evento de @purgatorymetalfest\n17 OUT · @forthegloryhc + @ftlband + @sunny_slam · @republica_da_musica · Lisboa · evento de @hellxis\n\nDesliza para veres os cartazes oficiais, guarda o post e confirma horários, bilhetes e fontes em odesvio.pt.\n\nMenos procura. Mais música.\n\n#odesvio #concertosportugal #fimdesemana #hardcore #metal #musicaportuguesa #musicaaovivo`,
   },
   {
     dir: "2026-10-21-semibreve",
@@ -143,12 +143,12 @@ const posts = [
     mascotPoseOrder: [2, 1, 3, 5, 4],
     mascotFlips: [false, false, false, false, false],
     events: [
-      { date: "31 OUT · PAREDES", title: "Bia Ferreira · Amefrica", venue: "Centro Cultural de Paredes · 21h30", promoter: "@FERREIRABIAOFICIAL · SOUL · WORLD", poster: path.join(posterRoot, "bia-ferreira.jpg") },
+      { date: "31 OUT · PAREDES", title: "Bia Ferreira · Amefrica", venue: "Centro Cultural de Paredes · 21h30", promoter: "@FERREIRABIAOFICIAL · SOUL · WORLD", posterLabel: "IMAGEM OFICIAL", poster: path.join(posterRoot, "bia-ferreira.jpg") },
       { date: "30–31 OUT · FOZ CÔA", title: "Patrimónios de Peso", venue: "Expocoa · entrada livre", promoter: "@PATRIMONIOS_DE_PESO", poster: path.join(posterRoot, "patrimonios.jpg") },
-      { date: "31 OUT · PORTO", title: "Moonspell + NÜN", venue: "Hard Club · 21h00", promoter: "EVENTO DE @FREEMUSICEVENTS", poster: path.join(posterRoot, "moonspell.jpg") },
+      { date: "31 OUT · PORTO", title: "Moonspell + NÜN", venue: "Hard Club · 21h00 · esgotado", promoter: "EVENTO DE @FREEMUSICEVENTS", poster: path.join(posterRoot, "moonspell.jpg") },
       { date: "31 OUT · PORTIMÃO", title: "No Candy Tonight", venue: "Clube da Pedra Mourinha · 21h30", promoter: "EVENTO DE @ASSOCIACAOMARGINALIA", poster: path.join(root, "brand/event-posters/no-candy-tonight-2026.jpg") },
     ],
-    caption: `Outubro sai com estrondo: soul e resistência em Paredes, património e peso em Foz Côa, ritual no Porto e Halloween junto ao mar.\n\n31 OUT · @ferreirabiaoficial · Centro Cultural de Paredes · Paredes\n30–31 OUT · @patrimonios_de_peso · Expocoa · Vila Nova de Foz Côa\n31 OUT · @moonspellofficial + NÜN · @hardclubporto · Porto · evento de @freemusicevents\n31 OUT · R.A.M.P. + Inhuman + Cicatriz + Shadowmare · Clube da Pedra Mourinha · Portimão · entrada livre · evento de @associacaomarginalia\n\nDesliza para veres os cartazes oficiais, guarda o post e confirma horários, bilhetes e fontes em odesvio.pt.\n\nMenos procura. Mais música.\n\n#odesvio #concertosportugal #fimdesemana #soul #moonspell #metal #musicaaovivo`,
+    caption: `Outubro sai com estrondo: soul e resistência em Paredes, património e peso em Foz Côa, ritual no Porto e Halloween junto ao mar.\n\n31 OUT · @ferreirabiaoficial · @ccp_paredes · Paredes · evento de @ferreirabiaoficial\n30–31 OUT · @patrimonios_de_peso · Expocoa · Vila Nova de Foz Côa · evento de @patrimonios_de_peso\n31 OUT · @moonspellofficial + NÜN · @hardclubporto · Porto · esgotado · evento de @freemusicevents\n31 OUT · @rampoficial + @inhuman.band + @cicatrizband + @shadowmare_official · Clube da Pedra Mourinha · Portimão · entrada livre · evento de @associacaomarginalia\n\nDesliza para veres os cartazes oficiais, guarda o post e confirma horários, bilhetes e fontes em odesvio.pt.\n\nMenos procura. Mais música.\n\n#odesvio #concertosportugal #fimdesemana #soul #moonspell #metal #musicaaovivo`,
   },
 ];
 
@@ -252,7 +252,7 @@ function eventSlide(post, event, mascots, index) {
   const details = event.tourDates ? tourDetails(event) : standardDetails(event, dark);
   const artwork = event.tourPosters
     ? tourPosterDiptych(event, mascot, post.mascotFlips[index - 1])
-    : `${posterBackground}<image href="${poster}" x="${posterBox.x}" y="${posterBox.y}" width="${posterBox.width}" height="${posterBox.height}" preserveAspectRatio="xMidYMid meet"/><rect x="${labelX}" y="${labelY}" width="224" height="45" rx="22" fill="${c.coral}"/><text class="mono" x="${labelX + 112}" y="${labelY + 28}" text-anchor="middle" fill="${c.cream}" font-size="15">CARTAZ OFICIAL</text>${mascotImage(mascot, mascotX, mascotY, mascotW, 420, post.mascotFlips[index - 1])}`;
+    : `${posterBackground}<image href="${poster}" x="${posterBox.x}" y="${posterBox.y}" width="${posterBox.width}" height="${posterBox.height}" preserveAspectRatio="xMidYMid meet"/><rect x="${labelX}" y="${labelY}" width="224" height="45" rx="22" fill="${c.coral}"/><text class="mono" x="${labelX + 112}" y="${labelY + 28}" text-anchor="middle" fill="${c.cream}" font-size="15">${event.posterLabel || "CARTAZ OFICIAL"}</text>${mascotImage(mascot, mascotX, mascotY, mascotW, 420, post.mascotFlips[index - 1])}`;
   return base(bg, `<text class="mono" x="64" y="183" fill="${c.gold}" font-size="19">${event.date}</text>${titleBlock(event, main)}${artwork}${details}`, index);
 }
 
