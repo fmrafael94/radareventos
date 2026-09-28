@@ -202,6 +202,8 @@ function render(event, poster) {
       <div class="event-overview">
         <p class="event-eyebrow">${escapeHtml(event.type || "Concerto")} · ${escapeHtml(event.city)}</p>
         <h1>${escapeHtml(event.title)}</h1>
+        ${event.scheduleNotice && event.time ? `<p class="event-door-time">${escapeHtml(siteLocale.startsWith("en") ? event.timeEn || event.time : event.time)}</p>` : ""}
+        ${event.scheduleNotice ? `<p class="event-schedule-notice" role="note">${escapeHtml(siteLocale.startsWith("en") ? event.scheduleNoticeEn || event.scheduleNotice : event.scheduleNotice)}</p>` : ""}
       </div>
       <div class="event-information">
         ${programmeDates.length ? `<section class="festival-programme"><p class="event-eyebrow">Programação</p><div class="festival-tabs" role="tablist" aria-label="Dias do festival">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" id="programme-tab-${index}" data-programme-date="${itemDate}" aria-controls="programme-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? "0" : "-1"}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" role="tabpanel" id="programme-panel-${index}" aria-labelledby="programme-tab-${index}" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(programmeTitle(event, item.title))}</strong><small>${escapeHtml(item.venue)}</small></div></article>`).join("")}</div>`).join("")}</section>` : ""}
