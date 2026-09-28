@@ -51,7 +51,7 @@ assert.ok(posterHolds.has("aveirense-ganso"));
 assert.ok(posterHolds.has("viriato-nanook"));
 assert.ok(!posterHolds.has("reign-fury-hardcore-fest-2026"));
 const publicEventIds = sitemapEventIds(eventSource);
-assert.equal(publicEventIds.length, 307 - posterHolds.size);
+assert.equal(publicEventIds.length, 306 - posterHolds.size);
 assert.ok(publicEventIds.includes("kalorama-2026"));
 assert.ok(publicEventIds.includes("20vintexx-plano-b-2026"));
 assert.ok(publicEventIds.includes("vul-fatal-move"));
@@ -61,7 +61,7 @@ assert.ok(!publicEventIds.includes("ferro-avoid-friends"));
 assert.ok(!publicEventIds.includes("kalorama-2026-28"));
 assert.ok(!publicEventIds.includes("under-doom-2026-09-25"));
 const currentSitemapIds = sitemapEventIds(eventSource, "2026-09-05");
-assert.equal(currentSitemapIds.length, 276);
+assert.equal(currentSitemapIds.length, 275);
 assert.ok(!currentSitemapIds.includes("kalorama-2026"));
 assert.ok(!currentSitemapIds.includes("iminente-2026-09-17"));
 
