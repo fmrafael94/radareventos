@@ -38,7 +38,7 @@ const heroFeature = document.querySelector("#hero-feature");
 const heroHighlightIds = [
   "reign-fury-hardcore-fest-2026",
   "faro-alternativo-2026",
-  "fatal-move-santo-tirso",
+  "vul-fatal-move",
   "black-box-fest-2026",
   "semibreve-2026",
   "patrimonios-de-peso-2026"
@@ -166,6 +166,7 @@ const dateRange = (start, end) => {
   return dates;
 };
 const festivalChildren = event => {
+  if (event.tourDates?.length) return event.tourDates;
   const explicit = explicitFestivalChildren(event);
   if (explicit.length || !event.endDate || event.endDate === event.date) return explicit;
   const days = dateRange(event.date, event.endDate);
@@ -1034,6 +1035,11 @@ const posterStyle = image => {
 const feedbackAction = event => `<button class="report-link feedback-open" type="button" data-feedback-kind="correction" data-feedback-event-id="${escapeHtml(event.id)}" data-feedback-event-title="${escapeHtml(encodeURIComponent(event.title))}">Informação errada?</button>`;
 const eventUrl = event => `/evento/${encodeURIComponent(event.id)}`;
 const compactNearbyDate = event => {
+  if (event.tourDates?.length) {
+    const next = event.tourDates.find(stop => (stop.endDate || stop.date) >= shiftedIso(0)) || event.tourDates.at(-1);
+    const [day, month] = dateParts(next.date);
+    return `${day} ${month} · ${event.tourDates.length} datas`;
+  }
   const [startDay, startMonth] = dateParts(event.date);
   if (!event.endDate) return `${startDay} ${startMonth}`;
   const [endDay, endMonth] = dateParts(event.endDate);
@@ -1043,8 +1049,8 @@ const compactNearbyDate = event => {
 function renderNearby(latitude, longitude, area) {
   const today = shiftedIso(0);
   const matches = EVENTS
-    .filter(event => isMainAgendaEvent(event) && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && areaCentres[event.area])
-    .map(event => ({ event, distance: distanceTo(latitude, longitude, ...areaCentres[event.area]) }))
+    .filter(event => isMainAgendaEvent(event) && hasOfficialPoster(event) && isCurrentOrUpcoming(event, today) && (event.tourDates || [event]).some(stop => areaCentres[stop.area]))
+    .map(event => ({ event, distance: Math.min(...(event.tourDates || [event]).filter(stop => (stop.endDate || stop.date) >= today && areaCentres[stop.area]).map(stop => distanceTo(latitude, longitude, ...areaCentres[stop.area]))) }))
     .sort((left, right) => left.distance - right.distance || left.event.date.localeCompare(right.event.date))
     .slice(0, 16)
     .sort((left, right) => Number(portraitPosterIds.has(right.event.id)) - Number(portraitPosterIds.has(left.event.id)) || left.distance - right.distance)
@@ -1169,14 +1175,16 @@ function startFeaturedAutoscroll() {
 }
 
 function eventCard(event) {
-  const [day, month] = dateParts(event.date);
-  const endDay = event.endDate ? eventDate(event.endDate).getDate() : null;
+  const nextStop = event.tourDates?.find(stop => (stop.endDate || stop.date) >= shiftedIso(0));
+  const cardDate = nextStop?.date || event.date;
+  const [day, month] = dateParts(cardDate);
+  const endDay = !event.tourDates?.length && event.endDate ? eventDate(event.endDate).getDate() : null;
   const availability = availabilityLabel(event);
   const statusClass = availability === "Esgotado" ? "sold" : availability === "Cancelado" ? "cancelled" : availability === "Bilhetes a confirmar" ? "pending" : "";
   return `<article class="event-card" data-event-id="${escapeHtml(event.id)}">
     <a class="event-card-link" href="${eventUrl(event)}" aria-label="Abrir ${escapeHtml(event.title)}">
-      <time class="date-box" datetime="${escapeHtml(event.date)}"><b>${escapeHtml(endDay ? `${day}–${endDay}` : day)}</b><span>${escapeHtml(month)}</span></time>
-      <span class="event-main"><span class="event-title">${escapeHtml(event.title)}</span><span class="event-venue">${escapeHtml(event.venue)} · ${escapeHtml(event.city)}</span></span>
+      <time class="date-box" datetime="${escapeHtml(cardDate)}"><b>${escapeHtml(endDay ? `${day}–${endDay}` : day)}</b><span>${escapeHtml(month)}</span></time>
+      <span class="event-main"><span class="event-title">${escapeHtml(event.title)}</span><span class="event-venue">${escapeHtml(event.tourDates?.length ? `${event.tourDates.length} datas · ${event.city}` : `${event.venue} · ${event.city}`)}</span></span>
       <span class="format">${escapeHtml(eventType(event))}</span>
       <span class="status ${statusClass}">${escapeHtml(availability)}</span>
       <span class="chevron" aria-hidden="true"><svg viewBox="0 0 20 20" focusable="false"><path d="M5 15 15 5M7 5h8v8" /></svg></span>
@@ -1189,8 +1197,16 @@ function filteredEvents() {
   const selectedRange = dateFilterRange(state.date);
   const today = shiftedIso(0);
   return EVENTS.filter(event => isMainAgendaEvent(event) && isCurrentOrUpcoming(event, today)).filter(event => {
-    const group = [event, ...festivalChildren(event)];
+    const group = event.tourDates?.length ? event.tourDates : [event, ...festivalChildren(event)];
     const text = searchableText(group.flatMap(item => [item.title, item.venue, item.city, item.district, item.area, eventType(item), ...item.genres]).join(" "));
+    const matchesStop = item => overlapsRange(item, selectedRange) &&
+      (!state.genre.length || item.genres.some(genre => state.genre.includes(genre))) &&
+      (!state.area.length || state.area.includes(item.area)) &&
+      (!state.district.length || state.district.includes(item.district)) &&
+      (!state.city.length || state.city.includes(item.city)) &&
+      (!state.type.length || state.type.includes(eventType(item))) &&
+      matchesPrice(item) && matchesTicketPrice(item) && matchesHighlight(item);
+    if (event.tourDates?.length) return (!query || text.includes(query)) && group.some(matchesStop);
     return (!query || text.includes(query)) &&
       group.some(item => overlapsRange(item, selectedRange)) &&
       (!state.genre.length || group.some(item => item.genres.some(genre => state.genre.includes(genre)))) &&
@@ -1201,7 +1217,10 @@ function filteredEvents() {
       matchesPrice(event) &&
       matchesTicketPrice(event) &&
       matchesHighlight(event);
-  }).sort((a, b) => a.date.localeCompare(b.date));
+  }).sort((a, b) => {
+    const nextDate = event => event.tourDates?.find(stop => (stop.endDate || stop.date) >= today)?.date || event.date;
+    return nextDate(a).localeCompare(nextDate(b));
+  });
 }
 
 function renderCalendar(matches) {
@@ -1213,6 +1232,17 @@ function renderCalendar(matches) {
   const mondayOffset = (firstDay.getDay() + 6) % 7;
   const eventByDay = new Map();
   matches.forEach(event => {
+    if (event.tourDates?.length) {
+      event.tourDates.forEach(stop => {
+        const last = eventDate(stop.endDate || stop.date);
+        for (const stopDate = eventDate(stop.date); stopDate <= last; stopDate.setDate(stopDate.getDate() + 1)) {
+          if (stopDate.getFullYear() !== year || stopDate.getMonth() !== month) continue;
+          const day = stopDate.getDate();
+          eventByDay.set(day, [...(eventByDay.get(day) || []), event]);
+        }
+      });
+      return;
+    }
     const first = eventDate(event.date);
     const last = eventDate(event.endDate || event.date);
     for (const date = new Date(first); date <= last; date.setDate(date.getDate() + 1)) {
@@ -1655,6 +1685,7 @@ async function loadApprovedCloudflareEvents() {
       }
       changed = true;
     });
+    window.refreshTourGroups?.(overrides);
     const known = new Set(EVENTS.map(event => event.id));
     const additions = result.items.flatMap(raw => {
       if (!raw || typeof raw !== "object" || !/^[a-z0-9-]{1,180}$/i.test(raw.id || "") || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date || "") || known.has(raw.id)) return [];

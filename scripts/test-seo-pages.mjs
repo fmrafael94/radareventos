@@ -44,6 +44,72 @@ test("only publishes current main events in landing pages", () => {
   assert.ok(events.some(event => event.id === "reign-fury-hardcore-fest-2026" && event.type === "Festival"), "Reign of Fury Fest must be published as a festival");
 });
 
+test("tours have one public record with every city and date preserved", () => {
+  const events = publicEventRecords(source, "2026-09-28");
+  const mono = events.find(event => event.id === "mono-snowdrop-lisboa-2027");
+  assert.deepEqual(mono.cities, ["Lisboa", "Porto"]);
+  assert.deepEqual(mono.tourStops.map(stop => stop.date), ["2027-02-10", "2027-02-11"]);
+  assert.equal(mono.endDate, "2027-02-11");
+  assert.ok(!events.some(event => event.id === "mono-snowdrop-porto-2027"));
+  assert.equal(events.find(event => event.id === "20vintexx-plano-b-2026")?.venue, "Plano B");
+});
+
+test("every grouped tour has valid ordered stops and no repeated public card", () => {
+  const window = {};
+  vm.runInNewContext(source, { window });
+  const ids = new Set(window.EVENTS.map(event => event.id));
+  const usedStops = new Set();
+  const publicIds = new Set(publicEventRecords(source).map(event => event.id));
+  for (const [mainId, stopIds] of Object.entries(window.TOUR_GROUPS)) {
+    assert.ok(publicIds.has(mainId), `missing canonical tour ${mainId}`);
+    assert.equal(stopIds[0], mainId);
+    assert.deepEqual([...stopIds].sort((left, right) => window.EVENTS.find(event => event.id === left).date.localeCompare(window.EVENTS.find(event => event.id === right).date)), [...stopIds], `${mainId} stops must be ordered`);
+    const main = window.EVENTS.find(event => event.id === mainId);
+    assert.equal(main.tourDates.length, stopIds.length);
+    for (const [index, stopId] of stopIds.entries()) {
+      assert.ok(ids.has(stopId), `missing stop ${stopId}`);
+      assert.ok(!usedStops.has(stopId), `stop ${stopId} belongs to multiple tours`);
+      usedStops.add(stopId);
+      assert.equal(main.tourDates[index].id, stopId);
+      if (index) {
+        assert.equal(window.EVENTS.find(event => event.id === stopId).seriesId, mainId);
+        assert.ok(!publicIds.has(stopId), `repeated card ${stopId}`);
+      }
+    }
+  }
+});
+
+test("tour stops keep newer official details when saved overrides are applied", () => {
+  const window = {};
+  vm.runInNewContext(source, { window, URL });
+  window.refreshTourGroups([
+    { id: "vul-fatal-move", patch: { sourceUrl: "https://example.com/old-poster.jpg", availability: "Bilhetes a confirmar" } },
+    { id: "fatal-move-santo-tirso", patch: { title: "Fatal Move + Fear The Lord + Lost Grave", tickets: "10 €", sourceUrl: "https://www.instagram.com/p/DczRDsYl61A/" } }
+  ]);
+  const tour = window.EVENTS.find(event => event.id === "vul-fatal-move");
+  assert.equal(tour.tourDates.length, 2);
+  assert.equal(tour.tourDates[0].sourceUrl, "https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath");
+  assert.equal(tour.tourDates[0].availability, "Disponível");
+  assert.equal(tour.tourDates[1].title, "Fatal Move + Fear The Lord + Lost Grave");
+  assert.equal(tour.tourDates[1].tickets, "10 €");
+});
+
+test("old tour-stop links redirect to the combined page", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/evento/mono-snowdrop-porto-2027"), { ASSETS: assets }, { waitUntil() {} });
+  assert.equal(response.status, 308);
+  assert.equal(response.headers.get("location"), "https://odesvio.pt/evento/mono-snowdrop-lisboa-2027");
+});
+
+test("tour page describes separate dated shows, not one continuous concert", async () => {
+  const response = await worker.fetch(new Request("https://odesvio.pt/evento/mono-snowdrop-lisboa-2027"), { ASSETS: assets }, { waitUntil() {} });
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /"@type":"EventSeries"/);
+  assert.match(html, /"startDate":"2027-02-10"/);
+  assert.match(html, /"startDate":"2027-02-11"/);
+  assert.match(html, /10.*fev.*11.*fev/s);
+});
+
 test("catalogue poster lookup never leaks an image from the next event", () => {
   const synthetic = `const updates = {
     "without-poster": { programme:[{ title:"No {poster} here" }] },

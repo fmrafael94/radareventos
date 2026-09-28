@@ -69,8 +69,36 @@ const humanDate = (iso, locale = "pt-PT") => {
 
 const eventLiteral = (source, id) => {
   const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return source.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`))?.[0] || "";
+  const start = source.search(new RegExp(`\\{\\s*id:\\s*"${escapedId}"`));
+  if (start < 0) return "";
+  let depth = 0;
+  let quote = "";
+  let escaped = false;
+  for (let index = start; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = "";
+      continue;
+    }
+    if (character === '"' || character === "'" || character === "`") { quote = character; continue; }
+    if (character === "{") depth += 1;
+    else if (character === "}" && --depth === 0) return source.slice(start, index + 1);
+  }
+  return "";
 };
+
+const tourGroupsFromSource = source => {
+  const block = source.match(/window\.TOUR_GROUPS\s*=\s*\{([\s\S]*?)\n\};/)?.[1] || "";
+  return new Map([...block.matchAll(/"([a-z0-9-]+)"\s*:\s*\[([^\]]+)\]/g)]
+    .map(([, mainId, stops]) => [mainId, [...stops.matchAll(/"([a-z0-9-]+)"/g)].map(match => match[1])]));
+};
+const tourStopsFor = (source, id) => (tourGroupsFromSource(source).get(id) || [])
+  .map(stopId => {
+    const literal = eventLiteral(source, stopId);
+    return { id: stopId, date: eventField(literal, "date"), endDate: eventField(literal, "endDate"), venue: eventField(literal, "venue"), city: eventField(literal, "city"), district: eventField(literal, "district"), area: eventField(literal, "area"), ticketUrl: eventField(literal, "ticketUrl"), availability: eventField(literal, "availability") };
+  }).filter(stop => stop.date);
 
 // The catalogue starts with compact event records and completes some of them
 // later through Object.assign. Browsers evaluate that JavaScript, while this
@@ -242,19 +270,26 @@ async function eventPage(request, env, id) {
     const events = await assetText(request, env, "/events.js");
     const patch = await publicEventPatch(env, id);
     if (patch.publicationStatus === "archived") return notFoundPage(request, env);
+    const tourGroups = tourGroupsFromSource(events);
+    const canonicalTourId = [...tourGroups].find(([, stops]) => stops.includes(id))?.[0];
+    if (canonicalTourId && canonicalTourId !== id) {
+      const canonical = new URL(request.url);
+      canonical.pathname = `/evento/${canonicalTourId}`;
+      return Response.redirect(canonical.toString(), 308);
+    }
+    const tourStops = canonicalTourId ? tourStopsFor(events, id) : [];
     const literal = eventLiteral(events, id);
     if (posterPublicationHoldIds(events).has(id) && !staticHoldIsReady(literal, patch)) return notFoundPage(request, env);
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
-    const cloudEvent = match ? null : await publishedEvent(env, id);
-    if (!match && !cloudEvent) return notFoundPage(request, env);
-    const event = match?.[0] || "";
+    const event = eventLiteral(events, id);
+    const cloudEvent = event ? null : await publishedEvent(env, id);
+    if (!event && !cloudEvent) return notFoundPage(request, env);
     const stringPatch = (key, fallback = "") => typeof patch[key] === "string" && patch[key].trim() ? patch[key].trim() : fallback;
     const title = stringPatch("title", cloudEvent?.title || eventField(event, "title") || "Evento");
     const date = stringPatch("date", cloudEvent?.date || eventField(event, "date"));
-    const endDate = stringPatch("endDate", cloudEvent?.endDate || eventField(event, "endDate"));
-    const venue = stringPatch("venue", cloudEvent?.venue || eventField(event, "venue"));
-    const city = stringPatch("city", cloudEvent?.city || eventField(event, "city"));
+    const endDate = stringPatch("endDate", tourStops.length ? tourStops.at(-1).endDate || tourStops.at(-1).date : cloudEvent?.endDate || eventField(event, "endDate"));
+    const venue = stringPatch("venue", tourStops.length && new Set(tourStops.map(stop => stop.venue)).size > 1 ? "Várias salas" : cloudEvent?.venue || eventField(event, "venue"));
+    const city = stringPatch("city", tourStops.length ? [...new Set(tourStops.map(stop => stop.city))].join(" · ") : cloudEvent?.city || eventField(event, "city"));
     const app = await assetText(request, env, "/app.js");
     // events.js editorial updates are applied after app.js's poster map in the
     // browser, so they are the current source of truth here as well. This
@@ -264,7 +299,7 @@ async function eventPage(request, env, id) {
     const canonical = `${url.origin}/evento/${encodeURIComponent(id)}`;
     const english = url.searchParams.get("lang") === "en";
     const pageLocale = english ? "en-GB" : "pt-PT";
-    const dateLabel = endDate && endDate !== date ? `${humanDate(date, pageLocale)}–${humanDate(endDate, pageLocale)}` : humanDate(date, pageLocale);
+    const dateLabel = tourStops.length ? tourStops.map(stop => humanDate(stop.date, pageLocale)).join(" · ") : endDate && endDate !== date ? `${humanDate(date, pageLocale)}–${humanDate(endDate, pageLocale)}` : humanDate(date, pageLocale);
     const description = [dateLabel, venue, city].filter(Boolean).join(" · ") || (english ? "Concerts, festivals and live music in Portugal." : "Agenda de concertos, festivais e música ao vivo em Portugal.");
     // Serve the official artwork from our own origin. That makes social previews
     // and the native share sheet independent from a third-party image host.
@@ -274,13 +309,22 @@ async function eventPage(request, env, id) {
     const image = poster ? `${url.origin}/api/event-poster/${encodeURIComponent(id)}?v=${cacheVersion(poster)}` : `${url.origin}/share-card.svg`;
     const eventSchema = JSON.stringify({
       "@context": "https://schema.org",
-      "@type": "MusicEvent",
+      "@type": tourStops.length ? "EventSeries" : "MusicEvent",
       name: title,
       startDate: date,
       ...(endDate ? { endDate } : {}),
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       eventStatus: stringPatch("availability", cloudEvent?.availability) === "Cancelado" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
-      location: { "@type": "Place", name: venue || "Local a confirmar", address: { "@type": "PostalAddress", addressLocality: city || "Portugal", addressCountry: "PT" } },
+      location: tourStops.length ? tourStops.map(stop => ({ "@type": "Place", name: stop.venue, address: { "@type": "PostalAddress", addressLocality: stop.city, addressCountry: "PT" } })) : { "@type": "Place", name: venue || "Local a confirmar", address: { "@type": "PostalAddress", addressLocality: city || "Portugal", addressCountry: "PT" } },
+      ...(tourStops.length ? { subEvent: tourStops.map(stop => ({
+        "@type": "MusicEvent",
+        name: `${title} · ${stop.city}`,
+        startDate: stop.date,
+        ...(stop.endDate ? { endDate: stop.endDate } : {}),
+        eventStatus: stop.availability === "Cancelado" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+        location: { "@type": "Place", name: stop.venue, address: { "@type": "PostalAddress", addressLocality: stop.city, addressCountry: "PT" } },
+        ...(stop.ticketUrl ? { offers: { "@type": "Offer", url: stop.ticketUrl, ...(stop.availability === "Esgotado" ? { availability: "https://schema.org/SoldOut" } : stop.availability === "Disponível" ? { availability: "https://schema.org/InStock" } : {}) } } : {})
+      })) } : {}),
       image: [image],
       url: canonical
     }).replace(/</g, "\\u003c");
@@ -301,9 +345,16 @@ async function eventPage(request, env, id) {
 
 export function sitemapEventIds(source, today = "0000-00-00") {
   const posterHolds = posterPublicationHoldIds(source);
-  const records = [...source.matchAll(/\{\s*id:\s*"([a-z0-9-]{1,180})"([^\n]*)/gi)]
-    .filter(match => !/\bseriesId:\s*"/i.test(match[2]))
-    .map(match => ({ id: match[1], lastDate: eventField(match[0], "endDate") || eventField(match[0], "date") }))
+  const tours = tourGroupsFromSource(source);
+  const tourChildren = new Set([...tours].flatMap(([, stops]) => stops.slice(1)));
+  const records = [...source.matchAll(/\{\s*id:\s*"([a-z0-9-]{1,180})"/gi)]
+    .map(match => {
+      const id = match[1];
+      const literal = eventLiteral(source, id);
+      const stops = tours.has(id) ? tourStopsFor(source, id) : [];
+      return { id, child: /\bseriesId:\s*"/i.test(literal) || tourChildren.has(id), lastDate: stops.length ? stops.at(-1).endDate || stops.at(-1).date : eventField(literal, "endDate") || eventField(literal, "date") };
+    })
+    .filter(record => !record.child)
     .filter(record => !posterHolds.has(record.id) && (!record.lastDate || record.lastDate >= today));
   const prefixBlock = source.match(/const festivalSeriesPrefixes = \{([\s\S]*?)\};/)?.[1] || "";
   const series = [...prefixBlock.matchAll(/"([a-z0-9-]+)"\s*:\s*"([a-z0-9-]+)"/gi)]
@@ -323,16 +374,24 @@ const isFreeEvent = event => /entrada livre|entrada gratuita|gratuit[oa]|gr[aá]
 export function publicEventRecords(source, today = "0000-00-00", excluded = new Set()) {
   return sitemapEventIds(source, today).filter(id => !excluded.has(id)).map(id => {
     const literal = eventLiteral(source, id);
+    const tourStops = tourStopsFor(source, id);
+    const cities = [...new Set(tourStops.map(stop => stop.city))];
+    const districts = [...new Set(tourStops.map(stop => stop.district))];
+    const areas = [...new Set(tourStops.map(stop => stop.area))];
     return {
       id,
       title: eventField(literal, "title"),
       date: eventField(literal, "date"),
-      endDate: eventField(literal, "endDate"),
+      endDate: tourStops.length ? tourStops.at(-1).endDate || tourStops.at(-1).date : eventField(literal, "endDate"),
       time: eventField(literal, "time"),
-      venue: eventField(literal, "venue"),
-      city: eventField(literal, "city"),
+      venue: tourStops.length && new Set(tourStops.map(stop => stop.venue)).size > 1 ? "Várias salas" : eventField(literal, "venue"),
+      city: cities.length ? cities.join(" · ") : eventField(literal, "city"),
       district: eventField(literal, "district"),
       area: eventField(literal, "area"),
+      cities: cities.length ? cities : [eventField(literal, "city")],
+      districts: districts.length ? districts : [eventField(literal, "district")],
+      areas: areas.length ? areas : [eventField(literal, "area")],
+      tourStops,
       type: eventField(literal, "type") || "Concerto",
       tickets: eventField(literal, "tickets"),
       availability: eventField(literal, "availability"),
@@ -344,7 +403,7 @@ export function publicEventRecords(source, today = "0000-00-00", excluded = new 
 const countsFor = (events, key) => {
   const counts = new Map();
   for (const event of events) {
-    const values = key === "genres" ? event.genres : [event[key]];
+    const values = key === "genres" ? event.genres : key === "city" ? event.cities : key === "district" ? event.districts : key === "area" ? event.areas : [event[key]];
     for (const value of values.filter(Boolean)) counts.set(value, (counts.get(value) || 0) + 1);
   }
   return [...counts].map(([name, count]) => ({ name, slug: slugify(name), count })).sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "pt"));
@@ -397,7 +456,7 @@ export function landingRoutes(source, today = "0000-00-00", excluded = new Set()
   ];
   for (const city of cities) {
     for (const genre of genres) {
-      const count = events.filter(event => event.city === city.name && event.genres.includes(genre.name)).length;
+      const count = events.filter(event => event.cities.includes(city.name) && event.genres.includes(genre.name)).length;
       if (count >= 3) routes.push(routeEntry(`/concertos/${city.slug}/${genre.slug}`, `${genre.name} ao vivo em ${city.name}`, "cityGenre", `${city.name}\u0000${genre.name}`));
     }
   }
@@ -414,15 +473,16 @@ function resolveLanding(source, pathname, today, excluded = new Set()) {
   const [weekStart, weekEnd] = weekRange(today);
   const [city, genre] = route.value.split("\u0000");
   const events = allEvents.filter(event => {
-    if (route.kind === "week") return event.date <= weekEnd && (event.endDate || event.date) >= weekStart;
-    if (route.kind === "weekend") return event.date <= weekendEnd && (event.endDate || event.date) >= weekendStart;
+    const dates = event.tourStops.length ? event.tourStops : [event];
+    if (route.kind === "week") return dates.some(stop => stop.date <= weekEnd && (stop.endDate || stop.date) >= weekStart);
+    if (route.kind === "weekend") return dates.some(stop => stop.date <= weekendEnd && (stop.endDate || stop.date) >= weekendStart);
     if (route.kind === "free") return isFreeEvent(event);
     if (route.kind === "festival") return event.type === "Festival" && event.date.startsWith(`${route.value}-`);
-    if (route.kind === "city") return event.city === route.value;
-    if (route.kind === "district") return event.district === route.value;
-    if (route.kind === "area") return event.area === route.value;
+    if (route.kind === "city") return event.cities.includes(route.value);
+    if (route.kind === "district") return event.districts.includes(route.value);
+    if (route.kind === "area") return event.areas.includes(route.value);
     if (route.kind === "genre") return event.genres.includes(route.value);
-    if (route.kind === "cityGenre") return event.city === city && event.genres.includes(genre);
+    if (route.kind === "cityGenre") return event.cities.includes(city) && event.genres.includes(genre);
     return true;
   }).sort((left, right) => left.date.localeCompare(right.date) || left.title.localeCompare(right.title, "pt"));
   return { ...route, events, routes };
@@ -451,7 +511,7 @@ async function landingPage(request, env, pathname) {
     const canonical = `${origin}${landing.path}`;
     const description = landingDescription(landing);
     const cards = landing.events.map(event => {
-      const date = event.endDate && event.endDate !== event.date ? `${humanDate(event.date)}–${humanDate(event.endDate)}` : humanDate(event.date);
+      const date = event.tourStops.length ? event.tourStops.map(stop => humanDate(stop.date)).join(" · ") : event.endDate && event.endDate !== event.date ? `${humanDate(event.date)}–${humanDate(event.endDate)}` : humanDate(event.date);
       const format = [event.type, event.genres.slice(0, 2).join(" · ")].filter(Boolean).join(" · ");
       return `<article class="landing-event"><a href="/evento/${encodeURIComponent(event.id)}"><time datetime="${escapeHtml(event.date)}">${escapeHtml(date)}</time><div><p>${escapeHtml(format)}</p><h2>${escapeHtml(event.title)}</h2><span>${escapeHtml([event.venue, event.city].filter(Boolean).join(" · "))}</span></div><b aria-hidden="true">↗</b></a></article>`;
     }).join("");
@@ -481,20 +541,9 @@ async function landingPage(request, env, pathname) {
 // server-rendered collection gives crawlers and no-JavaScript visitors a
 // stable set of ordinary links into the same current, public agenda.
 export function homepageEventLinks(source, today = "0000-00-00", limit = 12) {
-  const publicIds = new Set(sitemapEventIds(source, today));
-  return [...publicIds]
-    .map(id => {
-      const literal = eventLiteral(source, id);
-      return {
-        id,
-        title: eventField(literal, "title"),
-        date: eventField(literal, "date"),
-        endDate: eventField(literal, "endDate"),
-        venue: eventField(literal, "venue"),
-        city: eventField(literal, "city")
-      };
-    })
-    .filter(event => event.title && event.date && event.date >= today)
+  return publicEventRecords(source, today)
+    .map(event => ({ ...event, date: event.tourStops.find(stop => (stop.endDate || stop.date) >= today)?.date || event.date }))
+    .filter(event => event.title && event.date && (event.endDate || event.date) >= today)
     .sort((left, right) => left.date.localeCompare(right.date) || left.title.localeCompare(right.title, "pt"))
     .slice(0, limit);
 }
@@ -585,11 +634,11 @@ async function eventPoster(request, env, id, executionCtx) {
     const cached = await cache.match(request);
     if (cached) return cached;
     const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const match = events.match(new RegExp(`\\{\\s*id:\\s*"${escapedId}"[\\s\\S]*?\\}(?=,|\\))`));
-    const cloudEvent = match ? null : await publishedEvent(env, id);
-    if (!match && !cloudEvent) return new Response("Cartaz não encontrado.", { status: 404 });
+    const event = eventLiteral(events, id);
+    const cloudEvent = event ? null : await publishedEvent(env, id);
+    if (!event && !cloudEvent) return new Response("Cartaz não encontrado.", { status: 404 });
     const app = await assetText(request, env, "/app.js");
-    const poster = (typeof patch.image === "string" && patch.image.trim()) || imageFromCatalogueUpdate(events, id) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(match?.[0] || "", "image");
+    const poster = (typeof patch.image === "string" && patch.image.trim()) || imageFromCatalogueUpdate(events, id) || app.match(new RegExp(`["']${escapedId}["']\\s*:\\s*\\[\\s*["']([^"']+)`))?.[1] || cloudEvent?.image || eventField(event, "image");
     if (!poster) return shareFallback(request, env);
     const posterUrl = new URL(poster);
     if (!/^https?:$/.test(posterUrl.protocol)) return shareFallback(request, env);

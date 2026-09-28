@@ -6,8 +6,8 @@ window.EVENTS = [
   { id:"living-tombstone", title:"The Living Tombstone", date:"2026-09-09", time:"21:00", venue:"LAV — Lisboa ao Vivo", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", genres:["Pop","Rock"], age:"M/6", tickets:"Esgotado", ticketUrl:"https://www.ticketline.pt/pt/evento/the-living-tombstone-multiplayer-tour-98429", availability:"Esgotado", capacity:"Esgotado", source:"Everything Is New — página do evento", sourceUrl:"https://everythingisnew.pt/the-living-tombstone/", verifiedAt:"2026-08-23", salesCheckedAt:"2026-08-23" },
   { id:"ronnie-wood", title:"Ronnie Wood", date:"2026-09-14", time:"21:00", venue:"Coliseu dos Recreios", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", genres:["Rock"], age:"M/6", tickets:"45 €–195 €", ticketUrl:"https://coliseulisboa.bol.pt/Comprar/Bilhetes/179744/1954378/7693/Lugares", availability:"Disponível", capacity:"Não divulgado", source:"Everything Is New — página do evento", sourceUrl:"https://everythingisnew.pt/ronnie-wood/", verifiedAt:"2026-08-23", salesCheckedAt:"2026-08-23" },
   { id:"fat-freddys-drop", title:"Fat Freddy’s Drop", date:"2026-09-23", time:"21:00", venue:"Sagres Campo Pequeno", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", genres:["Reggae","Dub","Soul"], age:"M/6", tickets:"28 €–38 €", ticketUrl:"https://ticketline.pt/evento/fat-freddy-s-drop-97461", availability:"Disponível", capacity:"Não divulgado", source:"Everything Is New — página do evento", sourceUrl:"https://everythingisnew.pt/fat-freddys-drop-lisboa-2026/", verifiedAt:"2026-08-23", salesCheckedAt:"2026-08-23" },
-  { id:"placebo-porto", title:"Placebo", date:"2026-09-28", time:"20:00", venue:"Super Bock Arena", city:"Porto", district:"Porto", area:"Grande Porto", genres:["Rock","Alternativo"], age:"M/6", tickets:"Desde 26 €; VIP até 195 €", ticketUrl:"https://www.ticketline.pt/evento/102515", availability:"Disponível", capacity:"Não divulgado", source:"Everything Is New — página do evento", sourceUrl:"https://everythingisnew.pt/placebo-4/", verifiedAt:"2026-08-23", salesCheckedAt:"2026-08-23" },
-  { id:"placebo-lisboa", title:"Placebo", date:"2026-09-29", time:"20:00", venue:"Sagres Campo Pequeno", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", genres:["Rock","Alternativo"], age:"M/6", tickets:"Desde 26 €; VIP até 195 €", ticketUrl:"https://www.ticketline.pt/evento/102515", availability:"Disponível", capacity:"Não divulgado", source:"Everything Is New — página do evento", sourceUrl:"https://everythingisnew.pt/placebo-5/", verifiedAt:"2026-08-23", salesCheckedAt:"2026-08-23" },
+  { id:"placebo-porto", title:"Placebo — 30th Anniversary Tour", date:"2026-09-28", time:"Portas 18:30 · início 20:00", venue:"Super Bock Arena", city:"Porto", district:"Porto", area:"Grande Porto", genres:["Rock","Alternativo"], age:"M/6", tickets:"Esgotado", ticketUrl:"https://www.ticketline.pt/evento/102515", availability:"Esgotado", capacity:"Esgotado", source:"Everything Is New — página do evento", sourceUrl:"https://everythingisnew.pt/placebo-4/", verifiedAt:"2026-09-28", salesCheckedAt:"2026-09-28" },
+  { id:"placebo-lisboa", title:"Placebo", date:"2026-09-29", time:"20:00", venue:"Sagres Campo Pequeno", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", genres:["Rock","Alternativo"], age:"M/6", tickets:"Esgotado", ticketUrl:"https://www.ticketline.pt/evento/102515", availability:"Esgotado", capacity:"Esgotado", source:"Everything Is New — página do evento", sourceUrl:"https://everythingisnew.pt/placebo-5/", verifiedAt:"2026-09-28", salesCheckedAt:"2026-09-28" },
   { id:"transvision-lisboa", title:"Transvision Vamp", date:"2026-09-30", time:"Consultar", venue:"LAV — Lisboa ao Vivo", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", genres:["Rock","Pop"], age:"Consultar organização", tickets:"Bilhetes online", ticketUrl:"https://www.clap-box.com/", availability:"Disponível", capacity:"Não divulgado", source:"CLAP/BOX", sourceUrl:"https://www.clap-box.com/", verifiedAt:"2026-08-22" },
   { id:"transvision-porto", title:"Transvision Vamp", date:"2026-10-01", time:"Consultar", venue:"Hard Club", city:"Porto", district:"Porto", area:"Grande Porto", genres:["Rock","Pop"], age:"Consultar organização", tickets:"Bilhetes online", ticketUrl:"https://www.clap-box.com/", availability:"Disponível", capacity:"Não divulgado", source:"CLAP/BOX", sourceUrl:"https://www.clap-box.com/", verifiedAt:"2026-08-22" },
   { id:"evanescence", title:"Evanescence", date:"2026-10-04", time:"20:00", venue:"MEO Arena", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", genres:["Rock","Metal"], age:"M/6", tickets:"Bilhetes online", ticketUrl:"https://blueticket.meo.pt/pt/event/15722/purchase", availability:"Disponível", capacity:"Não divulgado", source:"Música no Coração — página oficial do evento", sourceUrl:"https://musicanocoracao.com/events/evanescence-2026", verifiedAt:"2026-09-24", salesCheckedAt:"2026-09-24" },
@@ -372,7 +372,7 @@ window.EVENTS.push(
   { id:"vul-afterglow", title:"Afterglow Music Session", date:"2026-09-26", endDate:"2026-09-27", time:"17:00–06:00", venue:"Village Underground Lisboa", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", type:"Night club", genres:["Eletrónica","House"], age:"Consultar organização", tickets:"Consultar organização", ticketUrl:"https://vulisboa.com/eventos", availability:"Disponível", capacity:"Não divulgado", source:"Village Underground Lisboa", sourceUrl:"https://vulisboa.com/eventos", verifiedAt:"2026-08-23" },
   { id:"vul-riot", title:"RIOT x VUL", date:"2026-10-02", endDate:"2026-10-03", time:"17:00–06:00", venue:"Village Underground Lisboa", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", type:"Night club", genres:["Eletrónica","Bass"], age:"Consultar organização", tickets:"Entrada livre 17:00–23:00", ticketUrl:"https://vulisboa.com/eventos/riot-x-vul-october", availability:"Disponível", capacity:"Não divulgado", source:"Village Underground Lisboa — página oficial do evento", sourceUrl:"https://vulisboa.com/eventos/riot-x-vul-october", verifiedAt:"2026-09-24" },
   { id:"vul-beleza-abstracta", title:"Beleza Abstracta Prog Fest", date:"2026-10-03", endDate:"2026-10-04", time:"17:00–06:00", venue:"Village Underground Lisboa", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", type:"Night club", genres:["Eletrónica","Experimental"], age:"Consultar organização", tickets:"Entrada livre 17:00–23:00", ticketUrl:"https://vulisboa.com/eventos/beleza-abstracta-prog-fest-03-out", availability:"Disponível", capacity:"Não divulgado", source:"Village Underground Lisboa — página oficial do evento", sourceUrl:"https://vulisboa.com/eventos/beleza-abstracta-prog-fest-03-out", verifiedAt:"2026-09-24" },
-  { id:"vul-fatal-move", title:"Sportswear Bookings — Fatal Move / Outta Spite / NoPath", date:"2026-10-09", time:"20:00–23:00", venue:"Village Underground Lisboa", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", type:"Concerto", genres:["Hardcore","Punk","Rock"], age:"Consultar organização", tickets:"Bilhetes online", ticketUrl:"https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath", availability:"Disponível", capacity:"Não divulgado", source:"Village Underground Lisboa — página oficial do evento", sourceUrl:"https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath", verifiedAt:"2026-09-24" },
+  { id:"vul-fatal-move", title:"Fatal Move — Iberic Tour", date:"2026-10-09", time:"20:00–23:00", venue:"Village Underground Lisboa", city:"Lisboa", district:"Lisboa", area:"Grande Lisboa", type:"Concerto", genres:["Hardcore","Punk","Rock"], lineup:"Fatal Move · Outta Spite · NoPath", age:"Consultar organização", tickets:"Bilhetes online", ticketUrl:"https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath", availability:"Disponível", capacity:"Não divulgado", source:"Village Underground Lisboa — página oficial do evento", sourceUrl:"https://vulisboa.com/eventos/sportswear-bookings-presents-fatal-move-/-outta-spite-/-nopath", verifiedAt:"2026-09-28" },
   { id:"fatal-move-santo-tirso", title:"Fatal Move / Fear The Lord / Lost Grave", date:"2026-10-10", time:"22:00", venue:"Carpe Diem", city:"Santo Tirso", district:"Porto", area:"Grande Porto", type:"Concerto", genres:["Hardcore","Metal","Punk"], lineup:"Fatal Move · Fear The Lord · Lost Grave", age:"Consultar organização", tickets:"10 €", ticketUrl:"https://www.instagram.com/p/DczRDsYl61A/?img_index=1", availability:"Disponível", capacity:"Não divulgado", source:"Born To Resist Events & Booking — Instagram oficial", sourceUrl:"https://www.instagram.com/p/DczRDsYl61A/?img_index=1", image:"/brand/event-posters/fatal-move-santo-tirso-2026.webp", posterSourceUrl:"https://www.instagram.com/p/DczRDsYl61A/?img_index=1", posterVerifiedAt:"2026-09-24", verifiedAt:"2026-09-24", salesCheckedAt:"2026-09-24" },
   { id:"faro-festival-f", title:"Festival F 2026", date:"2026-09-03", endDate:"2026-09-05", time:"18:00–01:00", venue:"Vila Adentro — Centro Histórico de Faro", city:"Faro", district:"Faro", area:"Algarve", type:"Festival", genres:["Música Portuguesa","Pop","Rock","Hip-Hop","Eletrónica"], age:"M/12; menores de 12 acompanhados não pagam", tickets:"Diário 22 €; passe 3 dias 54 €", ticketUrl:"https://bilheteira.fnac.pt/Evento-559465/FESTIVAL-F", availability:"Disponível", capacity:"Não divulgado", source:"Festival F — site oficial", sourceUrl:"https://www.festivalf.pt/pt/Default.aspx", image:"https://cms.cm-faro.pt/upload_files/client_id_1/website_id_6/HomeBanner/Homepage_festival_f_2026_3.jpg", verifiedAt:"2026-08-23" },
   { id:"faro-alternativo-2026", title:"Faro Alternativo 2026", date:"2026-10-02", endDate:"2026-10-04", time:"Consultar programa", venue:"Passeio Ribeirinho", city:"Faro", district:"Faro", area:"Algarve", type:"Festival", genres:["Metal","Rock","Hardcore","Punk","Alternativo"], age:"Consultar organização", tickets:"Consultar organização", ticketUrl:"https://www.caminhosmetalicos.com/agenda/", availability:"Disponível", capacity:"Não divulgado", source:"Caminhos Metálicos / Faro Alternativo", sourceUrl:"https://www.caminhosmetalicos.com/agenda/", verifiedAt:"2026-08-23" },
@@ -584,7 +584,7 @@ const curatedFestivalDetails = {
     { date:"2026-09-19", time:"Abertura 15:00", title:"Der Weg einer Freiheit · Wolfheart · Shores of Null · The Ominous Circle · Capela Mortuária · Against Them All · Debunker · Godark", venue:"Junto à Barragem, Rio de Moinhos, Penafiel" }
   ] },
   "einar-solberg-porto": { image:"https://www.masqueticket.com/storage/img/F0000002636_einar_solberg_portugal_bilhetes_masqueticket_2026.jpg", posterSourceUrl:"https://www.masqueticket.com/entradas/einar-solberg-oporto-lisboa-portugal-bilhetes-tickets-2026", posterVerifiedAt:"2026-08-30", source:"Free Music / MASqueTICKET — página oficial", sourceUrl:"https://www.masqueticket.com/entradas/einar-solberg-oporto-lisboa-portugal-bilhetes-tickets-2026", mapsUrl:"https://www.google.com/maps/search/?api=1&query=M.Ou.Co.%2C%20Rua%20de%20Frei%20Heitor%20Pinto%2065%2C%20Porto", time:"Portas 19:00 · início 19:30", tickets:"28 € + 2,07 € de taxa", ticketUrl:"https://www.masqueticket.com/entradas/einar-solberg-oporto-lisboa-portugal-bilhetes-tickets-2026", availability:"Disponível", age:"M/6", lineup:"Einar Solberg · Royal Sorrow · Raphael Weinroth-Browne" },
-  "brujeria-porto": { image:"https://www.masqueticket.com/storage/img/F0000002694_brujeria_lisboa_y_oporto_2026_en_masqueticket.jpg", posterSourceUrl:"https://www.masqueticket.com/entradas/brujeria-conciertos-lisboa-porto-portugal-tour-2026", posterVerifiedAt:"2026-08-30", source:"Hell Xis / MASqueTICKET — página oficial", sourceUrl:"https://www.masqueticket.com/entradas/brujeria-conciertos-lisboa-porto-portugal-tour-2026", mapsUrl:"https://www.google.com/maps/search/?api=1&query=M.Ou.Co.%2C%20Rua%20de%20Frei%20Heitor%20Pinto%2065%2C%20Porto", tickets:"Bilhetes oficiais — consultar disponibilidade", ticketUrl:"https://www.masqueticket.com/entradas/brujeria-conciertos-lisboa-porto-portugal-tour-2026", availability:"Disponível" },
+  "brujeria-porto": { image:"https://www.masqueticket.com/storage/img/F0000002694_brujeria_lisboa_y_oporto_2026_en_masqueticket.jpg", posterSourceUrl:"https://www.masqueticket.com/entradas/brujeria-conciertos-lisboa-porto-portugal-tour-2026", posterVerifiedAt:"2026-09-28", source:"Hell Xis / MASqueTICKET — página oficial", sourceUrl:"https://www.masqueticket.com/entradas/brujeria-conciertos-lisboa-porto-portugal-tour-2026", mapsUrl:"https://www.google.com/maps/search/?api=1&query=M.Ou.Co.%2C%20Rua%20de%20Frei%20Heitor%20Pinto%2065%2C%20Porto", time:"Portas 19:30 · início 20:00", age:"M/16", tickets:"20 € + 1,90 € de gestão", ticketUrl:"https://www.masqueticket.com/entradas/brujeria-conciertos-lisboa-porto-portugal-tour-2026", availability:"Disponível", verifiedAt:"2026-09-28", salesCheckedAt:"2026-09-28" },
   "moonspell-porto-2026": { image:"https://moonspell.com/galeria/tours/2d7f83fba42dcd21dc48a4c916cc714a.jpg", posterSourceUrl:"https://moonspell.com/tours/-/invicta-halloween-82/", posterVerifiedAt:"2026-09-27", source:"Free Music — bilheteira oficial", sourceUrl:"https://freemusic.seetickets.com/event/moonspell-invicta-halloween/hard-club-sala-1/3628985", mapsUrl:"https://www.google.com/maps/search/?api=1&query=Hard%20Club%2C%20Porto", time:"Portas 20:00 · início 21:00", tickets:"Esgotado", ticketUrl:"https://freemusic.seetickets.com/event/moonspell-invicta-halloween/hard-club-sala-1/3628985", availability:"Esgotado", age:"M/6", lineup:"Moonspell · NÜN" },
   "flotsam-jetsam-lisboa": { image:"https://www.rcaclub.com/data/uploads/2026/08/772547460_122132533149215404_4049675726061993101_n.jpg", posterSourceUrl:"https://www.rcaclub.com/flotsam-and-jetsam/", posterVerifiedAt:"2026-08-30", source:"RCA Club / Notredame Productions — página oficial", sourceUrl:"https://www.rcaclub.com/flotsam-and-jetsam/", mapsUrl:"https://www.google.com/maps/search/?api=1&query=RCA%20Club%2C%20Rua%20Jo%C3%A3o%20Saraiva%2018%2C%20Lisboa", time:"Portas 20:00 · início 21:00", tickets:"25 € pré-venda", ticketUrl:"", availability:"Disponível", age:"M/12" },
   "heavy-duty-fest-2026": { image:"https://www.rcaclub.com/data/uploads/2026/08/735238435_122184066992835961_1274634887569258260_n.jpg", posterSourceUrl:"https://www.rcaclub.com/heavy-duty-fest/", posterVerifiedAt:"2026-08-30", source:"RCA Club / Electric Chaos Productions — página oficial", sourceUrl:"https://www.rcaclub.com/heavy-duty-fest/", mapsUrl:"https://www.google.com/maps/search/?api=1&query=RCA%20Club%2C%20Rua%20Jo%C3%A3o%20Saraiva%2018%2C%20Lisboa", tickets:"35 € pré-venda · 40 € no dia", ticketUrl:"", availability:"Disponível", age:"M/12", lineup:"Medieval Steel · Elixir · Tarantula · Venator · Wicked Leather · Toxik Attack" },
@@ -805,3 +805,71 @@ const posterPublicationHoldIds = new Set(window.POSTER_PUBLICATION_HOLDS);
 window.EVENTS.forEach(event => {
   event.publicationStatus = posterPublicationHoldIds.has(event.id) ? "poster_pending" : "published";
 });
+
+// One public page per tour or multi-date run. Keep each stop in the catalogue
+// for its own official source, tickets, venue and time; older stop URLs
+// redirect to the first date's canonical page at the edge.
+window.TOUR_GROUPS = {
+  "einar-solberg-porto": ["einar-solberg-porto", "einar-solberg"],
+  "placebo-porto": ["placebo-porto", "placebo-lisboa"],
+  "transvision-lisboa": ["transvision-lisboa", "transvision-porto"],
+  "vul-fatal-move": ["vul-fatal-move", "fatal-move-santo-tirso"],
+  "rui-veloso-porto": ["rui-veloso-porto", "rui-veloso-lisboa"],
+  "figuras-pedro-abrunhosa": ["figuras-pedro-abrunhosa", "povoa-pedro-abrunhosa"],
+  "andre-rieu-lisboa-2026-10-29": ["andre-rieu-lisboa-2026-10-29", "andre-rieu-lisboa-2026-10-30", "andre-rieu-lisboa-2026-10-31"],
+  "brujeria-lisboa": ["brujeria-lisboa", "brujeria-porto"],
+  "bryan-adams-porto-2026-11-17": ["bryan-adams-porto-2026-11-17", "bryan-adams-porto-2026-11-18", "bryan-adams-lisboa-2026-11-20", "bryan-adams-lisboa-2026-11-21"],
+  "this-will-destroy-you-lisboa-2026": ["this-will-destroy-you-lisboa-2026", "this-will-destroy-you-porto-2026"],
+  "sara-correia-porto-1": ["sara-correia-porto-1", "sara-correia-porto-2"],
+  "macy-gray-braga": ["macy-gray-braga", "macy-gray-lisboa"],
+  "mono-snowdrop-lisboa-2027": ["mono-snowdrop-lisboa-2027", "mono-snowdrop-porto-2027"],
+  "simple-minds-porto-2027": ["simple-minds-porto-2027", "simple-minds-lisboa-2027"],
+  "warhaus-lisboa-2027": ["warhaus-lisboa-2027", "warhaus-porto-2027"],
+  "the-mission-porto-2027": ["the-mission-porto-2027", "the-mission-lisboa-2027"],
+  "rodrigo-gabriela-lisboa-2027": ["rodrigo-gabriela-lisboa-2027", "rodrigo-gabriela-porto-2027"]
+};
+const tourCatalogue = new Map(window.EVENTS.map(event => [event.id, event]));
+const tourOriginals = new Map(window.EVENTS.map(event => [event.id, { ...event }]));
+const tourStaticPriority = {
+  "vul-fatal-move": new Set(["sourceUrl", "ticketUrl", "tickets", "availability"]),
+  "brujeria-porto": new Set(["sourceUrl", "ticketUrl", "tickets", "availability"])
+};
+window.refreshTourGroups = (overrides = []) => {
+  const patches = new Map(overrides.map(item => [item.id, item.patch]));
+  for (const [mainId, stopIds] of Object.entries(window.TOUR_GROUPS)) {
+    const stops = stopIds.map(id => {
+      const base = tourOriginals.get(id);
+      if (!base) return null;
+      const stop = { ...base };
+      const patch = patches.get(id);
+      if (patch && typeof patch === "object") {
+        for (const key of ["title", "city", "venue", "tickets", "availability", "ticketUrl", "sourceUrl", "image", "posterSourceUrl", "publicationStatus", "date", "endDate"]) {
+          const value = patch[key];
+          if (typeof value !== "string" || !value.trim() || tourStaticPriority[id]?.has(key)) continue;
+          if ((key === "date" || key === "endDate") && !/^\d{4}-\d{2}-\d{2}$/.test(value)) continue;
+          if (key === "publicationStatus" && !["published", "archived"].includes(value)) continue;
+          if (["ticketUrl", "sourceUrl", "image", "posterSourceUrl"].includes(key)) {
+            try { if (!/^https?:$/.test(new URL(value).protocol)) continue; } catch { continue; }
+            if (key === "sourceUrl" && /\.(?:jpe?g|png|webp)(?:\?|$)/i.test(value) && !/\.(?:jpe?g|png|webp)(?:\?|$)/i.test(base.sourceUrl || "")) continue;
+          }
+          stop[key] = value.slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
+        }
+      }
+      return stop;
+    });
+    if (stops.some(stop => !stop)) continue;
+    const main = tourCatalogue.get(mainId);
+    stops.forEach((stop, index) => Object.assign(tourCatalogue.get(stop.id), stop, index ? { seriesId: mainId } : {}));
+    main.tourDates = stops.map(stop => ({ ...stop }));
+    main.date = stops[0].date;
+    main.endDate = stops.reduce((last, stop) => (stop.endDate || stop.date) > last ? (stop.endDate || stop.date) : last, main.date);
+    main.tourCities = [...new Set(stops.map(stop => stop.city))];
+    main.city = main.tourCities.join(" · ");
+    main.venue = new Set(stops.map(stop => stop.venue)).size === 1 ? stops[0].venue : "Várias salas";
+    main.time = "Ver horários por data";
+    main.tickets = "Bilhetes por data";
+    main.ticketUrl = "";
+    main.availability = stops.every(stop => stop.availability === "Esgotado") ? "Esgotado" : "Disponível";
+  }
+};
+window.refreshTourGroups();

@@ -60,19 +60,21 @@ async function applyStoredEventOverride(event) {
     const patch = Array.isArray(result.overrides)
       ? result.overrides.find(item => item?.id === event.id)?.patch
       : null;
-    if (!patch || typeof patch !== "object") return;
-    for (const key of ["title", "city", "venue", "tickets", "availability"]) {
-      if (typeof patch[key] === "string" && patch[key].trim()) event[key] = patch[key].trim().slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
+    if (patch && typeof patch === "object") {
+      for (const key of ["title", "city", "venue", "tickets", "availability"]) {
+        if (typeof patch[key] === "string" && patch[key].trim()) event[key] = patch[key].trim().slice(0, key === "title" ? 180 : key === "tickets" ? 220 : 1000);
+      }
+      if (["published", "archived"].includes(patch.publicationStatus)) event.publicationStatus = patch.publicationStatus;
+      for (const key of ["date", "endDate"]) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(patch[key] || "")) event[key] = patch[key];
+      }
+      for (const key of ["ticketUrl", "sourceUrl", "image", "posterSourceUrl"]) {
+        if (typeof patch[key] !== "string") continue;
+        const url = safePublicUrl(patch[key]);
+        if (url) event[key] = url;
+      }
     }
-    if (["published", "archived"].includes(patch.publicationStatus)) event.publicationStatus = patch.publicationStatus;
-    for (const key of ["date", "endDate"]) {
-      if (/^\d{4}-\d{2}-\d{2}$/.test(patch[key] || "")) event[key] = patch[key];
-    }
-    for (const key of ["ticketUrl", "sourceUrl", "image", "posterSourceUrl"]) {
-      if (typeof patch[key] !== "string") continue;
-      const url = safePublicUrl(patch[key]);
-      if (url) event[key] = url;
-    }
+    if (event.tourDates?.length) window.refreshTourGroups?.(result.overrides);
   } catch {
     // The static event remains intentionally usable when the optional update
     // channel is unavailable.
@@ -80,6 +82,7 @@ async function applyStoredEventOverride(event) {
 }
 
 function ticketButton(event) {
+  if (event.tourDates?.length) return `<a class="event-ticket" href="#tour-dates">Escolher data</a>`;
   if (event.availability === "Esgotado") return `<span class="event-ticket muted">Esgotado</span>`;
   if ((event.availability === "Entrada livre" || /entrada\s+(?:livre|gratuita)/i.test(event.tickets || "")) && !event.ticketUrl) return `<span class="event-ticket muted">${escapeHtml(event.tickets || "Entrada livre")}</span>`;
   if (!event.ticketUrl) return `<span class="event-ticket muted">Bilhetes por confirmar</span>`;
@@ -88,6 +91,7 @@ function ticketButton(event) {
 
 const eventSeriesName = event => String(event.title || "").split(" — ")[0].replace(/\s+\d{4}$/, "").trim();
 const festivalProgramme = event => {
+  if (event.tourDates?.length) return event.tourDates;
   if (!event.endDate) return [];
   if (Array.isArray(event.programme) && event.programme.length) return event.programme;
   return (window.EVENTS || [])
@@ -116,6 +120,7 @@ const programmeParent = candidate => (window.EVENTS || []).find(parent => {
 const isMainAgendaEvent = candidate => !candidate.seriesId && !programmeParent(candidate);
 const shortDate = iso => new Intl.DateTimeFormat(siteLocale, { day: "numeric", month: "short" }).format(eventDate(iso)).replace(".", "");
 const compactEventDate = event => {
+  if (event.tourDates?.length) return event.tourDates.map(stop => shortDate(stop.date)).join(" · ");
   const start = eventDate(event.date);
   if (!event.endDate) return new Intl.DateTimeFormat(siteLocale, { day: "numeric", month: "long" }).format(start);
   const end = eventDate(event.endDate);
@@ -148,6 +153,25 @@ const similarEvents = event => (window.EVENTS || [])
   .map(({ item }) => item);
 
 function calendarFile(event, shareUrl) {
+  if (event.tourDates?.length) {
+    const entries = event.tourDates.flatMap(stop => {
+      const start = String(stop.time || "").match(/(?:início|show|concertos)\s*(\d{2}:\d{2})/i)?.[1]
+        || String(stop.time || "").match(/^(\d{2}:\d{2})/)?.[1];
+      const dayAfter = eventDate(stop.endDate || stop.date);
+      dayAfter.setDate(dayAfter.getDate() + 1);
+      const endMinutes = start ? Number(start.slice(0, 2)) * 60 + Number(start.slice(3)) + 120 : 0;
+      const finishDate = eventDate(stop.date);
+      if (endMinutes >= 24 * 60) finishDate.setDate(finishDate.getDate() + 1);
+      const finishDay = `${finishDate.getFullYear()}-${String(finishDate.getMonth() + 1).padStart(2, "0")}-${String(finishDate.getDate()).padStart(2, "0")}`;
+      const dateLines = start && !stop.endDate
+        ? [`DTSTART;TZID=Europe/Lisbon:${icsDate(stop.date)}T${start.replace(":", "")}00`, `DTEND;TZID=Europe/Lisbon:${icsDate(finishDay)}T${String(Math.floor(endMinutes % (24 * 60) / 60)).padStart(2, "0")}${String(endMinutes % 60).padStart(2, "0")}00`]
+        : [`DTSTART;VALUE=DATE:${icsDate(stop.date)}`, `DTEND;VALUE=DATE:${icsDate(dayAfter.toISOString().slice(0, 10))}`];
+      return ["BEGIN:VEVENT", `UID:${icsText(`${stop.id}@desvio.pt`)}`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`, ...dateLines,
+        `SUMMARY:${icsText(`${event.title} · ${stop.city}`)}`, `LOCATION:${icsText(`${stop.venue}, ${stop.city}`)}`,
+        `DESCRIPTION:${icsText(`Fonte oficial: ${stop.sourceUrl || shareUrl}`)}`, `URL:${shareUrl}`, "END:VEVENT"];
+    });
+    return new File([["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Desvio//Agenda de música//PT", ...entries, "END:VCALENDAR", ""].join("\r\n")], `${event.id}.ics`, { type: "text/calendar;charset=utf-8" });
+  }
   const endDate = event.endDate || event.date;
   const reliableTime = !event.endDate && String(event.time || "").match(/^([01]\d|2[0-3]):([0-5]\d)(?:\s*[–-]\s*([01]\d|2[0-3]):([0-5]\d))?/);
   let dateLines;
@@ -185,8 +209,17 @@ function calendarFile(event, shareUrl) {
   return new File([calendar], `${event.id}.ics`, { type: "text/calendar;charset=utf-8" });
 }
 
+function tourStopActions(event, stop) {
+  const mapsUrl = stop.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${stop.venue}, ${stop.city}`)}`;
+  const image = stop.image && stop.image !== event.image
+    ? `<button type="button" class="tour-stop-poster" data-event-poster aria-label="Ampliar cartaz de ${escapeHtml(stop.city)}"><img src="${escapeHtml(stop.image)}" alt="Cartaz oficial de ${escapeHtml(event.title)} em ${escapeHtml(stop.city)}" loading="lazy" /></button>`
+    : "";
+  const tickets = stop.availability === "Esgotado" ? "<span>Esgotado</span>" : stop.availability === "Cancelado" ? "<span>Cancelado</span>"
+    : stop.ticketUrl ? `<a href="${escapeHtml(stop.ticketUrl)}" target="_blank" rel="noopener">Bilhetes</a>` : "<span>Bilhetes por confirmar</span>";
+  return `${image}<span class="tour-stop-links">${tickets}<a href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener">Percurso</a>${stop.sourceUrl ? `<a href="${escapeHtml(stop.sourceUrl)}" target="_blank" rel="noopener">Fonte oficial</a>` : ""}</span>`;
+}
+
 function render(event, poster) {
-  const date = event.endDate ? `${prettyDate(event.date)} — ${prettyDate(event.endDate)}` : prettyDate(event.date);
   const compactDate = compactEventDate(event);
   const shareUrl = eventUrl(event.id);
   const shareText = `${event.title}\n${compactDate} · ${event.venue}, ${event.city}`;
@@ -206,8 +239,8 @@ function render(event, poster) {
         ${event.scheduleNotice ? `<p class="event-schedule-notice" role="note">${escapeHtml(siteLocale.startsWith("en") ? event.scheduleNoticeEn || event.scheduleNotice : event.scheduleNotice)}</p>` : ""}
       </div>
       <div class="event-information">
-        ${programmeDates.length ? `<section class="festival-programme"><p class="event-eyebrow">Programação</p><div class="festival-tabs" role="tablist" aria-label="Dias do festival">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" id="programme-tab-${index}" data-programme-date="${itemDate}" aria-controls="programme-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? "0" : "-1"}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" role="tabpanel" id="programme-panel-${index}" aria-labelledby="programme-tab-${index}" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(programmeTitle(event, item.title))}</strong><small>${escapeHtml(item.venue)}</small></div></article>`).join("")}</div>`).join("")}</section>` : ""}
-        <div class="event-actions">${ticketButton(event)}<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ${arrowIcon}</span><span class="event-action-short">Percurso ${arrowIcon}</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ${arrowIcon}</span><span class="event-action-short">Fonte ${arrowIcon}</span></a><button class="event-calendar" type="button" data-calendar><span class="event-action-full">Adicionar ao Calendário ${calendarIcon}</span><span class="event-action-short">Adicionar ao Calendário ${calendarIcon}</span></button></div>
+        ${programmeDates.length ? `<section class="festival-programme" ${event.tourDates?.length ? 'id="tour-dates"' : ""}><p class="event-eyebrow">${event.tourDates?.length ? "Datas da tour" : "Programação"}</p><div class="festival-tabs" role="tablist" aria-label="${event.tourDates?.length ? "Datas da tour" : "Dias do festival"}">${programmeDates.map((itemDate, index) => `<button type="button" role="tab" id="programme-tab-${index}" data-programme-date="${itemDate}" aria-controls="programme-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? "0" : "-1"}">${escapeHtml(shortDate(itemDate))}</button>`).join("")}</div>${programmeDates.map((itemDate, index) => `<div class="festival-day-panel" role="tabpanel" id="programme-panel-${index}" aria-labelledby="programme-tab-${index}" data-programme-panel="${itemDate}" ${index ? "hidden" : ""}>${programme.filter(item => item.date === itemDate).map(item => `<article><time>${escapeHtml(item.time || "Horário a confirmar")}</time><div><strong>${escapeHtml(event.tourDates?.length ? item.lineup || item.title : programmeTitle(event, item.title))}</strong><small>${escapeHtml([item.venue, event.tourDates?.length ? item.city : ""].filter(Boolean).join(" · "))}</small>${event.tourDates?.length ? tourStopActions(event, item) : ""}</div></article>`).join("")}</div>`).join("")}</section>` : ""}
+        <div class="event-actions">${ticketButton(event)}${event.tourDates?.length ? "" : `<a class="event-route" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Percurso até ao local ${arrowIcon}</span><span class="event-action-short">Percurso ${arrowIcon}</span></a><a class="event-source" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener"><span class="event-action-full">Fonte oficial ${arrowIcon}</span><span class="event-action-short">Fonte ${arrowIcon}</span></a>`}<button class="event-calendar" type="button" data-calendar><span class="event-action-full">Adicionar ao Calendário ${calendarIcon}</span><span class="event-action-short">Adicionar ao Calendário ${calendarIcon}</span></button></div>
       </div>
       ${related.length ? `<section class="similar-events" aria-labelledby="similar-title"><p class="event-eyebrow">Pelo caminho</p><h2 id="similar-title">Também pode interessar.</h2><div>${related.map(item => `<a href="${eventUrl(item.id)}"><time datetime="${escapeHtml(item.date)}">${escapeHtml(compactEventDate(item))}</time><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(`${item.venue} · ${item.city}`)}</span></a>`).join("")}</div></section>` : ""}
       <p class="event-disclaimer">${event.verifiedAt ? `${siteLocale.startsWith("en") ? "Confirmed on" : "Confirmado em"} ${escapeHtml(prettyDate(event.verifiedAt))}. ` : ""}${siteLocale.startsWith("en") ? "Always confirm times and availability with the official source." : "Confirma sempre horários e disponibilidade na fonte oficial."}</p>
@@ -268,22 +301,23 @@ function render(event, poster) {
       selectProgrammeDay(buttons[nextIndex]);
     });
   });
-  const posterTrigger = page.querySelector("[data-event-poster]");
+  const posterTriggers = page.querySelectorAll("[data-event-poster]");
   const posterDialog = document.querySelector("#event-poster-lightbox");
-  if (posterTrigger && posterDialog) {
-    const posterImage = posterTrigger.querySelector("img");
-    posterImage.addEventListener("error", () => {
-      const fallback = posterImage.dataset.fallbackPoster;
-      if (fallback && posterImage.src !== fallback) {
-        posterImage.src = fallback;
-        delete posterImage.dataset.fallbackPoster;
-      }
-    });
-    posterTrigger.addEventListener("click", () => {
-      const image = posterTrigger.querySelector("img");
-      posterDialog.querySelector("img").src = image.currentSrc || image.src;
-      posterDialog.querySelector("img").alt = image.alt.replace("Cartaz oficial de ", "Cartaz oficial ampliado de ");
-      posterDialog.showModal();
+  if (posterTriggers.length && posterDialog) {
+    posterTriggers.forEach(posterTrigger => {
+      const posterImage = posterTrigger.querySelector("img");
+      posterImage.addEventListener("error", () => {
+        const fallback = posterImage.dataset.fallbackPoster;
+        if (fallback && posterImage.src !== fallback) {
+          posterImage.src = fallback;
+          delete posterImage.dataset.fallbackPoster;
+        }
+      });
+      posterTrigger.addEventListener("click", () => {
+        posterDialog.querySelector("img").src = posterImage.currentSrc || posterImage.src;
+        posterDialog.querySelector("img").alt = posterImage.alt.replace("Cartaz oficial de ", "Cartaz oficial ampliado de ");
+        posterDialog.showModal();
+      });
     });
     posterDialog.querySelector("[data-close-poster]").addEventListener("click", () => posterDialog.close());
     posterDialog.addEventListener("click", click => { if (click.target === posterDialog) posterDialog.close(); });
